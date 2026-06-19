@@ -2,30 +2,37 @@
 
 import { Menu, Search } from 'lucide-react'
 import { useState } from 'react'
-import { AuthPreviewToggle } from '@/components/navbar/auth-preview-toggle'
 import { Logo } from '@/components/navbar/logo'
 import { ProfileBlock } from '@/components/navbar/profile-block'
 import { SearchBar } from '@/components/navbar/search-bar'
 import { SellButton } from '@/components/navbar/sell-button'
 import { SignUpButton } from '@/components/navbar/sign-up-button'
 import { UtilityIcons } from '@/components/navbar/utility-icons'
+import AuthModal from '@/components/AuthModal'
+
+type Profile = {
+  username: string
+  full_name: string
+  avatar_url: string | null
+  role?: string
+} | null
 
 type NavbarProps = {
-  /** Controlled auth UI state. Omit to use the built-in preview toggle. */
-  isLoggedIn?: boolean
-  /** Hide the floating dev preview toggle (e.g. when you wire your own state). */
-  showPreviewToggle?: boolean
+  user: { id: string; email?: string } | null
+  profile: Profile
 }
 
-export function Navbar({
-  isLoggedIn: controlledIsLoggedIn,
-  showPreviewToggle = true,
-}: NavbarProps) {
-  const [internalLoggedIn, setInternalLoggedIn] = useState(false)
+export function Navbar({ user, profile }: NavbarProps) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [modalMode, setModalMode] = useState<'login' | 'register'>('register')
 
-  const isControlled = controlledIsLoggedIn !== undefined
-  const isLoggedIn = isControlled ? controlledIsLoggedIn : internalLoggedIn
+  const isLoggedIn = !!user
+
+  const openModal = (mode: 'login' | 'register') => {
+    setModalMode(mode)
+    setModalOpen(true)
+  }
 
   return (
     <>
@@ -34,7 +41,6 @@ export function Navbar({
           className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6"
           aria-label="Main navigation"
         >
-          {/* Left: logo + hamburger */}
           <div className="flex shrink-0 items-center gap-2">
             <Logo />
             <button
@@ -46,12 +52,10 @@ export function Navbar({
             </button>
           </div>
 
-          {/* Center: search (desktop) */}
           <div className="hidden min-w-0 flex-1 md:block">
             <SearchBar />
           </div>
 
-          {/* Right: actions */}
           <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
             <button
               type="button"
@@ -62,13 +66,16 @@ export function Navbar({
               <Search className="size-5" aria-hidden="true" />
             </button>
 
-            <SellButton />
-            <UtilityIcons />
+            <SellButton
+              isLoggedIn={isLoggedIn}
+              onRequireAuth={() => openModal('login')}
+            />
+            {isLoggedIn && <UtilityIcons />}
 
             {isLoggedIn ? (
-              <ProfileBlock />
+              <ProfileBlock profile={profile} />
             ) : (
-              <SignUpButton />
+              <SignUpButton onClick={() => openModal('register')} />
             )}
           </div>
         </nav>
@@ -80,12 +87,11 @@ export function Navbar({
         )}
       </header>
 
-      {showPreviewToggle && !isControlled && (
-        <AuthPreviewToggle
-          isLoggedIn={isLoggedIn}
-          onToggle={() => setInternalLoggedIn((prev) => !prev)}
-        />
-      )}
+      <AuthModal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        initialMode={modalMode}
+      />
     </>
   )
 }

@@ -1,16 +1,19 @@
 import { cn } from '@/lib/utils'
 
 type SignUpButtonProps = {
+  onClick?: () => void
   className?: string
 }
 
-export function SignUpButton({ className }: SignUpButtonProps) {
+export function SignUpButton({ onClick, className }: SignUpButtonProps) {
   return (
     <button
       type="button"
+      onClick={onClick}
+      
       className={cn(
-        'inline-flex h-9 shrink-0 items-center rounded-lg bg-[#2D2E32] px-4 text-sm font-medium text-white transition-colors hover:bg-[#1F2023] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#2D2E32]/40 focus-visible:ring-offset-2',
-        className
+        className="bg-white text-[#f16522] border-2 border-[#f16522] rounded-lg px-3 py-1 text-base font-[500] transition-all duration-200 ease-in-out hover:bg-[#fdf3ed]",
+        
       )}
     >
       Sign Up
