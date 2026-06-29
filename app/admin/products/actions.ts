@@ -54,3 +54,9 @@ export async function rejectProduct(productId: string, reason: string) {
 
   revalidatePath('/admin/products')
 }
+
+export async function deleteProductAsAdmin(productId: string) {
+  const supabase = await verifyAdmin()
+  await supabase.from('products').delete().eq('id', productId)
+  revalidatePath('/admin/products')
+}

@@ -1,19 +1,28 @@
+'use client'
+
+import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 type SellButtonProps = {
   isLoggedIn?: boolean
   onRequireAuth?: () => void
+  username?: string
   className?: string
 }
 
 export function SellButton({
   isLoggedIn = false,
   onRequireAuth,
+  username,
   className,
 }: SellButtonProps) {
+  const router = useRouter()
+
   const handleClick = () => {
-    if (!isLoggedIn) {
+    if (isLoggedIn) {
+      router.push(username ? `/profile/${username}` : '/feed')
+    } else {
       onRequireAuth?.()
     }
   }

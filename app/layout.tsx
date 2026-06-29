@@ -2,20 +2,28 @@ import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
-import { cn } from "@/lib/utils";
+import { cn } from "@/lib/utils"
+import { NavbarServer } from "@/components/navbar/navbar-server"
+import { createClient } from "@/lib/supabase/server"
+import { SupportChatBubble } from "@/components/support/support-chat-bubble"
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'})
+const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-mono",
 })
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   return (
     <html
       lang="en"
@@ -23,7 +31,13 @@ export default function RootLayout({
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
       <body suppressHydrationWarning>
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <div className="min-h-screen bg-[#F9FAFB]">
+            <NavbarServer />
+            {children}
+          </div>
+          <SupportChatBubble userId={user?.id ?? null} />
+        </ThemeProvider>
       </body>
     </html>
   )

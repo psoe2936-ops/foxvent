@@ -11,6 +11,7 @@ type ListingsSectionProps = {
   categories: Category[]
   initialProducts: Product[]
   isOwner: boolean
+  sellerUsername?: string
 }
 
 export function ListingsSection({
@@ -18,6 +19,7 @@ export function ListingsSection({
   categories,
   initialProducts,
   isOwner,
+  sellerUsername = '',
 }: ListingsSectionProps) {
   const [products, setProducts] = useState(initialProducts)
   const [modalOpen, setModalOpen] = useState(false)
@@ -37,7 +39,12 @@ export function ListingsSection({
         </div>
       )}
 
-      <ProductGrid products={products} isOwner={isOwner} />
+      <ProductGrid
+        products={products}
+        isOwner={isOwner}
+        categories={categories}
+        sellerUsername={sellerUsername}
+      />
 
       {isOwner && (
         <NewListingModal

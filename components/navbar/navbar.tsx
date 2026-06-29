@@ -1,7 +1,8 @@
 'use client'
 
 import { Menu, Search } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Logo } from '@/components/navbar/logo'
 import { ProfileBlock } from '@/components/navbar/profile-block'
 import { SearchBar } from '@/components/navbar/search-bar'
@@ -26,6 +27,20 @@ export function Navbar({ user, profile }: NavbarProps) {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'login' | 'register'>('register')
+  const [pendingNext, setPendingNext] = useState<string | null>(null)
+
+  const searchParams = useSearchParams()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (searchParams.get('login') === '1') {
+      const next = searchParams.get('next')
+      setModalMode('login')
+      setPendingNext(next)
+      setModalOpen(true)
+      router.replace('/')
+    }
+  }, [searchParams, router])
 
   const isLoggedIn = !!user
 
@@ -69,8 +84,9 @@ export function Navbar({ user, profile }: NavbarProps) {
             <SellButton
               isLoggedIn={isLoggedIn}
               onRequireAuth={() => openModal('login')}
+              username={profile?.username}
             />
-            {isLoggedIn && <UtilityIcons />}
+            {isLoggedIn && user && <UtilityIcons userId={user.id} />}
 
             {isLoggedIn ? (
               <ProfileBlock profile={profile} />
@@ -89,8 +105,12 @@ export function Navbar({ user, profile }: NavbarProps) {
 
       <AuthModal
         open={modalOpen}
-        onClose={() => setModalOpen(false)}
+        onClose={() => {
+          setModalOpen(false)
+          setPendingNext(null)
+        }}
         initialMode={modalMode}
+        redirectTo={pendingNext ?? undefined}
       />
     </>
   )

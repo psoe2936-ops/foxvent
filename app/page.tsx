@@ -1,19 +1,29 @@
-import { NavbarServer } from '@/components/navbar/navbar-server'
+import { redirect } from 'next/navigation'
 
-export default function Page() {
-  return (
-    <>
-      <NavbarServer />
-      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-        <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-[#2D2E32]">
-            FoxVend
-          </h1>
-          <p className="mx-auto mt-2 max-w-lg text-sm text-[#6B7280]">
-            Use the navbar to sign in and manage your account.
-          </p>
-        </div>
-      </main>
-    </>
-  )
+type SearchParams = Promise<{
+  category?: string
+  q?: string
+  sort?: string
+  login?: string
+  next?: string
+}>
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: SearchParams
+}) {
+  const params = await searchParams
+
+  const sp = new URLSearchParams()
+  if (params.login === '1') {
+    sp.set('login', '1')
+    if (params.next) sp.set('next', params.next)
+  } else {
+    if (params.category) sp.set('category', params.category)
+    if (params.q) sp.set('q', params.q)
+    if (params.sort) sp.set('sort', params.sort)
+  }
+
+  redirect(sp.toString() ? `/feed?${sp.toString()}` : '/feed')
 }

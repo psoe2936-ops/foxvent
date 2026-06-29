@@ -1,6 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+const PROTECTED_ROUTES = [
+  '/profile',
+  '/products/new',
+  '/chat',
+  '/wishlist',
+  '/following',
+  '/feed/wishlist',
+  '/feed/messages',
+  '/feed/notifications',
+  '/feed/listings',
+  '/feed/following',
+]
+
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
 
@@ -25,11 +38,24 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  // Refreshes the session if expired
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Admin route guard — Layer 1
-  if (request.nextUrl.pathname.startsWith('/admin')) {
+  const path = request.nextUrl.pathname
+  const isProtected = PROTECTED_ROUTES.some((route) => path.startsWith(route))
+
+  if (isProtected && !user) {
+    const redirectUrl = new URL('/feed', request.url)
+    redirectUrl.searchParams.set('login', '1')
+    redirectUrl.searchParams.set('next', path)
+    const redirect = NextResponse.redirect(redirectUrl)
+    supabaseResponse.cookies.getAll().forEach(c =>
+      redirect.cookies.set(c.name, c.value)
+    )
+    return redirect
+  }
+
+  // Admin route guard
+  if (path.startsWith('/admin')) {
     if (!user) {
       return NextResponse.redirect(new URL('/', request.url))
     }

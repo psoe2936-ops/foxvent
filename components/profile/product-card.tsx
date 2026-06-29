@@ -7,6 +7,11 @@ export type Product = {
   images: string[] | null
   status: string
   is_sold: boolean
+  // Optional extra fields used by the owner edit menu
+  description?: string | null
+  category_id?: string | null
+  condition?: string
+  location?: string | null
 }
 
 type ProductCardProps = {

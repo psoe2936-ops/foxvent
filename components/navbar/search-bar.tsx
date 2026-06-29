@@ -1,6 +1,7 @@
 'use client'
 
 import { Search } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useEffect, useRef } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -10,6 +11,7 @@ type SearchBarProps = {
 
 export function SearchBar({ className }: SearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const router = useRouter()
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -23,8 +25,21 @@ export function SearchBar({ className }: SearchBarProps) {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault()
+    const q = inputRef.current?.value.trim()
+    if (q) {
+      router.push(`/?q=${encodeURIComponent(q)}`)
+    } else {
+      router.push('/')
+    }
+  }
+
   return (
-    <div className={cn('relative w-full max-w-2xl', className)}>
+    <form
+      onSubmit={handleSubmit}
+      className={cn('relative w-full max-w-2xl', className)}
+    >
       <label htmlFor="navbar-search" className="sr-only">
         Search products, categories or users
       </label>
@@ -35,6 +50,7 @@ export function SearchBar({ className }: SearchBarProps) {
       <input
         ref={inputRef}
         id="navbar-search"
+        name="q"
         type="search"
         placeholder="Search products, categories or users..."
         className="h-10 w-full rounded-xl border border-transparent bg-[#F3F4F6] pr-16 pl-10 text-sm text-[#2D2E32] placeholder:text-[#9CA3AF] outline-none transition-colors focus:border-[#E5E7EB] focus:bg-white focus:ring-2 focus:ring-[#F36D21]/20"
@@ -43,6 +59,6 @@ export function SearchBar({ className }: SearchBarProps) {
         <span>Ctrl</span>
         <span>/</span>
       </kbd>
-    </div>
+    </form>
   )
 }

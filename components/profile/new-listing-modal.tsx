@@ -9,7 +9,7 @@ import {
   type DragEvent,
   type FormEvent,
 } from 'react'
-import { ImagePlus, Loader2, X } from 'lucide-react'
+import { ImagePlus, Loader2, MapPin, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import type { Product } from '@/components/profile/product-card'
@@ -59,6 +59,7 @@ export function NewListingModal({
   const [categoryId, setCategoryId] = useState('')
   const [condition, setCondition] = useState('')
   const [price, setPrice] = useState('')
+  const [location, setLocation] = useState('')
   const [photos, setPhotos] = useState<File[]>([])
   const [isDragging, setIsDragging] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
@@ -150,6 +151,7 @@ export function NewListingModal({
     setCategoryId('')
     setCondition('')
     setPrice('')
+    setLocation('')
     setPhotos([])
     setErrors({})
     setSubmitError(null)
@@ -238,6 +240,7 @@ export function NewListingModal({
           description: description.trim() || null,
           price: Number(price),
           condition,
+          location: location.trim() || null,
           images: imageUrls,
         })
         .select('id, title, price, images, status, is_sold')
@@ -411,6 +414,25 @@ export function NewListingModal({
                 {errors.price && (
                   <p className="mt-1 text-xs text-[#C0392B]">{errors.price}</p>
                 )}
+              </div>
+
+              <div>
+                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
+                  <span className="inline-flex items-center gap-1">
+                    <MapPin className="size-3.5" aria-hidden="true" />
+                    Location
+                  </span>
+                </label>
+                <input
+                  type="text"
+                  value={location}
+                  disabled={submitting}
+                  placeholder="e.g. Yangon, Mandalay, Mawlamyine"
+                  onChange={(event: ChangeEvent<HTMLInputElement>) =>
+                    setLocation(event.target.value)
+                  }
+                  className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] disabled:opacity-60"
+                />
               </div>
 
               <div>
