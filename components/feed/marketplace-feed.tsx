@@ -5,6 +5,8 @@ import { FeedRightSidebar } from '@/components/feed/right-sidebar'
 import { ProductCard } from '@/components/feed/product-card'
 import { FeedSidebar } from '@/components/feed/sidebar'
 import { SortTabs } from '@/components/feed/sort-tabs'
+import type { TrendingItem } from '@/components/feed/trending-panel'
+import type { ActivityNotification } from '@/components/feed/activity-panel'
 
 type SearchParams = {
   category?: string
@@ -26,6 +28,27 @@ const CONDITION_LABEL: Record<string, string> = {
 
 type SortOption = 'newest' | 'price_asc' | 'price_desc'
 
+function groupByCategory(products: { category_id: string | null; views_count: number | null; categories: { id: string; name: string; icon: string | null } | { id: string; name: string; icon: string | null }[] | null }[]): TrendingItem[] {
+  const map = new Map<string, { item: TrendingItem; viewSum: number }>()
+  for (const p of products) {
+    const cat = Array.isArray(p.categories) ? p.categories[0] : p.categories
+    if (!cat) continue
+    if (!map.has(cat.id)) {
+      map.set(cat.id, {
+        item: { id: cat.id, name: cat.name, icon: cat.icon ?? null, count: 0 },
+        viewSum: 0,
+      })
+    }
+    const entry = map.get(cat.id)!
+    entry.item.count++
+    entry.viewSum += p.views_count ?? 0
+  }
+  return Array.from(map.values())
+    .sort((a, b) => b.viewSum - a.viewSum || b.item.count - a.item.count)
+    .slice(0, 5)
+    .map((e) => e.item)
+}
+
 export async function MarketplaceFeed({
   searchParams,
   basePath = '/',
@@ -44,15 +67,20 @@ export async function MarketplaceFeed({
 
   let viewerUsername: string | undefined
   let savedSet = new Set<string>()
+  let followingSet = new Set<string>()
 
   if (user) {
-    const [profileResult, wishlistResult] = await Promise.all([
+    const [profileResult, wishlistResult, followsResult] = await Promise.all([
       supabase.from('users').select('username').eq('id', user.id).single(),
       supabase.from('wishlists').select('product_id').eq('user_id', user.id),
+      supabase.from('follows').select('following_id').eq('follower_id', user.id),
     ])
     viewerUsername = profileResult.data?.username
     savedSet = new Set(
       (wishlistResult.data ?? []).map((r: { product_id: string }) => r.product_id)
+    )
+    followingSet = new Set(
+      (followsResult.data ?? []).map((r: { following_id: string }) => r.following_id)
     )
   }
 
@@ -61,29 +89,47 @@ export async function MarketplaceFeed({
     .select('id, name, icon')
     .order('name')
 
+  // Products query
   let query = supabase
     .from('products')
     .select(
-      'id, title, price, images, condition, status, created_at, categories(id, name), users(username, avatar_url)'
+      'id, title, price, images, condition, status, is_sold, created_at, seller_id, categories(id, name), users(username, avatar_url)'
     )
     .eq('status', 'approved')
 
   if (sort === 'price_asc') {
-    query = query.order('price', { ascending: true })
+    query = query.order('is_sold', { ascending: true }).order('price', { ascending: true })
   } else if (sort === 'price_desc') {
-    query = query.order('price', { ascending: false })
+    query = query.order('is_sold', { ascending: true }).order('price', { ascending: false })
   } else {
-    query = query.order('created_at', { ascending: false })
+    query = query.order('is_sold', { ascending: true }).order('created_at', { ascending: false })
   }
 
-  if (category) {
-    query = query.eq('category_id', category)
-  }
-  if (q) {
-    query = query.ilike('title', `%${q}%`)
-  }
+  if (category) query = query.eq('category_id', category)
+  if (q) query = query.ilike('title', `%${q}%`)
 
   const { data: products } = await query
+
+  // Trending — sort by views sum per category
+  const { data: trendingProds } = await supabase
+    .from('products')
+    .select('category_id, views_count, categories(id, name, icon)')
+    .eq('status', 'approved')
+
+  const trendingItems = groupByCategory(trendingProds ?? [])
+  const trendingLabel = 'Most popular'
+
+  // Recent activity for logged-in user
+  let recentActivity: ActivityNotification[] = []
+  if (user) {
+    const { data } = await supabase
+      .from('notifications')
+      .select('id, type, title, link, is_read, created_at')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: false })
+      .limit(5)
+    recentActivity = (data as ActivityNotification[]) ?? []
+  }
 
   const filterParams = { category, q, sort }
 
@@ -140,7 +186,7 @@ export async function MarketplaceFeed({
               {products?.length === 1 ? '' : 's'}
             </p>
 
-            <div className="grid grid-cols-1 gap-4 min-[520px]:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
               {!products || products.length === 0 ? (
                 <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E8EAED] bg-white py-20 text-center">
                   <p className="text-sm font-medium text-[#374151]">
@@ -157,7 +203,9 @@ export async function MarketplaceFeed({
                   price: number
                   images: string[] | null
                   condition: string
+                  is_sold: boolean
                   created_at: string
+                  seller_id: string
                   categories:
                     | { id: string; name: string }
                     | { id: string; name: string }[]
@@ -191,6 +239,8 @@ export async function MarketplaceFeed({
                       sellerAvatar={seller?.avatar_url}
                       createdAt={product.created_at}
                       initialSaved={savedSet.has(product.id)}
+                      isFollowingSeller={followingSet.has(product.seller_id)}
+                      isSold={product.is_sold}
                     />
                   )
                 })
@@ -199,7 +249,12 @@ export async function MarketplaceFeed({
           </div>
         </div>
 
-        <FeedRightSidebar />
+        <FeedRightSidebar
+          trendingItems={trendingItems}
+          trendingLabel={trendingLabel}
+          recentActivity={recentActivity}
+          isLoggedIn={!!user}
+        />
       </div>
     </main>
   )
