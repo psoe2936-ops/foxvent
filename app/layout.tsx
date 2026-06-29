@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
@@ -6,6 +7,18 @@ import { cn } from "@/lib/utils"
 import { NavbarServer } from "@/components/navbar/navbar-server"
 import { createClient } from "@/lib/supabase/server"
 import { SupportChatBubble } from "@/components/support/support-chat-bubble"
+
+export const metadata: Metadata = {
+  title: {
+    default: 'FoxVent — Buy & Sell Second-Hand',
+    template: '%s — FoxVent',
+  },
+  description: 'FoxVent is a verified second-hand marketplace. Buy and sell pre-loved items safely.',
+  openGraph: {
+    siteName: 'FoxVent',
+    type: 'website',
+  },
+}
 
 const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
 

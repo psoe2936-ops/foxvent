@@ -1,13 +1,44 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Eye } from 'lucide-react'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { MessageSellerButton } from '@/components/products/message-seller-button'
 import { SellerActionBar } from '@/components/products/seller-action-bar'
+import { ReportButton } from '@/components/products/report-button'
 import type { Category } from '@/components/profile/new-listing-modal'
 
 type ProductDetailProps = {
   params: Promise<{ id: string }>
+}
+
+export async function generateMetadata({ params }: ProductDetailProps): Promise<Metadata> {
+  const { id } = await params
+  const supabase = await createClient()
+  const { data: product } = await supabase
+    .from('products')
+    .select('title, description, images')
+    .eq('id', id)
+    .single()
+
+  if (!product) return { title: 'Listing not found — FoxVent' }
+
+  const title = `${product.title} — FoxVent`
+  const description = product.description
+    ? product.description.slice(0, 160)
+    : `Buy ${product.title} on FoxVent — verified second-hand marketplace.`
+  const image = product.images?.[0]
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'website',
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
+  }
 }
 
 const CONDITION_LABEL: Record<string, string> = {
@@ -24,7 +55,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
   const { data: product } = await supabase
     .from('products')
     .select(
-      'id, title, description, price, condition, images, status, is_sold, views_count, category_id, location, created_at, seller_id, categories(name), users(id, username, full_name, avatar_url, created_at)'
+      'id, title, description, price, condition, images, status, is_sold, views_count, category_id, location, created_at, seller_id, rejection_reason, categories(name), users(id, username, full_name, avatar_url, created_at)'
     )
     .eq('id', id)
     .single()
@@ -171,6 +202,12 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
                 productId={product.id}
                 sellerId={seller.id}
               />
+            </div>
+          )}
+
+          {!isOwnListing && viewer && (
+            <div className="mt-3 flex justify-center">
+              <ReportButton productId={product.id} viewerId={viewer.id} />
             </div>
           )}
 

@@ -27,14 +27,20 @@ export default async function AdminLayout({
     redirect('/')
   }
 
-  const { count: pendingCount } = await supabase
-    .from('products')
-    .select('id', { count: 'exact', head: true })
-    .eq('status', 'pending')
+  const [{ count: pendingCount }, { count: pendingReportsCount }] = await Promise.all([
+    supabase
+      .from('products')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+    supabase
+      .from('reports')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+  ])
 
   return (
     <div className="flex min-h-screen items-start">
-      <AdminSidebar pendingCount={pendingCount ?? 0} />
+      <AdminSidebar pendingCount={pendingCount ?? 0} pendingReportsCount={pendingReportsCount ?? 0} />
       <main className="min-w-0 flex-1 bg-[#F9FAFB] p-8">{children}</main>
     </div>
   )

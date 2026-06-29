@@ -16,7 +16,7 @@ import { FoxIcon } from '@/components/navbar/fox-icon'
 import { createClient } from '@/lib/supabase/client'
 import { SupportUnreadBadge } from '@/components/admin/support-unread-badge'
 
-function SidebarInner({ pendingCount }: { pendingCount: number }) {
+function SidebarInner({ pendingCount, pendingReportsCount }: { pendingCount: number; pendingReportsCount: number }) {
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -107,6 +107,11 @@ function SidebarInner({ pendingCount }: { pendingCount: number }) {
         >
           <BarChart2 className="size-4 shrink-0" strokeWidth={1.75} />
           Reports
+          {pendingReportsCount > 0 && (
+            <span className="ml-auto rounded-full bg-[#FDEDEC] px-2 py-0.5 text-[11px] font-semibold text-[#C0392B]">
+              {pendingReportsCount}
+            </span>
+          )}
         </Link>
         <Link
           href="/admin/analytics"
@@ -152,14 +157,14 @@ function SidebarInner({ pendingCount }: { pendingCount: number }) {
   )
 }
 
-export function AdminSidebar({ pendingCount }: { pendingCount: number }) {
+export function AdminSidebar({ pendingCount, pendingReportsCount }: { pendingCount: number; pendingReportsCount: number }) {
   return (
     <Suspense
       fallback={
         <div className="sticky top-20 h-[calc(100vh-5rem)] w-55 shrink-0 border-r border-[#E5E7EB] bg-white" />
       }
     >
-      <SidebarInner pendingCount={pendingCount} />
+      <SidebarInner pendingCount={pendingCount} pendingReportsCount={pendingReportsCount} />
     </Suspense>
   )
 }

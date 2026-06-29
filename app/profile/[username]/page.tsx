@@ -1,3 +1,4 @@
+import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { MapPin } from 'lucide-react'
@@ -12,6 +13,34 @@ import { ListingsSection } from '@/components/profile/listings-section'
 
 type ProfilePageProps = {
   params: Promise<{ username: string }>
+}
+
+export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
+  const { username } = await params
+  const supabase = await createClient()
+  const { data: profile } = await supabase
+    .from('users')
+    .select('full_name, bio, avatar_url')
+    .eq('username', username)
+    .single()
+
+  if (!profile) return { title: 'Profile not found' }
+
+  const title = profile.full_name ? `${profile.full_name} (@${username})` : `@${username}`
+  const description = profile.bio
+    ? profile.bio.slice(0, 160)
+    : `View ${profile.full_name ?? username}'s listings on FoxVent.`
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: 'profile',
+      ...(profile.avatar_url ? { images: [{ url: profile.avatar_url }] } : {}),
+    },
+  }
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {

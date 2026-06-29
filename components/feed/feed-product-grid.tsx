@@ -1,4 +1,5 @@
-import { SlidersHorizontal } from 'lucide-react'
+import Link from 'next/link'
+import { SlidersHorizontal, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { CategoryPills } from '@/components/feed/category-pills'
 import { ProductCard } from '@/components/feed/product-card'
@@ -66,17 +67,38 @@ export async function FeedProductGrid({
     query = query.order('is_sold', { ascending: true }).order('created_at', { ascending: false })
   }
 
-  if (category) query = query.eq('category_id', category)
-  if (q) query = query.ilike('title', `%${q}%`)
+  // Auto-match category name from search term (e.g. "Electronics" → select that category)
+  let effectiveCategory = category
+  if (q && !category) {
+    const autoMatch = (categories ?? []).find(
+      (c: { id: string; name: string; icon: string | null }) =>
+        c.name.toLowerCase() === q.trim().toLowerCase()
+    )
+    if (autoMatch) effectiveCategory = autoMatch.id
+  }
+
+  if (effectiveCategory) query = query.eq('category_id', effectiveCategory)
+  // Text search across title + description when q doesn't map to a category name
+  if (q && effectiveCategory === category) {
+    query = query.or(`title.ilike.%${q}%,description.ilike.%${q}%`)
+  }
 
   const { data: products } = await query
   const filterParams = { category, q, sort }
+
+  // URL to clear just the search term, preserving category + sort
+  const clearSearchParams = new URLSearchParams()
+  if (category) clearSearchParams.set('category', category)
+  if (sort !== 'newest') clearSearchParams.set('sort', sort)
+  const clearSearchUrl = clearSearchParams.size > 0
+    ? `${basePath}?${clearSearchParams}`
+    : basePath
 
   return (
     <div className="space-y-4">
       <CategoryPills
         categories={categories ?? []}
-        activeCategory={category}
+        activeCategory={effectiveCategory}
         filterParams={filterParams}
         basePath={basePath}
       />
@@ -84,17 +106,28 @@ export async function FeedProductGrid({
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-lg font-bold text-[#1F2937] sm:text-xl">All Listings</h1>
-          <form action={basePath} method="get" className="w-full sm:w-auto">
-            {category && <input type="hidden" name="category" value={category} />}
-            {sort !== 'newest' && <input type="hidden" name="sort" value={sort} />}
-            <input
-              type="text"
-              name="q"
-              defaultValue={q ?? ''}
-              placeholder="Search listings..."
-              className="w-full rounded-lg border border-[#E8EAED] bg-white px-3.5 py-2 text-sm text-[#374151] shadow-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20 sm:w-56"
-            />
-          </form>
+          <div className="relative w-full sm:w-56">
+            <form action={basePath} method="get">
+              {category && <input type="hidden" name="category" value={category} />}
+              {sort !== 'newest' && <input type="hidden" name="sort" value={sort} />}
+              <input
+                type="text"
+                name="q"
+                defaultValue={q ?? ''}
+                placeholder="Search listings..."
+                className={`w-full rounded-lg border border-[#E8EAED] bg-white py-2 text-sm text-[#374151] shadow-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20 ${q ? 'pl-3.5 pr-8' : 'px-3.5'}`}
+              />
+            </form>
+            {q && (
+              <Link
+                href={clearSearchUrl}
+                aria-label="Clear search"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280]"
+              >
+                <X className="size-3.5" />
+              </Link>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center justify-between border-b border-[#E8EAED] pb-1">
@@ -117,10 +150,19 @@ export async function FeedProductGrid({
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {!products || products.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E8EAED] bg-white py-20 text-center">
-              <p className="text-sm font-medium text-[#374151]">No listings found</p>
+              <span className="text-4xl">🦊</span>
+              <p className="mt-3 text-sm font-medium text-[#374151]">No listings found</p>
               <p className="mt-1 text-sm text-[#9CA3AF]">
                 Try a different search or category.
               </p>
+              {(q || category) && (
+                <Link
+                  href={basePath}
+                  className="mt-4 rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
+                >
+                  Clear filters
+                </Link>
+              )}
             </div>
           ) : (
             products.map(

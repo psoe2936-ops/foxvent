@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { ArrowUp, MessageCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { sanitizeText } from '@/lib/sanitize'
 import { FoxIcon } from '@/components/navbar/fox-icon'
 
 type SupportMessage = {
@@ -160,7 +161,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
       conversation_id: convId,
       sender_id: userId!,
       is_admin: false,
-      content,
+      content: sanitizeText(content, 2000),
     })
 
     void supabase
@@ -177,7 +178,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     <>
       {/* Chat popup */}
       {open && (
-        <div className="fixed bottom-0 right-0 z-50 flex h-[60vh] w-full flex-col overflow-hidden rounded-t-2xl border border-[#E5E7EB] bg-white shadow-xl sm:bottom-24 sm:right-6 sm:h-[420px] sm:w-[320px] sm:rounded-2xl">
+        <div className="fixed bottom-0 right-0 z-50 flex h-[60vh] w-full flex-col overflow-hidden rounded-t-2xl border border-[#E5E7EB] bg-white shadow-xl sm:bottom-24 sm:right-6 sm:h-105 sm:w-[320px] sm:rounded-2xl">
           {/* Header */}
           <div className="flex shrink-0 items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
             <FoxIcon className="size-8 shrink-0" />

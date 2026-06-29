@@ -4,6 +4,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { sanitizeText } from '@/lib/sanitize'
 
 type EditProfileModalProps = {
   profile: {
@@ -51,10 +52,10 @@ export function EditProfileModal({ profile }: EditProfileModalProps) {
     const { error: updateError } = await supabase
       .from('users')
       .update({
-        full_name: trimmedFullName,
+        full_name: sanitizeText(trimmedFullName, 100),
         username: trimmedUsername,
-        bio: trimmedBio || null,
-        location: trimmedLocation || null,
+        bio: sanitizeText(trimmedBio, 280) || null,
+        location: sanitizeText(trimmedLocation, 100) || null,
       })
       .eq('id', profile.id)
 

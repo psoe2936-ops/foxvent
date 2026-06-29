@@ -1,4 +1,10 @@
+import type { Metadata } from 'next'
 import { FeedProductGrid } from '@/components/feed/feed-product-grid'
+
+export const metadata: Metadata = {
+  title: 'Browse Listings',
+  description: 'Discover pre-loved items for sale on FoxVent — electronics, fashion, furniture and more.',
+}
 
 type SearchParams = Promise<{
   category?: string

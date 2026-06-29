@@ -12,6 +12,7 @@ import {
 import { ImagePlus, Loader2, MapPin, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
+import { sanitizeText, sanitizePrice } from '@/lib/sanitize'
 import type { Product } from '@/components/profile/product-card'
 
 export type Category = {
@@ -236,11 +237,11 @@ export function NewListingModal({
         .insert({
           seller_id: userId,
           category_id: categoryId,
-          title: title.trim(),
-          description: description.trim() || null,
-          price: Number(price),
+          title: sanitizeText(title, 100),
+          description: sanitizeText(description, 1000) || null,
+          price: sanitizePrice(Number(price)),
           condition,
-          location: location.trim() || null,
+          location: sanitizeText(location, 200) || null,
           images: imageUrls,
         })
         .select('id, title, price, images, status, is_sold')

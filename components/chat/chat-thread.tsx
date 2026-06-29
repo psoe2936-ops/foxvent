@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { Send, Video } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { sanitizeText } from '@/lib/sanitize'
 import dynamic from 'next/dynamic'
 
 const VideoCall = dynamic(
@@ -102,7 +103,7 @@ export function ChatThread({
     const { error } = await supabase.from('messages').insert({
       conversation_id: conversationId,
       sender_id: currentUserId,
-      content,
+      content: sanitizeText(content, 2000),
     })
 
     if (error) {

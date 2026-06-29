@@ -9,6 +9,7 @@ import {
 } from 'react'
 import { Check, Eye, EyeOff, Mail } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { sanitizeUsername } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
 
 type AuthMode = 'login' | 'register' | 'forgot'
@@ -296,7 +297,7 @@ function AuthModalContent({
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: trimmedEmail,
         password: trimmedPassword,
-        options: { data: { full_name: fullName.trim(), username } },
+        options: { data: { full_name: fullName.trim(), username: sanitizeUsername(username) } },
       })
       setLoading(false)
       if (signUpError) {
@@ -488,7 +489,7 @@ function AuthModalContent({
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative h-full w-full overflow-y-auto bg-white p-8 sm:h-auto sm:max-h-[90vh] sm:w-[380px] sm:max-w-[90vw] sm:rounded-[14px] sm:shadow-xl"
+        className="relative h-full w-full overflow-y-auto bg-white p-8 sm:h-auto sm:max-h-[90vh] sm:w-95 sm:max-w-[90vw] sm:rounded-[14px] sm:shadow-xl"
       >
         <button type="button" onClick={onClose} style={closeButtonStyle} aria-label="Close">
           ×
@@ -554,7 +555,7 @@ function AuthModalContent({
                   onChange={(e) => handleOtpChange(i, e.target.value)}
                   onKeyDown={(e) => handleOtpKeyDown(i, e)}
                   onPaste={handleOtpPaste}
-                  className="size-11 rounded-xl border-2 text-center text-xl font-bold outline-none transition-colors focus:ring-2 focus:ring-[#F36D21]/20 disabled:cursor-not-allowed disabled:opacity-60 sm:size-[52px]"
+                  className="size-11 rounded-xl border-2 text-center text-xl font-bold outline-none transition-colors focus:ring-2 focus:ring-[#F36D21]/20 disabled:cursor-not-allowed disabled:opacity-60 sm:size-13"
                   style={{
                     borderColor: focusedBox === i || digit ? '#F36D21' : '#E5E7EB',
                     color: '#1A1814',
