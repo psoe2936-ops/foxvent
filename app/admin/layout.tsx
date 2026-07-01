@@ -1,6 +1,8 @@
+import { Suspense } from 'react'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
+import { AdminMobileNav } from '@/components/admin/admin-mobile-nav'
 
 export default async function AdminLayout({
   children,
@@ -39,9 +41,21 @@ export default async function AdminLayout({
   ])
 
   return (
-    <div className="flex min-h-screen items-start">
-      <AdminSidebar pendingCount={pendingCount ?? 0} pendingReportsCount={pendingReportsCount ?? 0} />
-      <main className="min-w-0 flex-1 bg-[#F9FAFB] p-8">{children}</main>
+    <div className="flex min-h-screen flex-col">
+      <Suspense fallback={null}>
+        <AdminMobileNav
+          pendingCount={pendingCount ?? 0}
+          pendingReportsCount={pendingReportsCount ?? 0}
+        />
+      </Suspense>
+
+      <div className="flex flex-1 items-start">
+        <AdminSidebar
+          pendingCount={pendingCount ?? 0}
+          pendingReportsCount={pendingReportsCount ?? 0}
+        />
+        <main className="min-w-0 flex-1 bg-[#F9FAFB] p-4 lg:p-8">{children}</main>
+      </div>
     </div>
   )
 }

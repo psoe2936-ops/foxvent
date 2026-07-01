@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils"
 import { NavbarServer } from "@/components/navbar/navbar-server"
 import { createClient } from "@/lib/supabase/server"
 import { SupportChatBubble } from "@/components/support/support-chat-bubble"
+import { BottomNav } from "@/components/mobile/bottom-nav"
 
 export const metadata: Metadata = {
   title: {
@@ -37,6 +38,16 @@ export default async function RootLayout({
     data: { user },
   } = await supabase.auth.getUser()
 
+  let profile: { username: string | null; avatar_url: string | null } | null = null
+  if (user) {
+    const { data } = await supabase
+      .from('users')
+      .select('username, avatar_url')
+      .eq('id', user.id)
+      .single()
+    profile = data
+  }
+
   return (
     <html
       lang="en"
@@ -47,9 +58,15 @@ export default async function RootLayout({
         <ThemeProvider>
           <div className="min-h-screen bg-[#F9FAFB]">
             <NavbarServer />
-            {children}
+            <div className="pb-16 md:pb-0">
+              {children}
+            </div>
           </div>
           <SupportChatBubble userId={user?.id ?? null} />
+          <BottomNav
+            username={profile?.username ?? null}
+            userId={user?.id ?? null}
+          />
         </ThemeProvider>
       </body>
     </html>

@@ -15,5 +15,10 @@ export async function NavbarServer() {
     profile = data
   }
 
-  return <Navbar user={user} profile={profile} />
+  const { data: categories } = await supabase
+    .from('categories')
+    .select('id, name, icon')
+    .order('name')
+
+  return <Navbar user={user} profile={profile} categories={categories ?? []} />
 }

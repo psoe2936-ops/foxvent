@@ -49,11 +49,13 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const seller = Array.isArray(conversation.seller)
     ? conversation.seller[0]
     : conversation.seller
+
   const otherPerson = conversation.buyer_id === user.id ? seller : buyer
+  const currentUserProfile = conversation.buyer_id === user.id ? buyer : seller
 
   const { data: initialMessages } = await supabase
     .from('messages')
-    .select('id, sender_id, content, created_at')
+    .select('id, sender_id, content, created_at, is_read')
     .eq('conversation_id', id)
     .order('created_at', { ascending: true })
 
@@ -62,6 +64,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
       <ChatThread
         conversationId={id}
         currentUserId={user.id}
+        currentUserFullName={currentUserProfile?.full_name ?? ''}
+        currentUserAvatar={currentUserProfile?.avatar_url ?? null}
         otherPerson={otherPerson}
         product={product}
         initialMessages={initialMessages ?? []}

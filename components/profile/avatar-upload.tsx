@@ -86,7 +86,7 @@ export function AvatarUpload({
   }
 
   return (
-    <div className="relative -mt-10 size-20 shrink-0 sm:-mt-12 sm:size-24">
+    <div className="relative -mt-12 size-24 shrink-0 sm:-mt-16 sm:size-32">
       <div className="group/avatar relative size-full overflow-hidden rounded-full border-4 border-white shadow-sm">
         {avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element

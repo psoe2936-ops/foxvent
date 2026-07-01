@@ -44,7 +44,7 @@ function SidebarInner({ pendingCount, pendingReportsCount }: { pendingCount: num
   }
 
   return (
-    <aside className="scrollbar-none sticky top-20 flex h-[calc(100vh-5rem)] w-55 shrink-0 flex-col overflow-y-auto border-r border-[#E5E7EB] bg-white">
+    <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-55 shrink-0 flex-col overflow-y-auto border-r border-[#E5E7EB] bg-white lg:flex">
       {/* Brand */}
       <div className="flex shrink-0 items-center gap-2.5 border-b border-[#E5E7EB] px-4 py-4">
         <FoxIcon className="size-7" />
@@ -161,7 +161,7 @@ export function AdminSidebar({ pendingCount, pendingReportsCount }: { pendingCou
   return (
     <Suspense
       fallback={
-        <div className="sticky top-20 h-[calc(100vh-5rem)] w-55 shrink-0 border-r border-[#E5E7EB] bg-white" />
+        <div className="sticky top-20 hidden h-[calc(100vh-5rem)] w-55 shrink-0 border-r border-[#E5E7EB] bg-white lg:block" />
       }
     >
       <SidebarInner pendingCount={pendingCount} pendingReportsCount={pendingReportsCount} />

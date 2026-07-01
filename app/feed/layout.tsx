@@ -87,7 +87,7 @@ export default async function FeedLayout({
   }
 
   return (
-    <div className="w-full py-4 pb-10 lg:py-6">
+    <div className="w-full py-4 pb-24 lg:py-6 lg:pb-10">
       <div className="flex w-full items-start">
         <FeedSidebar username={viewerUsername} userId={user?.id} />
         <div className="min-w-0 flex-1 px-4 sm:px-6 lg:px-10">

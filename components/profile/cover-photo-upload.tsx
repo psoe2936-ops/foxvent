@@ -76,7 +76,7 @@ export function CoverPhotoUpload({
   }
 
   return (
-    <div className="relative h-36 overflow-hidden bg-gradient-to-r from-[#FDEEDD] to-[#FEF3E2] sm:h-44 md:h-52">
+    <div className="relative h-40 overflow-hidden bg-linear-to-r from-[#FEF3E2] to-[#F36D21]/20 sm:h-56">
       {coverUrl && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={coverUrl} alt="" className="size-full object-cover" />

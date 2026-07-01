@@ -1,12 +1,45 @@
 import { createClient } from '@/lib/supabase/server'
+import { BanButton } from '@/components/admin/ban-button'
 
 export default async function AdminUsersPage() {
   const supabase = await createClient()
 
   const { data: users } = await supabase
     .from('users')
-    .select('id, username, full_name, role, created_at')
+    .select('id, username, full_name, role, created_at, is_banned, banned_until, ban_reason')
     .order('created_at', { ascending: false })
+
+  function banBadge(user: {
+    is_banned: boolean
+    banned_until: string | null
+    ban_reason: string | null
+  }) {
+    if (!user.is_banned) {
+      return (
+        <span className="rounded-full bg-[#E8F5E9] px-2 py-0.5 text-xs font-semibold text-[#1A7A4A]">
+          Active
+        </span>
+      )
+    }
+    if (!user.banned_until) {
+      return (
+        <span
+          title={user.ban_reason ?? undefined}
+          className="cursor-help rounded-full bg-[#FDEDEC] px-2 py-0.5 text-xs font-semibold text-[#C0392B]"
+        >
+          Banned
+        </span>
+      )
+    }
+    return (
+      <span
+        title={user.ban_reason ?? undefined}
+        className="cursor-help rounded-full bg-[#FEF3E2] px-2 py-0.5 text-xs font-semibold text-[#C26A08]"
+      >
+        Banned until {new Date(user.banned_until).toLocaleDateString()}
+      </span>
+    )
+  }
 
   return (
     <div>
@@ -22,13 +55,15 @@ export default async function AdminUsersPage() {
               <th className="px-5 py-3">User</th>
               <th className="px-5 py-3">Username</th>
               <th className="px-5 py-3">Role</th>
+              <th className="px-5 py-3">Status</th>
               <th className="px-5 py-3">Joined</th>
+              <th className="px-5 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
             {!users || users.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-5 py-8 text-center text-[#6B7280]">
+                <td colSpan={6} className="px-5 py-8 text-center text-[#6B7280]">
                   No users found.
                 </td>
               </tr>
@@ -55,8 +90,20 @@ export default async function AdminUsersPage() {
                       {user.role ?? 'user'}
                     </span>
                   </td>
+                  <td className="px-5 py-3">
+                    {banBadge(user)}
+                  </td>
                   <td className="px-5 py-3 text-[#9CA3AF]">
                     {new Date(user.created_at).toLocaleDateString()}
+                  </td>
+                  <td className="px-5 py-3">
+                    {user.role !== 'admin' && (
+                      <BanButton
+                        userId={user.id}
+                        username={user.username}
+                        isBanned={user.is_banned ?? false}
+                      />
+                    )}
                   </td>
                 </tr>
               ))

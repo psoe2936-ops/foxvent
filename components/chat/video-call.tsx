@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import AgoraRTC, {
   AgoraRTCProvider,
   useRTCClient,
@@ -22,20 +22,82 @@ type CallUIProps = {
 }
 
 function CallUI({ conversationId, onEnd }: CallUIProps) {
+  const [token, setToken] = useState<string | null>(null)
+  const [tokenError, setTokenError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
 
+  useEffect(() => {
+    let cancelled = false
+
+    async function fetchToken() {
+      setTokenError(false)
+      try {
+        const res = await fetch('/api/agora-token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ channelName: conversationId }),
+        })
+        if (!res.ok) throw new Error('Token fetch failed')
+        const data = await res.json()
+        if (!cancelled) setToken(data.token)
+      } catch {
+        if (!cancelled) setTokenError(true)
+      }
+    }
+
+    fetchToken()
+    return () => {
+      cancelled = true
+    }
+  }, [conversationId, retryCount])
+
+  // All hooks called unconditionally — useJoin uses ready flag to gate the actual join
   const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn)
   const { localCameraTrack } = useLocalCameraTrack(camOn)
   const remoteUsers = useRemoteUsers()
 
-  useJoin({
-    appid: APP_ID,
-    channel: 'test',
-    token: '007eJxTYEieK5MqVCYn2qK05oGpS5Lb4/93K5622yftyzT97uB4YJMCQ1pqYnKakUmScbKJqUlySrKlsVGaaZKpqVmigUGicVIab7RlVkMgI0MUfx4LIwMEgvgsDCWpxSUMDAAEMB4e',
-  })
-
+  useJoin(
+    { appid: APP_ID, channel: conversationId, token: token ?? '' },
+    !!token,
+  )
   usePublish([localMicrophoneTrack, localCameraTrack])
+
+  // Conditional renders after all hooks
+  if (!token && !tokenError) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+        <div className="text-center text-white">
+          <div className="mx-auto mb-3 size-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
+          <p className="text-sm">Connecting...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (tokenError) {
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-black text-white">
+        <p className="text-sm">Failed to connect. Please try again.</p>
+        <button
+          onClick={() => {
+            setToken(null)
+            setRetryCount((c) => c + 1)
+          }}
+          className="rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
+        >
+          Retry
+        </button>
+        <button
+          onClick={onEnd}
+          className="text-sm text-[#9CA3AF] hover:text-white"
+        >
+          Cancel
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black">
@@ -77,11 +139,9 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
               <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-[#333]">
                 <Video className="size-8 text-[#666]" />
               </div>
-              <p className="text-sm text-white">
-                Waiting for other person...
-              </p>
+              <p className="text-sm text-white">Waiting for other person...</p>
               <p className="mt-1 text-xs text-[#666]">
-                Ask them to click "Video call" in the chat
+                Ask them to click &quot;Video call&quot; in the chat
               </p>
             </div>
           </div>
@@ -114,11 +174,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
           }`}
           aria-label={camOn ? 'Turn off camera' : 'Turn on camera'}
         >
-          {camOn ? (
-            <Video className="size-5" />
-          ) : (
-            <VideoOff className="size-5" />
-          )}
+          {camOn ? <Video className="size-5" /> : <VideoOff className="size-5" />}
         </button>
       </div>
     </div>

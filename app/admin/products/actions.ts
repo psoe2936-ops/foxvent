@@ -30,7 +30,7 @@ export async function approveProduct(formData: FormData) {
   const supabase = await verifyAdmin()
   const productId = formData.get('productId') as string
 
-  const { data, error, count } = await supabase
+  const { data, error } = await supabase
     .from('products')
     .update({ status: 'approved', approved_at: new Date().toISOString() })
     .eq('id', productId)
@@ -44,6 +44,13 @@ export async function approveProduct(formData: FormData) {
 export async function rejectProduct(productId: string, reason: string) {
   const supabase = await verifyAdmin()
 
+  // Fetch product + seller for the notification
+  const { data: product } = await supabase
+    .from('products')
+    .select('title, seller_id, users(username)')
+    .eq('id', productId)
+    .single()
+
   const { data, error } = await supabase
     .from('products')
     .update({ status: 'rejected', rejection_reason: reason })
@@ -51,6 +58,18 @@ export async function rejectProduct(productId: string, reason: string) {
     .select()
 
   console.log('Reject result — error:', error, 'updated rows:', data)
+
+  // Insert notification with rejection reason included in body
+  if (product) {
+    const seller = Array.isArray(product.users) ? product.users[0] : product.users
+    await supabase.from('notifications').insert({
+      user_id: product.seller_id,
+      type: 'product_rejected',
+      title: 'Your listing needs changes',
+      body: `Your listing "${product.title}" was rejected. Reason: ${reason}`,
+      link: `/profile/${seller?.username}`,
+    })
+  }
 
   revalidatePath('/admin/products')
 }

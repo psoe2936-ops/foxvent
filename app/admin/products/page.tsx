@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { Check, Pencil } from 'lucide-react'
+import { Check, Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { RejectButton } from '@/components/admin/reject-button'
 import { AdminDeleteButton } from '@/components/admin/admin-delete-button'
@@ -189,7 +189,7 @@ export default async function AdminProductsPage({
                         title="View details"
                         className="flex size-8 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
                       >
-                        <Pencil className="size-3.5" />
+                        <Eye className="size-3.5" />
                       </Link>
                       {product.status === 'pending' && (
                         <>

@@ -14,9 +14,10 @@ type EditProfileModalProps = {
     bio: string | null
     location: string | null
   }
+  trigger?: ReactNode
 }
 
-export function EditProfileModal({ profile }: EditProfileModalProps) {
+export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
   const [open, setOpen] = useState(false)
   const [fullName, setFullName] = useState(profile.full_name)
   const [username, setUsername] = useState(profile.username)
@@ -80,14 +81,20 @@ export function EditProfileModal({ profile }: EditProfileModalProps) {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen(true)}
-        className="inline-flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2D2E32] transition-colors hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
-      >
-        <Pencil className="size-4" aria-hidden="true" />
-        Edit profile
-      </button>
+      {trigger ? (
+        <button type="button" onClick={() => setOpen(true)} className="contents">
+          {trigger}
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2D2E32] transition-colors hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
+        >
+          <Pencil className="size-4" aria-hidden="true" />
+          Edit profile
+        </button>
+      )}
 
       {open && (
         <div

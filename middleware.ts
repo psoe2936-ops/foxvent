@@ -38,9 +38,55 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
+
+  // Fetch user profile once for all logged-in users (reused for ban check + admin check)
+  let userProfile: {
+    role: string
+    is_banned: boolean
+    banned_until: string | null
+    ban_reason: string | null
+  } | null = null
+
+  if (user && !path.startsWith('/banned')) {
+    const { data } = await supabase
+      .from('users')
+      .select('role, is_banned, banned_until, ban_reason')
+      .eq('id', user.id)
+      .single()
+    userProfile = data
+  }
+
+  // Ban check — skip for admins and the /banned page itself
+  if (
+    user &&
+    userProfile &&
+    userProfile.is_banned &&
+    userProfile.role !== 'admin' &&
+    !path.startsWith('/banned')
+  ) {
+    const bannedUntil = userProfile.banned_until
+    const isExpired = bannedUntil !== null && new Date(bannedUntil) <= new Date()
+
+    if (isExpired) {
+      // Auto-unban expired temporary ban; allow through
+      await supabase
+        .from('users')
+        .update({ is_banned: false, banned_until: null, ban_reason: null })
+        .eq('id', user.id)
+    } else {
+      const redirect = NextResponse.redirect(new URL('/banned', request.url))
+      supabaseResponse.cookies.getAll().forEach((c) =>
+        redirect.cookies.set(c.name, c.value)
+      )
+      return redirect
+    }
+  }
+
   const isProtected = PROTECTED_ROUTES.some((route) => path.startsWith(route))
 
   if (isProtected && !user) {
@@ -48,7 +94,7 @@ export async function middleware(request: NextRequest) {
     redirectUrl.searchParams.set('login', '1')
     redirectUrl.searchParams.set('next', path)
     const redirect = NextResponse.redirect(redirectUrl)
-    supabaseResponse.cookies.getAll().forEach(c =>
+    supabaseResponse.cookies.getAll().forEach((c) =>
       redirect.cookies.set(c.name, c.value)
     )
     return redirect
@@ -60,13 +106,7 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/', request.url))
     }
 
-    const { data: profile } = await supabase
-      .from('users')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || profile.role !== 'admin') {
+    if (!userProfile || userProfile.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }
   }
