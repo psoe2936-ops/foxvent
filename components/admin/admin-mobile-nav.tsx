@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   BarChart2,
+  Flag,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -20,9 +21,10 @@ import { createClient } from '@/lib/supabase/client'
 type AdminMobileNavProps = {
   pendingCount: number
   pendingReportsCount: number
+  pendingUserReportsCount: number
 }
 
-export function AdminMobileNav({ pendingCount, pendingReportsCount }: AdminMobileNavProps) {
+export function AdminMobileNav({ pendingCount, pendingReportsCount, pendingUserReportsCount }: AdminMobileNavProps) {
   const [open, setOpen] = useState(false)
   const pathname = usePathname()
   const searchParams = useSearchParams()
@@ -135,6 +137,15 @@ export function AdminMobileNav({ pendingCount, pendingReportsCount }: AdminMobil
                 {pendingReportsCount > 0 && (
                   <span className="ml-auto rounded-full bg-[#FDEDEC] px-2 py-0.5 text-[11px] font-semibold text-[#C0392B]">
                     {pendingReportsCount}
+                  </span>
+                )}
+              </Link>
+              <Link href="/admin/user-reports" onClick={close} className={navCls(pathname.startsWith('/admin/user-reports'))}>
+                <Flag className="size-4 shrink-0" />
+                User Reports
+                {pendingUserReportsCount > 0 && (
+                  <span className="ml-auto rounded-full bg-[#FDEDEC] px-2 py-0.5 text-[11px] font-semibold text-[#C0392B]">
+                    {pendingUserReportsCount}
                   </span>
                 )}
               </Link>

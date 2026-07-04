@@ -10,9 +10,14 @@ import { FollowButton } from '@/components/profile/follow-button'
 import { ProfileTabs } from '@/components/profile/profile-tabs'
 import { ListingsSection } from '@/components/profile/listings-section'
 import { ExpandableBio } from '@/components/profile/expandable-bio'
+import { FeedSidebar } from '@/components/feed/sidebar'
+import { SellPromoCard } from '@/components/feed/sell-promo-card'
+import { HelpPromoCard } from '@/components/feed/help-promo-card'
+import { UserSafetyMenu } from '@/components/users/user-safety-menu'
 
 type ProfilePageProps = {
   params: Promise<{ username: string }>
+  searchParams: Promise<{ new?: string }>
 }
 
 export async function generateMetadata({ params }: ProfilePageProps): Promise<Metadata> {
@@ -43,8 +48,9 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
   }
 }
 
-export default async function ProfilePage({ params }: ProfilePageProps) {
+export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
   const { username } = await params
+  const { new: newParam } = await searchParams
   const supabase = await createClient()
 
   const {
@@ -93,13 +99,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
   let isFollowing = false
   let followsYouBack = false
+  let isBlocked = false
   if (viewer && !isOwner) {
-    const [{ data: followRow }, { data: reverseRow }] = await Promise.all([
+    const [{ data: followRow }, { data: reverseRow }, { data: blockRow }] = await Promise.all([
       supabase.from('follows').select('id').eq('follower_id', viewer.id).eq('following_id', profile.id).maybeSingle(),
       supabase.from('follows').select('id').eq('follower_id', profile.id).eq('following_id', viewer.id).maybeSingle(),
+      supabase.from('blocks').select('id').eq('blocker_id', viewer.id).eq('blocked_id', profile.id).maybeSingle(),
     ])
     isFollowing = !!followRow
     followsYouBack = !!reverseRow
+    isBlocked = !!blockRow
   }
 
   const memberSince = new Date(profile.created_at).toLocaleDateString('en-US', {
@@ -110,137 +119,146 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
   const isVerifiedSeller = (approvedCount ?? 0) >= 5
 
   return (
-    <main className="min-h-screen bg-[#F9FAFB] pb-24 md:pb-10">
-      <CoverPhotoUpload
-        userId={profile.id}
-        initialCoverUrl={profile.cover_url}
-        isOwner={isOwner}
-      />
+    <div className="w-full pb-24 lg:pb-10">
+      <div className="flex w-full items-start">
+        {/* Left sidebar */}
+        <FeedSidebar userId={viewer?.id} />
 
-      {/* Profile content */}
-      <div className="mx-auto max-w-5xl px-4 sm:px-6">
-        {/* Avatar row — AvatarUpload has -mt-12 sm:-mt-16 built in for overlap */}
-        <div className="flex items-start justify-between gap-4">
-          <AvatarUpload
+        {/* Center — cover photo goes full-width, content gets padding */}
+        <div className="min-w-0 flex-1">
+          <CoverPhotoUpload
             userId={profile.id}
-            initialAvatarUrl={profile.avatar_url}
-            fullName={profile.full_name ?? profile.username}
+            initialCoverUrl={profile.cover_url}
             isOwner={isOwner}
           />
-          {/* Follow / Edit button — push down so it clears the cover bottom */}
-          <div className="mt-3 shrink-0">
-            {isOwner ? (
-              <EditProfileModal profile={profile} />
-            ) : (
-              <FollowButton
-                targetUserId={profile.id}
-                viewerId={viewer?.id ?? null}
-                initialFollowing={isFollowing}
-                followerCount={followerCount ?? 0}
+
+          <div className="px-4 sm:px-6 lg:px-8">
+            {/* Avatar + Edit/Follow button row */}
+            <div className="flex items-start justify-between gap-4">
+              <AvatarUpload
+                userId={profile.id}
+                initialAvatarUrl={profile.avatar_url}
+                fullName={profile.full_name ?? profile.username}
+                isOwner={isOwner}
               />
-            )}
-          </div>
-        </div>
-
-        {/* Name + info */}
-        <div className="mt-3">
-          <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">
-            {profile.full_name ?? profile.username}
-          </h1>
-          <p className="mt-0.5 text-sm text-[#6B7280]">@{profile.username}</p>
-
-          {/* Bio */}
-          {profile.bio && (
-            <div className="mt-2">
-              <ExpandableBio bio={profile.bio} />
+              <div className="mt-3 flex shrink-0 items-center gap-2">
+                {isOwner ? (
+                  <EditProfileModal profile={profile} />
+                ) : (
+                  <>
+                    <FollowButton
+                      targetUserId={profile.id}
+                      viewerId={viewer?.id ?? null}
+                      initialFollowing={isFollowing}
+                      followerCount={followerCount ?? 0}
+                    />
+                    {viewer && (
+                      <UserSafetyMenu
+                        targetUserId={profile.id}
+                        targetUsername={profile.username}
+                        viewerId={viewer.id}
+                        initialBlocked={isBlocked}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
             </div>
-          )}
 
-          {/* Location */}
-          {profile.location && (
-            <p className="mt-2 inline-flex items-center gap-1 text-sm text-[#6B7280]">
-              <MapPin className="size-4 shrink-0" aria-hidden="true" />
-              {profile.location}
-            </p>
-          )}
+            {/* Name + bio + location + trust signals */}
+            <div className="mt-3">
+              <h1 className="text-xl font-bold text-[#1F2937] sm:text-2xl">
+                {profile.full_name ?? profile.username}
+              </h1>
+              <p className="mt-0.5 text-sm text-[#6B7280]">@{profile.username}</p>
 
-          {/* Trust signals */}
-          <div className="mt-3 flex flex-wrap items-center gap-3">
-            {isVerifiedSeller && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
-                <ShieldCheck className="size-3.5" />
-                Verified seller
-              </span>
-            )}
-            <span className="text-xs text-[#9CA3AF]">Member since {memberSince}</span>
-          </div>
+              {profile.bio && (
+                <div className="mt-2">
+                  <ExpandableBio bio={profile.bio} />
+                </div>
+              )}
 
-          {/* Follows you back badge */}
-          {!isOwner && followsYouBack && (
-            <span className="mt-2 inline-block rounded-full bg-[#F3F4F6] px-2.5 py-1 text-xs text-[#6B7280]">
-              Follows you back
-            </span>
-          )}
+              {profile.location && (
+                <p className="mt-2 inline-flex items-center gap-1 text-sm text-[#6B7280]">
+                  <MapPin className="size-4 shrink-0" aria-hidden="true" />
+                  {profile.location}
+                </p>
+              )}
 
-          {/* Stats row */}
-          <div className="mt-5 flex items-center divide-x divide-[#E5E7EB] border-t border-[#E5E7EB] pt-4">
-            <div className="pr-6 text-center">
-              <p className="text-lg font-bold text-[#1F2937]">{products?.length ?? 0}</p>
-              <p className="text-xs text-[#6B7280]">Listings</p>
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                {isVerifiedSeller && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
+                    <ShieldCheck className="size-3.5" />
+                    Verified seller
+                  </span>
+                )}
+                <span className="text-xs text-[#9CA3AF]">Member since {memberSince}</span>
+              </div>
+
+              {!isOwner && followsYouBack && (
+                <span className="mt-2 inline-block rounded-full bg-[#F3F4F6] px-2.5 py-1 text-xs text-[#6B7280]">
+                  Follows you back
+                </span>
+              )}
             </div>
-            <Link
-              href={`/profile/${profile.username}/followers`}
-              className="px-6 text-center transition-opacity hover:opacity-70"
-            >
-              <p className="text-lg font-bold text-[#1F2937]">{followerCount ?? 0}</p>
-              <p className="text-xs text-[#6B7280]">Followers</p>
-            </Link>
-            <Link
-              href={`/profile/${profile.username}/following`}
-              className="px-6 text-center transition-opacity hover:opacity-70"
-            >
-              <p className="text-lg font-bold text-[#1F2937]">{followingCount ?? 0}</p>
-              <p className="text-xs text-[#6B7280]">Following</p>
-            </Link>
-          </div>
 
-          {/* Owner action buttons */}
-          {isOwner && (
-            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+            {/* Stats row */}
+            <div className="mt-5 flex items-center divide-x divide-[#E5E7EB] border-t border-[#E5E7EB] pt-4">
+              <div className="pr-6 text-center">
+                <p className="text-lg font-bold text-[#1F2937]">{products?.length ?? 0}</p>
+                <p className="text-xs text-[#6B7280]">Listings</p>
+              </div>
               <Link
-                href="/products/new"
-                className="flex h-11 w-full items-center justify-center rounded-xl bg-[#F36D21] text-sm font-semibold text-white hover:opacity-90 sm:w-auto sm:px-6"
+                href={`/profile/${profile.username}/followers`}
+                className="px-6 text-center transition-opacity hover:opacity-70"
               >
-                + New listing
+                <p className="text-lg font-bold text-[#1F2937]">{followerCount ?? 0}</p>
+                <p className="text-xs text-[#6B7280]">Followers</p>
+              </Link>
+              <Link
+                href={`/profile/${profile.username}/following`}
+                className="px-6 text-center transition-opacity hover:opacity-70"
+              >
+                <p className="text-lg font-bold text-[#1F2937]">{followingCount ?? 0}</p>
+                <p className="text-xs text-[#6B7280]">Following</p>
               </Link>
             </div>
-          )}
+
+            {/* Tabs — ListingsSection contains the "+ New listing" button for owners */}
+            <div className="mt-6">
+              <ProfileTabs
+                listingsContent={
+                  <ListingsSection
+                    userId={profile.id}
+                    categories={categories ?? []}
+                    initialProducts={products ?? []}
+                    isOwner={isOwner}
+                    sellerUsername={profile.username}
+                    initialModalOpen={isOwner && newParam === '1'}
+                  />
+                }
+                aboutContent={
+                  <ProfileAbout
+                    bio={profile.bio}
+                    location={profile.location}
+                    memberSince={memberSince}
+                    approvedCount={approvedCount ?? 0}
+                  />
+                }
+              />
+            </div>
+          </div>
         </div>
 
-        {/* Tabs */}
-        <div className="mt-6">
-          <ProfileTabs
-            listingsContent={
-              <ListingsSection
-                userId={profile.id}
-                categories={categories ?? []}
-                initialProducts={products ?? []}
-                isOwner={isOwner}
-                sellerUsername={profile.username}
-              />
-            }
-            aboutContent={
-              <ProfileAbout
-                bio={profile.bio}
-                location={profile.location}
-                memberSince={memberSince}
-                approvedCount={approvedCount ?? 0}
-              />
-            }
-          />
-        </div>
+        {/* Right sidebar */}
+        <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-75 shrink-0 flex-col overflow-y-auto border-l border-[#E8EAED] bg-[#F9FAFB] py-6 pl-4 pr-5 xl:flex xl:pr-6">
+          <div className="space-y-6">
+            <SellPromoCard />
+            <HelpPromoCard />
+          </div>
+        </aside>
       </div>
-    </main>
+    </div>
   )
 }
 

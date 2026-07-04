@@ -67,6 +67,8 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
     })
   }
 
+  const isApproved = product.status === 'approved'
+
   return (
     <>
       <div ref={menuRef} className="absolute right-2 top-2 z-10">
@@ -89,15 +91,17 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
               <Pencil className="size-3.5 text-[#9CA3AF]" />
               Edit
             </button>
-            <button
-              type="button"
-              onClick={(e) => { e.preventDefault(); handleSoldToggle() }}
-              disabled={isPending}
-              className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] disabled:opacity-60"
-            >
-              <CheckCircle className="size-3.5 text-[#9CA3AF]" />
-              {product.is_sold ? 'Mark available' : 'Mark as sold'}
-            </button>
+            {isApproved && (
+              <button
+                type="button"
+                onClick={(e) => { e.preventDefault(); handleSoldToggle() }}
+                disabled={isPending}
+                className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] disabled:opacity-60"
+              >
+                <CheckCircle className="size-3.5 text-[#9CA3AF]" />
+                {product.is_sold ? 'Mark available' : 'Mark as sold'}
+              </button>
+            )}
             <div className="my-1 h-px bg-[#F3F4F6]" />
             <button
               type="button"
@@ -156,6 +160,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
             status: product.status,
           }}
           categories={categories}
+          sellerUsername={sellerUsername}
           onClose={() => setEditOpen(false)}
           onSuccess={() => router.refresh()}
         />

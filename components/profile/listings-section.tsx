@@ -1,6 +1,7 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { ProductGrid } from '@/components/profile/product-grid'
 import { NewListingModal, type Category } from '@/components/profile/new-listing-modal'
@@ -12,6 +13,7 @@ type ListingsSectionProps = {
   initialProducts: Product[]
   isOwner: boolean
   sellerUsername?: string
+  initialModalOpen?: boolean
 }
 
 export function ListingsSection({
@@ -20,9 +22,20 @@ export function ListingsSection({
   initialProducts,
   isOwner,
   sellerUsername = '',
+  initialModalOpen = false,
 }: ListingsSectionProps) {
   const [products, setProducts] = useState(initialProducts)
-  const [modalOpen, setModalOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(initialModalOpen)
+  const pathname = usePathname()
+  const router = useRouter()
+
+  // Clean ?new=1 from the URL once the modal has auto-opened
+  useEffect(() => {
+    if (initialModalOpen) {
+      router.replace(pathname, { scroll: false })
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div>

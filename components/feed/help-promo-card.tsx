@@ -1,6 +1,6 @@
-import Link from 'next/link'
 import { Headphones } from 'lucide-react'
 import { FoxIcon } from '@/components/navbar/fox-icon'
+import { ContactSupportButton } from '@/components/support/contact-support-button'
 
 export function HelpPromoCard() {
   return (
@@ -17,12 +17,7 @@ export function HelpPromoCard() {
           <p className="mt-1.5 text-xs leading-relaxed text-[#9CA3AF]">
             Our support fox is here for you.
           </p>
-          <Link
-            href="/chat"
-            className="mt-4 inline-flex items-center rounded-lg border border-[#E8EAED] bg-white px-3.5 py-2 text-xs font-semibold text-[#374151] transition-colors hover:border-[#F36D21]/30 hover:text-[#F36D21]"
-          >
-            Contact Support
-          </Link>
+          <ContactSupportButton className="mt-4 inline-flex items-center rounded-lg border border-[#E8EAED] bg-white px-3.5 py-2 text-xs font-semibold text-[#374151] transition-colors hover:border-[#F36D21]/30 hover:text-[#F36D21]" />
         </div>
       </div>
     </section>

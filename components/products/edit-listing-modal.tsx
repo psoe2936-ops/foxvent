@@ -27,11 +27,12 @@ type EditableProduct = {
 type Props = {
   product: EditableProduct
   categories: Category[]
+  sellerUsername: string
   onClose: () => void
   onSuccess?: () => void
 }
 
-export function EditListingModal({ product, categories, onClose, onSuccess }: Props) {
+export function EditListingModal({ product, categories, sellerUsername, onClose, onSuccess }: Props) {
   const [title, setTitle] = useState(product.title)
   const [description, setDescription] = useState(product.description ?? '')
   const [price, setPrice] = useState(String(product.price))
@@ -43,7 +44,8 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
   const [isPending, startTransition] = useTransition()
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const isApproved = product.status === 'approved'
+  // Editing an approved or rejected listing resets it to pending
+  const willResubmit = product.status === 'approved' || product.status === 'rejected'
 
   function handleClose() {
     if (isPending) return
@@ -57,7 +59,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
 
   function handleSubmit(e: { preventDefault(): void }) {
     e.preventDefault()
-    if (isApproved || isPending) return
+    if (isPending) return
 
     if (!title.trim()) { setError('Title is required.'); return }
     if (!categoryId) { setError('Please select a category.'); return }
@@ -68,6 +70,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
     setError(null)
     const fd = new FormData()
     fd.set('productId', product.id)
+    fd.set('sellerUsername', sellerUsername)
     fd.set('title', title)
     fd.set('description', description)
     fd.set('price', price)
@@ -82,7 +85,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
         onSuccess?.()
         onClose()
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong.')
+        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       }
     })
   }
@@ -113,9 +116,11 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
           </div>
 
           <div className="flex-1 overflow-y-auto px-6 py-4">
-            {isApproved && (
+            {willResubmit && (
               <div className="mb-4 rounded-lg bg-[#FEF3E2] px-4 py-3 text-sm text-[#C26A08]">
-                This listing is approved and cannot be edited. Contact support if changes are needed.
+                {product.status === 'approved'
+                  ? 'Saving changes will put this listing back in pending review.'
+                  : 'Saving changes will resubmit this listing for review.'}
               </div>
             )}
 
@@ -126,7 +131,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
                   type="text"
                   value={title}
                   maxLength={100}
-                  disabled={isPending || isApproved}
+                  disabled={isPending}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)}
                   className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none focus:border-[#F36D21] disabled:opacity-60"
                 />
@@ -139,7 +144,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
                   value={description}
                   maxLength={1000}
                   rows={4}
-                  disabled={isPending || isApproved}
+                  disabled={isPending}
                   onChange={(e: ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)}
                   className="w-full resize-none rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] disabled:opacity-60"
                 />
@@ -150,7 +155,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
                   <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Category</label>
                   <select
                     value={categoryId}
-                    disabled={isPending || isApproved}
+                    disabled={isPending}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setCategoryId(e.target.value)}
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none focus:border-[#F36D21] disabled:opacity-60"
                   >
@@ -166,7 +171,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
                   <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Condition</label>
                   <select
                     value={condition}
-                    disabled={isPending || isApproved}
+                    disabled={isPending}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value)}
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none focus:border-[#F36D21] disabled:opacity-60"
                   >
@@ -190,7 +195,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
                     step="1"
                     inputMode="numeric"
                     value={price}
-                    disabled={isPending || isApproved}
+                    disabled={isPending}
                     onChange={(e: ChangeEvent<HTMLInputElement>) => setPrice(e.target.value)}
                     className="w-full rounded-lg border border-[#E5E7EB] py-2 pl-14 pr-3 text-sm outline-none focus:border-[#F36D21] disabled:opacity-60"
                   />
@@ -202,7 +207,7 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
                 <input
                   type="text"
                   value={location}
-                  disabled={isPending || isApproved}
+                  disabled={isPending}
                   placeholder="e.g. Yangon, Mandalay"
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
                   className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] disabled:opacity-60"
@@ -215,18 +220,16 @@ export function EditListingModal({ product, categories, onClose, onSuccess }: Pr
 
               <button
                 type="submit"
-                disabled={isPending || isApproved}
+                disabled={isPending}
                 className={cn(
                   'w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors',
-                  isApproved
-                    ? 'cursor-not-allowed bg-[#D1D5DB]'
-                    : 'bg-[#F36D21] hover:bg-[#E0631D] disabled:opacity-70'
+                  'bg-[#F36D21] hover:bg-[#E0631D] disabled:opacity-70'
                 )}
               >
                 {isPending ? (
                   <span className="inline-flex items-center justify-center gap-2">
                     <Loader2 className="size-4 animate-spin" />
-                    Saving...
+                    Saving…
                   </span>
                 ) : (
                   'Save changes'

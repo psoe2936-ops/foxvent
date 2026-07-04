@@ -29,13 +29,21 @@ export default async function AdminLayout({
     redirect('/')
   }
 
-  const [{ count: pendingCount }, { count: pendingReportsCount }] = await Promise.all([
+  const [
+    { count: pendingCount },
+    { count: pendingReportsCount },
+    { count: pendingUserReportsCount },
+  ] = await Promise.all([
     supabase
       .from('products')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'pending'),
     supabase
       .from('reports')
+      .select('id', { count: 'exact', head: true })
+      .eq('status', 'pending'),
+    supabase
+      .from('user_reports')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'pending'),
   ])
@@ -46,6 +54,7 @@ export default async function AdminLayout({
         <AdminMobileNav
           pendingCount={pendingCount ?? 0}
           pendingReportsCount={pendingReportsCount ?? 0}
+          pendingUserReportsCount={pendingUserReportsCount ?? 0}
         />
       </Suspense>
 
@@ -53,6 +62,7 @@ export default async function AdminLayout({
         <AdminSidebar
           pendingCount={pendingCount ?? 0}
           pendingReportsCount={pendingReportsCount ?? 0}
+          pendingUserReportsCount={pendingUserReportsCount ?? 0}
         />
         <main className="min-w-0 flex-1 bg-[#F9FAFB] p-4 lg:p-8">{children}</main>
       </div>

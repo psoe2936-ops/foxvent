@@ -53,11 +53,23 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const otherPerson = conversation.buyer_id === user.id ? seller : buyer
   const currentUserProfile = conversation.buyer_id === user.id ? buyer : seller
 
-  const { data: initialMessages } = await supabase
-    .from('messages')
-    .select('id, sender_id, content, created_at, is_read')
-    .eq('conversation_id', id)
-    .order('created_at', { ascending: true })
+  const [
+    { data: initialMessages },
+    { data: blockRow },
+    { data: reverseBlockRow },
+  ] = await Promise.all([
+    supabase
+      .from('messages')
+      .select('id, sender_id, content, created_at, is_read')
+      .eq('conversation_id', id)
+      .order('created_at', { ascending: true }),
+    otherPerson
+      ? supabase.from('blocks').select('id').eq('blocker_id', user.id).eq('blocked_id', otherPerson.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+    otherPerson
+      ? supabase.from('blocks').select('id').eq('blocker_id', otherPerson.id).eq('blocked_id', user.id).maybeSingle()
+      : Promise.resolve({ data: null }),
+  ])
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
@@ -69,6 +81,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
         otherPerson={otherPerson}
         product={product}
         initialMessages={initialMessages ?? []}
+        iBlockedThem={!!blockRow}
+        theyBlockedMe={!!reverseBlockRow}
       />
     </main>
   )

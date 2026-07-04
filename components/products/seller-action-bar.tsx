@@ -28,85 +28,110 @@ type Props = {
 export function SellerActionBar({ product, categories, sellerUsername }: Props) {
   const [editOpen, setEditOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
 
+  const isApproved = product.status === 'approved'
+
   function handleSoldToggle() {
+    setError(null)
     startTransition(async () => {
-      if (product.is_sold) {
-        await markAsUnsold(product.id)
-      } else {
-        await markAsSold(product.id)
+      try {
+        if (product.is_sold) {
+          await markAsUnsold(product.id)
+        } else {
+          await markAsSold(product.id)
+        }
+        router.refresh()
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
       }
-      router.refresh()
     })
   }
 
   function handleDelete() {
+    setError(null)
     startTransition(async () => {
-      await deleteProduct(product.id, sellerUsername)
+      try {
+        await deleteProduct(product.id, sellerUsername)
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+      }
     })
   }
 
   return (
     <>
-      <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
-        <button
-          type="button"
-          onClick={() => setEditOpen(true)}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6]"
-        >
-          <Pencil className="size-3.5" />
-          Edit
-        </button>
+      <div className="mt-4 rounded-xl border border-[#E5E7EB] bg-[#F9FAFB] p-3">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Edit — available for all statuses */}
+          <button
+            type="button"
+            onClick={() => setEditOpen(true)}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6]"
+          >
+            <Pencil className="size-3.5" />
+            Edit
+          </button>
 
-        <button
-          type="button"
-          onClick={handleSoldToggle}
-          disabled={isPending}
-          className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] disabled:opacity-60"
-        >
-          <CheckCircle className="size-3.5" />
-          {product.is_sold ? 'Mark available' : 'Mark as sold'}
-        </button>
-
-        <div className="ml-auto flex items-center gap-2">
-          {!confirmDelete ? (
+          {/* Mark as sold — only for approved listings */}
+          {isApproved && (
             <button
               type="button"
-              onClick={() => setConfirmDelete(true)}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[#FDEDEC] bg-white px-3 py-1.5 text-sm font-medium text-[#C0392B] transition-colors hover:bg-[#FDEDEC]"
+              onClick={handleSoldToggle}
+              disabled={isPending}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] disabled:opacity-60"
             >
-              <Trash2 className="size-3.5" />
-              Delete
+              <CheckCircle className="size-3.5" />
+              {product.is_sold ? 'Mark available' : 'Mark as sold'}
             </button>
-          ) : (
-            <>
-              <span className="text-xs text-[#6B7280]">Are you sure? This cannot be undone.</span>
-              <button
-                type="button"
-                onClick={() => setConfirmDelete(false)}
-                className="rounded-lg border border-[#E5E7EB] px-2.5 py-1 text-xs text-[#6B7280] hover:bg-[#F3F4F6]"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDelete}
-                disabled={isPending}
-                className="rounded-lg bg-[#C0392B] px-2.5 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
-              >
-                {isPending ? 'Deleting...' : 'Delete'}
-              </button>
-            </>
           )}
+
+          {/* Delete — with inline confirmation */}
+          <div className="ml-auto flex items-center gap-2">
+            {!confirmDelete ? (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-[#FDEDEC] bg-white px-3 py-1.5 text-sm font-medium text-[#C0392B] transition-colors hover:bg-[#FDEDEC]"
+              >
+                <Trash2 className="size-3.5" />
+                Delete
+              </button>
+            ) : (
+              <>
+                <span className="text-xs text-[#6B7280]">Are you sure?</span>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(false)}
+                  className="rounded-lg border border-[#E5E7EB] px-2.5 py-1 text-xs text-[#6B7280] hover:bg-[#F3F4F6]"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDelete}
+                  disabled={isPending}
+                  className="rounded-lg bg-[#C0392B] px-2.5 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
+                >
+                  {isPending ? 'Deleting…' : 'Delete'}
+                </button>
+              </>
+            )}
+          </div>
         </div>
+
+        {error && (
+          <p className="mt-2 text-xs text-[#C0392B]">{error}</p>
+        )}
       </div>
 
       {editOpen && (
         <EditListingModal
           product={product}
           categories={categories}
+          sellerUsername={sellerUsername}
           onClose={() => setEditOpen(false)}
           onSuccess={() => router.refresh()}
         />

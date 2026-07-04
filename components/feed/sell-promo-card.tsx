@@ -1,7 +1,25 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
 import { FoxIcon } from '@/components/navbar/fox-icon'
 
-export function SellPromoCard() {
+export async function SellPromoCard() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  let href = '/?login=1'
+  if (user) {
+    const { data: profile } = await supabase
+      .from('users')
+      .select('username')
+      .eq('id', user.id)
+      .single()
+    href = profile?.username
+      ? `/profile/${profile.username}?new=1`
+      : '/feed/listings'
+  }
+
   return (
     <section className="rounded-xl border border-[#E8EAED] bg-white p-5 shadow-sm">
       <div className="flex flex-col items-center px-2 py-2 text-center">
@@ -13,7 +31,7 @@ export function SellPromoCard() {
           Sell to your community.
         </p>
         <Link
-          href="/feed"
+          href={href}
           className="mt-4 w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
           Start Selling

@@ -34,6 +34,13 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     openRef.current = open
   }, [open])
 
+  // Allow other components to open the chat via a custom window event
+  useEffect(() => {
+    const handleOpenSupport = () => { setOpen(true); setUnreadCount(0) }
+    window.addEventListener('open-support-chat', handleOpenSupport)
+    return () => window.removeEventListener('open-support-chat', handleOpenSupport)
+  }, [])
+
   // On mount: pre-load conversation id + unread badge count
   useEffect(() => {
     if (isHidden) return
@@ -252,29 +259,21 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
         </div>
       )}
 
-      {/* Floating bubble — hidden on mobile when popup is open */}
-      <button
-        onClick={() => {
-          const next = !open
-          setOpen(next)
-          if (next) setUnreadCount(0)
-        }}
-        className={`fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#F36D21] shadow-lg transition-transform hover:scale-105 active:scale-95 ${
-          open ? 'max-sm:hidden' : ''
-        }`}
-        aria-label={open ? 'Close support chat' : 'Open support chat'}
-      >
-        {open ? (
-          <X className="size-6 text-white" />
-        ) : (
+      {/* Floating bubble — only shown when popup is closed */}
+      {!open && (
+        <button
+          onClick={() => { setOpen(true); setUnreadCount(0) }}
+          className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#F36D21] shadow-lg transition-transform hover:scale-105 active:scale-95"
+          aria-label="Open support chat"
+        >
           <MessageCircle className="size-6 text-white" />
-        )}
-        {!open && unreadCount > 0 && (
-          <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
+          {unreadCount > 0 && (
+            <span className="absolute -right-1 -top-1 flex size-5 items-center justify-center rounded-full bg-red-500 text-[11px] font-bold text-white">
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
+        </button>
+      )}
     </>
   )
 }

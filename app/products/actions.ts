@@ -25,13 +25,17 @@ async function verifySeller(productId: string) {
 
 export async function updateProduct(formData: FormData) {
   const productId = formData.get('productId') as string
+  const sellerUsername = (formData.get('sellerUsername') as string) || ''
+
   const { supabase, product } = await verifySeller(productId)
 
-  if (product.status === 'approved') {
-    throw new Error('Approved listings cannot be edited')
-  }
+  // Editing a rejected or approved listing resubmits it for review
+  const newStatus =
+    product.status === 'rejected' || product.status === 'approved'
+      ? 'pending'
+      : product.status
 
-  await supabase
+  const { error } = await supabase
     .from('products')
     .update({
       title: (formData.get('title') as string).trim(),
@@ -40,28 +44,52 @@ export async function updateProduct(formData: FormData) {
       condition: formData.get('condition') as string,
       category_id: formData.get('category_id') as string,
       location: (formData.get('location') as string)?.trim() || null,
+      status: newStatus,
     })
     .eq('id', productId)
 
+  if (error) throw new Error('Failed to update listing. Please try again.')
+
   revalidatePath(`/products/${productId}`)
-  revalidatePath('/profile')
+  if (sellerUsername) revalidatePath(`/profile/${sellerUsername}`)
 }
 
 export async function deleteProduct(productId: string, sellerUsername: string) {
   const { supabase } = await verifySeller(productId)
-  await supabase.from('products').delete().eq('id', productId)
+
+  const { error } = await supabase.from('products').delete().eq('id', productId)
+  if (error) throw new Error('Failed to delete listing. Please try again.')
+
   revalidatePath(`/profile/${sellerUsername}`)
   redirect(`/profile/${sellerUsername}`)
 }
 
 export async function markAsSold(productId: string) {
-  const { supabase } = await verifySeller(productId)
-  await supabase.from('products').update({ is_sold: true }).eq('id', productId)
+  const { supabase, product } = await verifySeller(productId)
+
+  if (product.status !== 'approved') throw new Error('Only approved listings can be marked as sold.')
+
+  const { error } = await supabase
+    .from('products')
+    .update({ is_sold: true })
+    .eq('id', productId)
+
+  if (error) throw new Error('Failed to update listing. Please try again.')
+
   revalidatePath(`/products/${productId}`)
 }
 
 export async function markAsUnsold(productId: string) {
-  const { supabase } = await verifySeller(productId)
-  await supabase.from('products').update({ is_sold: false }).eq('id', productId)
+  const { supabase, product } = await verifySeller(productId)
+
+  if (product.status !== 'approved') throw new Error('Only approved listings can be marked as available.')
+
+  const { error } = await supabase
+    .from('products')
+    .update({ is_sold: false })
+    .eq('id', productId)
+
+  if (error) throw new Error('Failed to update listing. Please try again.')
+
   revalidatePath(`/products/${productId}`)
 }
