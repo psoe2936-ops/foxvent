@@ -63,6 +63,7 @@ export function ChatThread({
   iBlockedThem?: boolean
   theyBlockedMe?: boolean
 }) {
+  const [mounted, setMounted] = useState(false)
   const [messages, setMessages] = useState<Message[]>(initialMessages)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
@@ -103,6 +104,8 @@ export function ChatThread({
     document.addEventListener('mousedown', onOutside)
     return () => document.removeEventListener('mousedown', onOutside)
   }, [kebabOpen])
+
+  useEffect(() => setMounted(true), [])
 
   // Mark messages as read on mount
   useEffect(() => {
@@ -270,7 +273,7 @@ export function ChatThread({
             <p className="truncate font-medium text-[#2D2E32]">{otherPerson?.full_name}</p>
             {product && (
               <p className="truncate text-xs text-[#6B7280]">
-                {product.title} · MMK {product.price.toLocaleString()}
+                {product.title} · MMK {mounted ? product.price.toLocaleString() : product.price}
               </p>
             )}
           </div>
@@ -399,7 +402,7 @@ export function ChatThread({
                   </div>
                   <div className="mt-1 flex items-center gap-1">
                     <span className="text-[10px] text-[#9CA3AF]">
-                      {new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                      {mounted ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
                     </span>
                     {isMine && (
                       msg.is_read

@@ -12,7 +12,7 @@ import AgoraRTC, {
   RemoteUser,
   LocalVideoTrack,
 } from 'agora-rtc-react'
-import { Mic, MicOff, Video, VideoOff, PhoneOff } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Volume2 } from 'lucide-react'
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!
 
@@ -27,6 +27,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   const [retryCount, setRetryCount] = useState(0)
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
+  const [audioBlocked, setAudioBlocked] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -48,14 +49,12 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
     }
 
     fetchToken()
-    return () => {
-      cancelled = true
-    }
+    return () => { cancelled = true }
   }, [conversationId, retryCount])
 
-  // All hooks called unconditionally — useJoin uses ready flag to gate the actual join
-  const { localMicrophoneTrack } = useLocalMicrophoneTrack(micOn)
-  const { localCameraTrack } = useLocalCameraTrack(camOn)
+  // All hooks called unconditionally — useJoin/usePublish gate themselves via the ready flag
+  const { localMicrophoneTrack, isLoading: micLoading, error: micError } = useLocalMicrophoneTrack(micOn)
+  const { localCameraTrack, isLoading: camLoading, error: camError } = useLocalCameraTrack(camOn)
   const remoteUsers = useRemoteUsers()
 
   useJoin(
@@ -64,7 +63,56 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   )
   usePublish([localMicrophoneTrack, localCameraTrack])
 
-  // Conditional renders after all hooks
+  // Log device errors for debugging
+  useEffect(() => {
+    if (camError) console.error('Camera error:', camError)
+  }, [camError])
+  useEffect(() => {
+    if (micError) console.error('Mic error:', micError)
+  }, [micError])
+
+  // Manually play remote audio tracks so we can catch mobile autoplay blocks.
+  // RemoteUser below has playAudio={false}, so we own the play() call here.
+  // IRemoteAudioTrack.play() is typed void but returns a Promise at runtime in
+  // browsers that implement the Promises-based autoplay policy (Chrome 66+, etc.).
+  useEffect(() => {
+    if (remoteUsers.length === 0) return
+
+    const promises: Promise<void>[] = []
+
+    remoteUsers.forEach((user) => {
+      if (user.audioTrack) {
+        const result = (user.audioTrack.play as () => void | Promise<void>)()
+        if (result instanceof Promise) promises.push(result)
+      }
+    })
+
+    if (promises.length > 0) {
+      // At least one browser returned a Promise — detect rejection (autoplay block)
+      Promise.all(promises).catch(() => setAudioBlocked(true))
+    } else {
+      // play() returned void (older SDK path); fall back to AudioContext state check
+      try {
+        const ctx = new window.AudioContext()
+        if (ctx.state === 'suspended') setAudioBlocked(true)
+        void ctx.close()
+      } catch {
+        // AudioContext unavailable — assume audio is fine
+      }
+    }
+  }, [remoteUsers])
+
+  function handleUnblockAudio() {
+    // Called directly from a click handler — counts as a user gesture on all mobile browsers
+    remoteUsers.forEach((user) => {
+      if (user.audioTrack) {
+        ;(user.audioTrack.play as () => void | Promise<void>)()
+      }
+    })
+    setAudioBlocked(false)
+  }
+
+  // ── Loading / connecting ────────────────────────────────────────────────────
   if (!token && !tokenError) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
@@ -76,34 +124,81 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
     )
   }
 
+  // ── Token error ─────────────────────────────────────────────────────────────
   if (tokenError) {
     return (
       <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-black text-white">
         <p className="text-sm">Failed to connect. Please try again.</p>
         <button
-          onClick={() => {
-            setToken(null)
-            setRetryCount((c) => c + 1)
-          }}
+          onClick={() => { setToken(null); setRetryCount((c) => c + 1) }}
           className="rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
           Retry
         </button>
-        <button
-          onClick={onEnd}
-          className="text-sm text-[#9CA3AF] hover:text-white"
-        >
+        <button onClick={onEnd} className="text-sm text-[#9CA3AF] hover:text-white">
           Cancel
         </button>
       </div>
     )
   }
 
+  // ── Camera / mic permission denied ──────────────────────────────────────────
+  if (camError || micError) {
+    const label =
+      camError && micError ? 'Camera and microphone' : camError ? 'Camera' : 'Microphone'
+
+    return (
+      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black px-6 text-center text-white">
+        <div className="flex size-16 items-center justify-center rounded-full bg-[#C0392B]/20">
+          <VideoOff className="size-8 text-[#C0392B]" />
+        </div>
+        <div>
+          <p className="text-base font-semibold">{label} access denied</p>
+          <p className="mt-2 max-w-xs text-sm text-[#9CA3AF]">
+            Please allow access in your browser settings and reload the page to try again.
+          </p>
+        </div>
+        <button
+          onClick={onEnd}
+          className="mt-2 rounded-lg border border-[#444] px-5 py-2 text-sm text-[#9CA3AF] hover:bg-[#1a1a1a] hover:text-white"
+        >
+          Leave call
+        </button>
+      </div>
+    )
+  }
+
+  // True when tracks are being acquired (mic or cam toggle just happened)
+  const isDeviceLoading = (micOn && micLoading) || (camOn && camLoading)
+
+  // ── Main call UI ────────────────────────────────────────────────────────────
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black">
+      {/* Tap-to-enable-audio overlay — appears when mobile autoplay is blocked */}
+      {audioBlocked && remoteUsers.length > 0 && (
+        <div className="absolute inset-0 z-10 flex items-center justify-center">
+          <button
+            onClick={handleUnblockAudio}
+            className="flex items-center gap-2 rounded-2xl bg-black/70 px-6 py-4 text-white backdrop-blur-sm"
+          >
+            <Volume2 className="size-6 text-[#F36D21]" />
+            <span className="text-sm font-semibold">Tap to enable audio</span>
+          </button>
+        </div>
+      )}
+
+      {/* Device-acquiring indicator */}
+      {isDeviceLoading && (
+        <div className="absolute left-3 top-3 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
+          <div className="size-3 animate-spin rounded-full border border-white border-t-transparent" />
+          <span className="text-xs text-white">Waiting for camera/microphone permission…</span>
+        </div>
+      )}
+
       <div className="flex flex-1 gap-1 overflow-hidden p-1">
+        {/* Local video tile */}
         <div className="relative flex-1 overflow-hidden rounded-xl bg-[#1a1a1a]">
-          {camOn ? (
+          {camOn && localCameraTrack ? (
             <LocalVideoTrack
               track={localCameraTrack}
               play
@@ -121,13 +216,14 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
           </span>
         </div>
 
+        {/* Remote video tiles — playAudio={false} so we own audio play() manually above */}
         {remoteUsers.length > 0 ? (
           remoteUsers.map((user) => (
             <div
               key={user.uid}
               className="relative flex-1 overflow-hidden rounded-xl bg-[#1a1a1a]"
             >
-              <RemoteUser user={user} className="size-full object-cover" />
+              <RemoteUser user={user} playAudio={false} className="size-full object-cover" />
               <span className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-0.5 text-xs text-white">
                 Them
               </span>
@@ -148,6 +244,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
         )}
       </div>
 
+      {/* Call controls */}
       <div className="flex items-center justify-center gap-4 bg-black py-5">
         <button
           onClick={() => setMicOn((prev) => !prev)}
