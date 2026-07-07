@@ -65,6 +65,25 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   usePublish([localMicrophoneTrack, localCameraTrack])
 
   useEffect(() => {
+    console.log('Publish status:', {
+      micOn,
+      hasLocalMicTrack: !!localMicrophoneTrack,
+      micTrackEnabled: localMicrophoneTrack?.enabled,
+      micMuted: localMicrophoneTrack?.muted,
+    })
+  }, [micOn, localMicrophoneTrack])
+
+  useEffect(() => {
+    remoteUsers.forEach((user) => {
+      console.log('Remote user audio status:', {
+        uid: user.uid,
+        hasAudioTrack: !!user.audioTrack,
+        audioTrackEnabled: user.audioTrack?.enabled,
+      })
+    })
+  }, [remoteUsers])
+
+  useEffect(() => {
     if (!localMicrophoneTrack) return
     const interval = setInterval(() => {
       setMicLevel(localMicrophoneTrack.getVolumeLevel())
