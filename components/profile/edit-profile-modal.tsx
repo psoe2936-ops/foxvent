@@ -3,8 +3,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil, X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { sanitizeText } from '@/lib/sanitize'
+import { updateProfile } from '@/app/profile/actions'
 
 type EditProfileModalProps = {
   profile: {
@@ -26,7 +25,6 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const router = useRouter()
-  const supabase = createClient()
 
   const closeModal = () => {
     if (loading) return
@@ -37,46 +35,30 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setError(null)
-
-    const trimmedFullName = fullName.trim()
-    const trimmedUsername = username.trim().toLowerCase()
-    const trimmedLocation = location.trim()
-    const trimmedBio = bio.trim()
-
-    if (!trimmedFullName || !trimmedUsername) {
-      setError('Full name and username are required.')
-      return
-    }
-
     setLoading(true)
 
-    const { error: updateError } = await supabase
-      .from('users')
-      .update({
-        full_name: sanitizeText(trimmedFullName, 100),
-        username: trimmedUsername,
-        bio: sanitizeText(trimmedBio, 280) || null,
-        location: sanitizeText(trimmedLocation, 100) || null,
-      })
-      .eq('id', profile.id)
+    const result = await updateProfile({
+      userId: profile.id,
+      fullName: fullName,
+      username: username,
+      bio: bio,
+      location: location,
+    })
 
-    if (updateError) {
-      setError(
-        updateError.code === '23505'
-          ? 'That username is already taken.'
-          : updateError.message
-      )
-      setLoading(false)
+    setLoading(false)
+
+    if ('error' in result) {
+      setError(result.error)
       return
     }
 
-    setLoading(false)
     setOpen(false)
 
-    if (trimmedUsername !== profile.username) {
-      router.push(`/profile/${trimmedUsername}`)
+    if (result.username !== profile.username) {
+      router.push(`/profile/${result.username}`)
+    } else {
+      router.refresh()
     }
-    router.refresh()
   }
 
   return (
@@ -98,7 +80,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={closeModal}
         >
           <div
@@ -106,7 +88,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
             aria-modal="true"
             aria-labelledby="edit-profile-title"
             onClick={(event) => event.stopPropagation()}
-            className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+            className="relative w-full max-w-md rounded-2xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
           >
             <button
               type="button"
@@ -162,7 +144,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
                   value={bio}
                   onChange={(event) => setBio(event.target.value)}
                   rows={3}
-                  maxLength={280}
+                  maxLength={300}
                   placeholder="Tell people a bit about yourself"
                   className="w-full resize-none rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
                 />

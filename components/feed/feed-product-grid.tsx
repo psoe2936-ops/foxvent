@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { SlidersHorizontal, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -181,7 +182,7 @@ export async function FeedProductGrid({
 
           {listings.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E8EAED] bg-white py-16 text-center">
-              <span className="text-4xl">🦊</span>
+              <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
               <p className="mt-3 text-sm font-medium text-[#374151]">No listings found</p>
               <p className="mt-1 text-sm text-[#9CA3AF]">Try a different search term.</p>
             </div>
@@ -249,6 +250,25 @@ export async function FeedProductGrid({
   if (effectiveCategory) query = query.eq('category_id', effectiveCategory)
 
   const { data: products } = await query
+
+  // Single query for all seller ratings — no N+1
+  const sellerIds = [...new Set((products ?? []).map((p: RawProduct) => p.seller_id))]
+  const sellerRatingMap = new Map<string, { avg: number; count: number }>()
+  if (sellerIds.length > 0) {
+    const { data: ratingRows } = await supabase
+      .from('reviews')
+      .select('seller_id, rating')
+      .in('seller_id', sellerIds)
+    const agg = new Map<string, { sum: number; count: number }>()
+    for (const row of (ratingRows ?? []) as { seller_id: string; rating: number }[]) {
+      const e = agg.get(row.seller_id) ?? { sum: 0, count: 0 }
+      e.sum += row.rating
+      e.count++
+      agg.set(row.seller_id, e)
+    }
+    agg.forEach((v, k) => sellerRatingMap.set(k, { avg: v.sum / v.count, count: v.count }))
+  }
+
   const filterParams = { category, q, sort }
 
   const clearSearchParams = new URLSearchParams()
@@ -314,7 +334,7 @@ export async function FeedProductGrid({
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {!products || products.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E8EAED] bg-white py-20 text-center">
-              <span className="text-4xl">🦊</span>
+              <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
               <p className="mt-3 text-sm font-medium text-[#374151]">No listings found</p>
               <p className="mt-1 text-sm text-[#9CA3AF]">
                 Try a different search or category.
@@ -337,6 +357,7 @@ export async function FeedProductGrid({
                 const seller = Array.isArray(product.users)
                   ? product.users[0]
                   : product.users
+                const ratingInfo = sellerRatingMap.get(product.seller_id)
 
                 return (
                   <ProductCard
@@ -354,6 +375,8 @@ export async function FeedProductGrid({
                     initialSaved={savedSet.has(product.id)}
                     isFollowingSeller={followingSet.has(product.seller_id)}
                     isSold={product.is_sold}
+                    sellerRating={ratingInfo?.avg ?? null}
+                    sellerReviewCount={ratingInfo?.count ?? 0}
                   />
                 )
               }

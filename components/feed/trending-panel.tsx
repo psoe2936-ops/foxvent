@@ -1,5 +1,36 @@
 import Link from 'next/link'
-import { ChevronRight, Tag } from 'lucide-react'
+import {
+  Armchair,
+  BookOpen,
+  ChevronRight,
+  Cpu,
+  Dumbbell,
+  Home,
+  Package,
+  Shirt,
+  Smartphone,
+} from 'lucide-react'
+import type { LucideIcon } from 'lucide-react'
+
+const CATEGORY_ICONS: Record<string, LucideIcon> = {
+  electronics: Cpu,
+  mobiles: Smartphone,
+  phones: Smartphone,
+  mobile: Smartphone,
+  fashion: Shirt,
+  clothing: Shirt,
+  books: BookOpen,
+  home: Home,
+  sports: Dumbbell,
+  furniture: Armchair,
+}
+
+function CategoryIcon({ name }: { name: string }) {
+  const key = name.toLowerCase().trim()
+  const Icon =
+    Object.entries(CATEGORY_ICONS).find(([k]) => key.includes(k))?.[1] ?? Package
+  return <Icon className="size-4 text-[#6B7280]" />
+}
 
 export type TrendingItem = {
   id: string
@@ -33,14 +64,10 @@ export function TrendingPanel({
                 className="group flex items-center gap-3 py-2.5"
               >
                 <span
-                  className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-[#F9FAFB] text-base"
+                  className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#F3F4F6]"
                   aria-hidden
                 >
-                  {item.icon ? (
-                    item.icon
-                  ) : (
-                    <Tag className="size-4 text-[#9CA3AF]" />
-                  )}
+                  <CategoryIcon name={item.name} />
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-[#374151] transition-colors group-hover:text-[#F36D21]">

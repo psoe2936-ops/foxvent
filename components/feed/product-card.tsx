@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { WishlistHeart } from '@/components/feed/wishlist-heart'
 import { formatRelativeTime } from '@/lib/format-relative-time'
+import { StarRatingDisplay } from '@/components/reviews/star-rating-display'
 
 type ProductCardProps = {
   id: string
@@ -16,6 +17,8 @@ type ProductCardProps = {
   initialSaved?: boolean
   isFollowingSeller?: boolean
   isSold?: boolean
+  sellerRating?: number | null
+  sellerReviewCount?: number
 }
 
 const CONDITION_STYLES: Record<string, string> = {
@@ -39,6 +42,8 @@ export function ProductCard({
   initialSaved = false,
   isFollowingSeller = false,
   isSold = false,
+  sellerRating = null,
+  sellerReviewCount = 0,
 }: ProductCardProps) {
   const badgeStyle =
     CONDITION_STYLES[conditionKey] ??
@@ -47,7 +52,7 @@ export function ProductCard({
   return (
     <Link
       href={`/products/${id}`}
-      className="group block overflow-hidden rounded-xl border border-[#E8EAED] bg-white shadow-sm transition-all hover:border-[#F36D21]/30 hover:shadow-md"
+      className="group block overflow-hidden rounded-xl border border-[#E8EAED] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.06)] transition-all hover:border-[#F36D21]/30 hover:shadow-[0_4px_20px_rgba(0,0,0,0.1)]"
     >
       <div className="relative aspect-5/4 w-full overflow-hidden bg-[#F3F4F6]">
         {images && images[0] ? (
@@ -108,11 +113,15 @@ export function ProductCard({
             <span className="min-w-0 truncate text-xs font-medium text-[#4B5563]">
               @{sellerUsername}
             </span>
-            {isFollowingSeller && (
+            {sellerRating !== null && sellerReviewCount > 0 ? (
+              <span className="ml-auto shrink-0">
+                <StarRatingDisplay rating={sellerRating} size="sm" showNumber />
+              </span>
+            ) : isFollowingSeller ? (
               <span className="ml-auto shrink-0 rounded-full bg-[#FEF3E2] px-1.5 py-0.5 text-[10px] font-medium text-[#F36D21]">
                 Following
               </span>
-            )}
+            ) : null}
           </div>
         )}
       </div>

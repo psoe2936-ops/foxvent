@@ -25,13 +25,19 @@ export function BanButton({
   const [unbanConfirm, setUnbanConfirm] = useState(false)
   const [duration, setDuration] = useState<BanDuration>('24h')
   const [reason, setReason] = useState('')
+  const [banError, setBanError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
   function handleBan() {
     const trimmed = reason.trim()
     if (trimmed.length < 10) return
+    setBanError(null)
     startTransition(async () => {
-      await banUser(userId, duration, trimmed)
+      const result = await banUser(userId, duration, trimmed)
+      if ('error' in result) {
+        setBanError(result.error)
+        return
+      }
       setBanOpen(false)
       setReason('')
     })
@@ -92,7 +98,7 @@ export function BanButton({
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
+            className="w-full max-w-sm rounded-2xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
           >
             <h3 className="font-semibold text-[#2D2E32]">Ban @{username}</h3>
             <p className="mt-1 text-sm text-[#6B7280]">
@@ -135,6 +141,9 @@ export function BanButton({
                 <p className="mt-1 text-xs text-[#C0392B]">
                   At least 10 characters required.
                 </p>
+              )}
+              {banError && (
+                <p className="mt-1 text-xs text-[#C0392B]">{banError}</p>
               )}
             </div>
 

@@ -95,7 +95,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-[#E5E7EB] bg-[#FEFEFE] p-3">
+      <header className="sticky top-0 z-40 border-b border-white/40 bg-white/70 p-3 backdrop-blur-xl shadow-[0_1px_16px_rgba(0,0,0,0.04)]">
         <nav
           className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6"
           aria-label="Main navigation"
@@ -178,7 +178,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
       {drawerOpen && (
         <>
           <div
-            className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
@@ -225,7 +225,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                     key={href}
                     href={href}
                     onClick={() => setDrawerOpen(false)}
-                    className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
                   >
                     <span className="relative shrink-0">
                       <Icon className="size-5" strokeWidth={1.75} />
@@ -238,14 +238,14 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                 ))
               ) : (
                 <>
-                  <Link href="/feed" onClick={() => setDrawerOpen(false)} className="flex min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]">
+                  <Link href="/feed" onClick={() => setDrawerOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]">
                     <Home className="size-5" strokeWidth={1.75} />
                     Browse listings
                   </Link>
                   <button
                     type="button"
                     onClick={() => { setDrawerOpen(false); openModal('login') }}
-                    className="flex w-full min-h-[44px] items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#F36D21] hover:bg-[#FEF3E2]"
+                    className="flex w-full min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#F36D21] hover:bg-[#FEF3E2]"
                   >
                     Log in
                   </button>
@@ -259,7 +259,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                 <Link
                   href={`/profile/${profile.username}`}
                   onClick={() => setDrawerOpen(false)}
-                  className="flex min-h-[44px] w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]"
+                  className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]"
                 >
                   View my profile
                 </Link>

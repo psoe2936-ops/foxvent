@@ -1,5 +1,5 @@
+import Image from 'next/image'
 import Link from 'next/link'
-import { Users } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { ProductCard } from '@/components/feed/product-card'
 import { FollowButton } from '@/components/profile/follow-button'
@@ -132,9 +132,7 @@ export async function FollowingContent({ userId }: { userId: string }) {
         <p className="mt-0.5 text-sm text-[#6B7280]">Listings from sellers you follow</p>
 
         <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-12 text-center">
-          <div className="flex size-12 items-center justify-center rounded-full bg-[#FEF3E2]">
-            <Users className="size-6 text-[#F36D21]" />
-          </div>
+          <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto" />
           <div>
             <p className="font-semibold text-[#1F2937]">You&apos;re not following anyone yet</p>
             <p className="mt-1 text-sm text-[#6B7280]">

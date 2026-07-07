@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Flag, X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { submitProductReport } from '@/app/reports/actions'
 
 const REASONS = [
   'Spam',
@@ -27,28 +27,25 @@ export function ReportButton({
   const [done, setDone] = useState(false)
   const [alreadyReported, setAlreadyReported] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = useMemo(() => createClient(), [])
 
   async function handleSubmit() {
     if (!reason || submitting) return
     setSubmitting(true)
     setError(null)
 
-    const { error: insertError } = await supabase.from('reports').insert({
-      reporter_id: viewerId,
-      product_id: productId,
+    const result = await submitProductReport({
+      productId,
       reason,
       description: description.trim() || null,
-      status: 'pending',
     })
 
     setSubmitting(false)
 
-    if (insertError) {
-      if (insertError.code === '23505') {
+    if ('error' in result) {
+      if (result.error.includes('already reported')) {
         setAlreadyReported(true)
       } else {
-        setError('Something went wrong. Please try again.')
+        setError(result.error)
       }
       return
     }
@@ -78,7 +75,7 @@ export function ReportButton({
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
           onClick={handleClose}
         >
           <div
@@ -86,7 +83,7 @@ export function ReportButton({
             aria-modal="true"
             aria-labelledby="report-modal-title"
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-sm rounded-2xl bg-white p-6 shadow-lg"
+            className="relative w-full max-w-sm rounded-2xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
           >
             <button
               type="button"

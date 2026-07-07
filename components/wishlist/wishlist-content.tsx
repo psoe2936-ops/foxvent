@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { Heart } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
@@ -42,8 +43,8 @@ export async function WishlistContent({ userId }: { userId: string }) {
 
       {savedProducts.length === 0 ? (
         <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
-          <Heart className="size-10 text-[#D1D5DB]" />
-          <p className="mt-4 text-base font-medium text-[#1F2937]">No saved items yet</p>
+          <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
+          <p className="text-base font-medium text-[#1F2937]">No saved items yet</p>
           <p className="mt-1 text-sm text-[#6B7280]">
             Tap the heart on any listing to save it here.
           </p>

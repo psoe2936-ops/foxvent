@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Heart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/components/ui/toast'
 
 export function WishlistHeart({
   productId,
@@ -16,6 +17,7 @@ export function WishlistHeart({
   const [pending, setPending] = useState(false)
   const router = useRouter()
   const supabase = createClient()
+  const { showToast } = useToast()
 
   const handleClick = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -45,8 +47,8 @@ export function WishlistHeart({
         .eq('product_id', productId)
 
       if (error) {
-        console.error('Failed to remove from wishlist:', error)
-        setSaved(true) // revert
+        setSaved(true)
+        showToast('Could not remove from wishlist. Please try again.', 'error')
       }
     } else {
       const { error } = await supabase
@@ -54,8 +56,8 @@ export function WishlistHeart({
         .insert({ user_id: user.id, product_id: productId })
 
       if (error) {
-        console.error('Failed to add to wishlist:', error)
-        setSaved(false) // revert
+        setSaved(false)
+        showToast('Could not save to wishlist. Please try again.', 'error')
       }
     }
 

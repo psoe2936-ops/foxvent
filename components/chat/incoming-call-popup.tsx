@@ -23,7 +23,7 @@ export function IncomingCallPopup({
   }, [onDecline])
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 w-[300px] rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-xl">
+    <div className="fixed bottom-24 right-6 z-50 w-[300px] rounded-2xl border border-white/40 bg-white/90 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl">
       <div className="flex items-center gap-3">
         <div className="relative shrink-0">
           {callerAvatar ? (

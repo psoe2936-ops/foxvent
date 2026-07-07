@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 
 type BanDuration = '24h' | '7d' | '30d' | 'permanent'
+const ALLOWED_DURATIONS = new Set<BanDuration>(['24h', '7d', '30d', 'permanent'])
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -20,7 +21,22 @@ async function verifyAdmin() {
   return supabase
 }
 
-export async function banUser(userId: string, duration: BanDuration, reason: string) {
+export async function banUser(
+  userId: string,
+  duration: BanDuration,
+  reason: string
+): Promise<{ error: string } | { success: true }> {
+  if (!ALLOWED_DURATIONS.has(duration)) {
+    return { error: 'Invalid ban duration.' }
+  }
+  const trimmedReason = reason.trim()
+  if (!trimmedReason || trimmedReason.length < 10) {
+    return { error: 'Ban reason must be at least 10 characters.' }
+  }
+  if (trimmedReason.length > 500) {
+    return { error: 'Ban reason must be 500 characters or fewer.' }
+  }
+
   const supabase = await verifyAdmin()
 
   const bannedUntil: string | null =
@@ -34,7 +50,7 @@ export async function banUser(userId: string, duration: BanDuration, reason: str
 
   await supabase
     .from('users')
-    .update({ is_banned: true, banned_until: bannedUntil, ban_reason: reason })
+    .update({ is_banned: true, banned_until: bannedUntil, ban_reason: trimmedReason })
     .eq('id', userId)
 
   const durationLabel: Record<BanDuration, string> = {
@@ -48,11 +64,12 @@ export async function banUser(userId: string, duration: BanDuration, reason: str
     user_id: userId,
     type: 'product_rejected',
     title: 'Your account has been restricted',
-    body: `Reason: ${reason}. Duration: ${durationLabel[duration]}.`,
+    body: `Reason: ${trimmedReason}. Duration: ${durationLabel[duration]}.`,
     link: '/settings',
   })
 
   revalidatePath('/admin/users')
+  return { success: true }
 }
 
 export async function unbanUser(userId: string) {

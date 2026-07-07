@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { useToast } from '@/components/ui/toast'
 
 type Props = {
   targetUserId: string
@@ -24,6 +25,7 @@ export function FollowButton({
   const [count, setCount] = useState(followerCount ?? 0)
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const { showToast } = useToast()
 
   if (viewerId === targetUserId) return null
 
@@ -58,6 +60,7 @@ export function FollowButton({
     } catch {
       setFollowing(!next)
       if (followerCount !== undefined) setCount((c) => (next ? c - 1 : c + 1))
+      showToast('Something went wrong. Please try again.', 'error')
     } finally {
       setLoading(false)
     }

@@ -6,6 +6,7 @@ import { CheckCircle, Pencil, Trash2 } from 'lucide-react'
 import { deleteProduct, markAsSold, markAsUnsold } from '@/app/products/actions'
 import { EditListingModal } from '@/components/products/edit-listing-modal'
 import type { Category } from '@/components/profile/new-listing-modal'
+import { useToast } from '@/components/ui/toast'
 
 type ProductData = {
   id: string
@@ -31,6 +32,7 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
+  const { showToast } = useToast()
 
   const isApproved = product.status === 'approved'
 
@@ -45,7 +47,9 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
         }
         router.refresh()
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+        const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+        setError(msg)
+        showToast(msg, 'error')
       }
     })
   }
@@ -56,7 +60,9 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
       try {
         await deleteProduct(product.id, sellerUsername)
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+        const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+        setError(msg)
+        showToast(msg, 'error')
       }
     })
   }

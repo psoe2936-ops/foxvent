@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from "next/font/google"
 
 import "./globals.css"
@@ -8,6 +8,16 @@ import { NavbarServer } from "@/components/navbar/navbar-server"
 import { createClient } from "@/lib/supabase/server"
 import { SupportChatBubble } from "@/components/support/support-chat-bubble"
 import { BottomNav } from "@/components/mobile/bottom-nav"
+import { GlobalCallListener } from "@/components/chat/global-call-listener"
+import { ToastProvider } from "@/components/ui/toast"
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+}
 
 export const metadata: Metadata = {
   title: {
@@ -54,19 +64,22 @@ export default async function RootLayout({
       suppressHydrationWarning
       className={cn("antialiased", fontMono.variable, "font-sans", geist.variable)}
     >
-      <body suppressHydrationWarning>
+      <body suppressHydrationWarning className="overflow-x-hidden">
         <ThemeProvider>
-          <div className="min-h-screen bg-[#F9FAFB]">
-            <NavbarServer />
-            <div className="pb-16 md:pb-0">
-              {children}
+          <ToastProvider>
+            <div className="min-h-screen bg-[#F9FAFB]">
+              <NavbarServer />
+              <div className="pb-16 md:pb-0">
+                {children}
+              </div>
             </div>
-          </div>
-          <SupportChatBubble userId={user?.id ?? null} />
-          <BottomNav
-            username={profile?.username ?? null}
-            userId={user?.id ?? null}
-          />
+            <SupportChatBubble userId={user?.id ?? null} />
+            {user && <GlobalCallListener currentUserId={user.id} />}
+            <BottomNav
+              username={profile?.username ?? null}
+              userId={user?.id ?? null}
+            />
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

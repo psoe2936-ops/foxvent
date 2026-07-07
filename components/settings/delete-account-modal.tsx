@@ -22,7 +22,7 @@ export function DeleteAccountModal() {
             className="absolute inset-0 bg-black/40"
             onClick={() => setOpen(false)}
           />
-          <div className="relative z-10 w-full max-w-sm rounded-t-2xl bg-white p-6 shadow-xl sm:rounded-2xl">
+          <div className="relative z-10 w-full max-w-sm rounded-t-3xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl sm:rounded-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}

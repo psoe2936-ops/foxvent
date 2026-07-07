@@ -1,8 +1,8 @@
 'use client'
 
-import { useMemo, useState, useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { X } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
+import { submitUserReport } from '@/app/reports/actions'
 
 const REASONS = [
   { value: 'scam_or_fraud', label: 'Scam or fraud' },
@@ -33,7 +33,6 @@ export function ReportUserModal({
   const [submitted, setSubmitted] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
-  const supabase = useMemo(() => createClient(), [])
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -44,25 +43,24 @@ export function ReportUserModal({
     }
     setError(null)
     startTransition(async () => {
-      const { error: dbErr } = await supabase.from('user_reports').insert({
-        reporter_id: reporterId,
-        reported_user_id: targetUserId,
+      const result = await submitUserReport({
+        reportedUserId: targetUserId,
         reason,
         description: description.trim(),
-        ...(conversationId ? { conversation_id: conversationId } : {}),
+        conversationId,
       })
-      if (dbErr) { setError('Failed to submit. Please try again.'); return }
+      if ('error' in result) { setError(result.error); return }
       setSubmitted(true)
     })
   }
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
+        className="w-full max-w-md rounded-2xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">

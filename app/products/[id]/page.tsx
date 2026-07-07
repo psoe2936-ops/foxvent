@@ -4,6 +4,7 @@ import { Eye } from 'lucide-react'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { MessageSellerButton } from '@/components/products/message-seller-button'
+import { MakeOfferButton } from '@/components/products/make-offer-button'
 import { SellerActionBar } from '@/components/products/seller-action-bar'
 import { ReportButton } from '@/components/products/report-button'
 import { ImageGallery } from '@/components/products/image-gallery'
@@ -202,7 +203,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               </div>
 
               <Link
-                href={`/profile/${seller?.username}`}
+                href={seller?.username ? `/profile/${seller.username}` : '/feed'}
                 className="mt-6 flex items-center gap-3 rounded-2xl border border-[#E5E7EB] p-4 hover:bg-[#F9FAFB]"
               >
                 {seller?.avatar_url ? (
@@ -224,8 +225,12 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               </Link>
 
               {!isOwnListing && seller && !product.is_sold && (
-                <div className="mt-5 w-full">
+                <div className="mt-5 grid grid-cols-2 gap-3">
                   <MessageSellerButton
+                    productId={product.id}
+                    sellerId={seller.id}
+                  />
+                  <MakeOfferButton
                     productId={product.id}
                     sellerId={seller.id}
                   />

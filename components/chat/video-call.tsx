@@ -71,43 +71,27 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
     if (micError) console.error('Mic error:', micError)
   }, [micError])
 
-  // Manually play remote audio tracks so we can catch mobile autoplay blocks.
-  // RemoteUser below has playAudio={false}, so we own the play() call here.
-  // IRemoteAudioTrack.play() is typed void but returns a Promise at runtime in
-  // browsers that implement the Promises-based autoplay policy (Chrome 66+, etc.).
+  // Proactively play each remote audio track and catch autoplay blocks on any
+  // browser/device. IRemoteAudioTrack.play() is typed void but returns a Promise
+  // at runtime in browsers that implement the Promises-based autoplay policy.
   useEffect(() => {
-    if (remoteUsers.length === 0) return
-
-    const promises: Promise<void>[] = []
-
     remoteUsers.forEach((user) => {
-      if (user.audioTrack) {
-        const result = (user.audioTrack.play as () => void | Promise<void>)()
-        if (result instanceof Promise) promises.push(result)
+      if (!user.audioTrack) return
+      const playResult = (user.audioTrack.play as () => void | Promise<void>)()
+      if (playResult && typeof (playResult as Promise<void>).catch === 'function') {
+        ;(playResult as Promise<void>).catch((err: unknown) => {
+          console.error('Audio play failed for user:', user.uid, err)
+          setAudioBlocked(true)
+        })
       }
     })
-
-    if (promises.length > 0) {
-      // At least one browser returned a Promise — detect rejection (autoplay block)
-      Promise.all(promises).catch(() => setAudioBlocked(true))
-    } else {
-      // play() returned void (older SDK path); fall back to AudioContext state check
-      try {
-        const ctx = new window.AudioContext()
-        if (ctx.state === 'suspended') setAudioBlocked(true)
-        void ctx.close()
-      } catch {
-        // AudioContext unavailable — assume audio is fine
-      }
-    }
   }, [remoteUsers])
 
   function handleUnblockAudio() {
-    // Called directly from a click handler — counts as a user gesture on all mobile browsers
+    // Called from a click handler — satisfies user-gesture requirement on all browsers
     remoteUsers.forEach((user) => {
-      if (user.audioTrack) {
-        ;(user.audioTrack.play as () => void | Promise<void>)()
-      }
+      if (!user.audioTrack) return
+      ;(user.audioTrack.play as () => void | Promise<void>)()
     })
     setAudioBlocked(false)
   }

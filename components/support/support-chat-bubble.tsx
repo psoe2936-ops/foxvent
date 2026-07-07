@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { ArrowUp, MessageCircle, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeText } from '@/lib/sanitize'
+import { checkRateLimit, formatRetryTime } from '@/lib/rate-limit'
 import { FoxIcon } from '@/components/navbar/fox-icon'
 
 type SupportMessage = {
@@ -22,6 +23,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
   const [conversationId, setConversationId] = useState<string | null>(null)
   const [input, setInput] = useState('')
   const [sending, setSending] = useState(false)
+  const [sendError, setSendError] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
   const bottomRef = useRef<HTMLDivElement>(null)
   const openRef = useRef(false)
@@ -142,7 +144,16 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     const content = input.trim()
     if (!content || sending) return
     setSending(true)
+    setSendError(null)
     setInput('')
+
+    const rl = await checkRateLimit(supabase, userId!, 'support_message', 20, 10)
+    if (!rl.allowed) {
+      const wait = formatRetryTime(rl.retryAfterSeconds ?? 600)
+      setSendError(`You're messaging a bit fast — give it ${wait}!`)
+      setSending(false)
+      return
+    }
 
     let convId = conversationId
 
@@ -185,7 +196,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     <>
       {/* Chat popup */}
       {open && (
-        <div className="fixed bottom-0 right-0 z-50 flex h-[60vh] w-full flex-col overflow-hidden rounded-t-2xl border border-[#E5E7EB] bg-white shadow-xl sm:bottom-24 sm:right-6 sm:h-105 sm:w-[320px] sm:rounded-2xl">
+        <div className="fixed bottom-0 right-0 z-50 flex h-[60vh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/40 bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:bottom-24 sm:right-6 sm:h-105 sm:w-[320px] sm:rounded-2xl">
           {/* Header */}
           <div className="flex shrink-0 items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
             <FoxIcon className="size-8 shrink-0" />
@@ -237,10 +248,14 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
           </div>
 
           {/* Input */}
-          <div className="flex shrink-0 items-center gap-2 border-t border-[#E5E7EB] p-3">
+          <div className="flex shrink-0 flex-col border-t border-[#E5E7EB]">
+            {sendError && (
+              <p className="px-4 pt-2 text-[11px] text-[#C0392B]">{sendError}</p>
+            )}
+          <div className="flex items-center gap-2 p-3">
             <input
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => { setInput(e.target.value); setSendError(null) }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) handleSend()
               }}
@@ -255,6 +270,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
             >
               <ArrowUp className="size-4" />
             </button>
+          </div>
           </div>
         </div>
       )}

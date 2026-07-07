@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { AlertCircle, Bell, CheckCircle2, MessageCircle, UserPlus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { formatRelativeTime } from '@/lib/format-relative-time'
@@ -45,8 +46,8 @@ export async function NotificationsContent({ userId }: { userId: string }) {
 
       {notifications.length === 0 ? (
         <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
-          <Bell className="size-10 text-[#D1D5DB]" />
-          <p className="mt-4 text-base font-medium text-[#1F2937]">No notifications yet</p>
+          <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
+          <p className="text-base font-medium text-[#1F2937]">No notifications yet</p>
           <p className="mt-1 text-sm text-[#6B7280]">
             We&apos;ll notify you when something happens.
           </p>

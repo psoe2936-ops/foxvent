@@ -7,12 +7,12 @@ import {
   useState,
   type ChangeEvent,
   type DragEvent,
-  type FormEvent,
 } from 'react'
 import { ImagePlus, Loader2, MapPin, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeText, sanitizePrice } from '@/lib/sanitize'
+import { createListing } from '@/app/products/actions'
 import type { Product } from '@/components/profile/product-card'
 
 export type Category = {
@@ -31,6 +31,7 @@ type NewListingModalProps = {
 
 type FormErrors = {
   title?: string
+  description?: string
   category?: string
   condition?: string
   price?: string
@@ -174,10 +175,18 @@ export function NewListingModal({
   function validate(): boolean {
     const nextErrors: FormErrors = {}
 
-    if (!title.trim()) {
-      nextErrors.title = 'Title is required.'
-    } else if (title.length > 100) {
+    const trimmedTitle = title.trim()
+    if (!trimmedTitle || trimmedTitle.length < 3) {
+      nextErrors.title = 'Title must be at least 3 characters.'
+    } else if (trimmedTitle.length > 100) {
       nextErrors.title = 'Title must be 100 characters or fewer.'
+    }
+
+    const trimmedDesc = description.trim()
+    if (!trimmedDesc || trimmedDesc.length < 10) {
+      nextErrors.description = 'Description must be at least 10 characters.'
+    } else if (trimmedDesc.length > 2000) {
+      nextErrors.description = 'Description must be 2000 characters or fewer.'
     }
 
     if (!categoryId) {
@@ -191,6 +200,8 @@ export function NewListingModal({
     const numericPrice = Number(price)
     if (!price || Number.isNaN(numericPrice) || numericPrice <= 0) {
       nextErrors.price = 'Enter a price greater than 0.'
+    } else if (numericPrice > 999_999_999) {
+      nextErrors.price = 'Price exceeds the maximum allowed value.'
     }
 
     if (photos.length === 0) {
@@ -201,8 +212,7 @@ export function NewListingModal({
     return Object.keys(nextErrors).length === 0
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  async function handleSubmit() {
     setSubmitError(null)
 
     if (!validate()) return
@@ -232,29 +242,23 @@ export function NewListingModal({
         imageUrls.push(publicUrl)
       }
 
-      const { data: newProduct, error: insertError } = await supabase
-        .from('products')
-        .insert({
-          seller_id: userId,
-          category_id: categoryId,
-          title: sanitizeText(title, 100),
-          description: sanitizeText(description, 1000) || null,
-          price: sanitizePrice(Number(price)),
-          condition,
-          location: sanitizeText(location, 200) || null,
-          images: imageUrls,
-        })
-        .select('id, title, price, images, status, is_sold')
-        .single()
+      // Server action — handles validation + rate limiting + DB insert
+      const result = await createListing({
+        categoryId,
+        title: sanitizeText(title, 100),
+        description: sanitizeText(description, 2000) || null,
+        price: sanitizePrice(Number(price)),
+        condition,
+        location: sanitizeText(location, 100) || null,
+        images: imageUrls,
+      })
 
-      if (insertError) {
-        console.error(
-          `Failed to insert product: message="${insertError.message}" code="${insertError.code}" details="${insertError.details}" hint="${insertError.hint}"`
-        )
-        throw new Error(insertError.message)
+      if ('error' in result) {
+        setSubmitError(result.error)
+        return
       }
 
-      onSuccess(newProduct as Product)
+      onSuccess(result as Product)
       resetForm()
       onClose()
       showSuccessToast()
@@ -271,7 +275,7 @@ export function NewListingModal({
     <>
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 sm:p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm sm:p-4"
           onClick={handleClose}
         >
           <div
@@ -279,7 +283,7 @@ export function NewListingModal({
             aria-modal="true"
             aria-labelledby="new-listing-title"
             onClick={(event) => event.stopPropagation()}
-            className="relative flex h-full w-full flex-col bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
+            className="relative flex h-full w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
           >
             <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
               <h2 id="new-listing-title" className="text-lg font-bold text-[#2D2E32]">
@@ -297,7 +301,7 @@ export function NewListingModal({
             </div>
 
             <form
-              onSubmit={handleSubmit}
+              onSubmit={(e) => { e.preventDefault(); void handleSubmit() }}
               className="flex-1 space-y-4 overflow-y-auto px-6 py-4"
             >
               <div>
@@ -326,7 +330,7 @@ export function NewListingModal({
                 </label>
                 <textarea
                   value={description}
-                  maxLength={1000}
+                  maxLength={2000}
                   rows={4}
                   disabled={submitting}
                   placeholder="Describe the item's condition, size, material..."
@@ -335,8 +339,9 @@ export function NewListingModal({
                   }
                   className="w-full resize-none rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] disabled:opacity-60"
                 />
-                <div className="mt-1 text-right text-xs text-[#9CA3AF]">
-                  {description.length} / 1000
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs text-[#C0392B]">{errors.description}</span>
+                  <span className="text-xs text-[#9CA3AF]">{description.length} / 2000</span>
                 </div>
               </div>
 
@@ -546,7 +551,7 @@ export function NewListingModal({
         <div
           aria-live="polite"
           className={cn(
-            'fixed bottom-6 right-6 z-[60] rounded-xl bg-[#1F9254] px-4 py-3 text-sm font-medium text-white shadow-lg transition-opacity duration-500',
+            'fixed bottom-6 right-6 z-60 rounded-xl bg-[#1F9254] px-4 py-3 text-sm font-medium text-white shadow-lg transition-opacity duration-500',
             toast.fading ? 'opacity-0' : 'opacity-100'
           )}
         >

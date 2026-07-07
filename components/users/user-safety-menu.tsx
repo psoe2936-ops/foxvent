@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { MoreHorizontal } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { ReportUserModal } from '@/components/users/report-user-modal'
+import { useToast } from '@/components/ui/toast'
 
 type Props = {
   targetUserId: string
@@ -26,6 +27,7 @@ export function UserSafetyMenu({
   const [isPending, startTransition] = useTransition()
   const menuRef = useRef<HTMLDivElement>(null)
   const supabase = useMemo(() => createClient(), [])
+  const { showToast } = useToast()
 
   // Close on outside click
   useEffect(() => {
@@ -52,12 +54,14 @@ export function UserSafetyMenu({
           .eq('blocked_id', targetUserId)
         if (dbErr) { setError('Failed. Please try again.'); return }
         setIsBlocked(false)
+        showToast(`@${targetUsername} has been unblocked.`, 'success')
       } else {
         const { error: dbErr } = await supabase
           .from('blocks')
           .upsert({ blocker_id: viewerId, blocked_id: targetUserId }, { onConflict: 'blocker_id,blocked_id' })
         if (dbErr) { setError('Failed. Please try again.'); return }
         setIsBlocked(true)
+        showToast(`@${targetUsername} has been blocked.`, 'success')
       }
       setOpen(false)
       setMode('menu')

@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 
@@ -22,6 +23,7 @@ export async function ChatInboxContent({ userId }: { userId: string }) {
       <div className="mt-6 space-y-2">
         {!conversations || conversations.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
+            <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
             <p className="text-base font-medium text-[#1F2937]">No conversations yet</p>
             <p className="mt-1 text-sm text-[#6B7280]">
               Message a seller from any listing to start chatting.
@@ -48,7 +50,7 @@ export async function ChatInboxContent({ userId }: { userId: string }) {
               >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={otherPerson?.avatar_url ?? ''}
+                  src={otherPerson?.avatar_url ?? undefined}
                   alt=""
                   className="size-12 shrink-0 rounded-full bg-[#F3F4F6] object-cover"
                 />

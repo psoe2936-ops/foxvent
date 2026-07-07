@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { MapPin, ShieldCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { StarRatingDisplay } from '@/components/reviews/star-rating-display'
+import { formatRelativeTime } from '@/lib/format-relative-time'
 import { CoverPhotoUpload } from '@/components/profile/cover-photo-upload'
 import { AvatarUpload } from '@/components/profile/avatar-upload'
 import { EditProfileModal } from '@/components/profile/edit-profile-modal'
@@ -14,6 +16,15 @@ import { FeedSidebar } from '@/components/feed/sidebar'
 import { SellPromoCard } from '@/components/feed/sell-promo-card'
 import { HelpPromoCard } from '@/components/feed/help-promo-card'
 import { UserSafetyMenu } from '@/components/users/user-safety-menu'
+
+type ReviewRow = {
+  id: string
+  rating: number
+  comment: string | null
+  created_at: string
+  reviewer: { username: string; full_name: string | null; avatar_url: string | null } | { username: string; full_name: string | null; avatar_url: string | null }[] | null
+  products: { title: string } | { title: string }[] | null
+}
 
 type ProfilePageProps = {
   params: Promise<{ username: string }>
@@ -85,13 +96,25 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
     { count: followerCount },
     { count: followingCount },
     { count: approvedCount },
+    { data: rawReviews },
   ] = await Promise.all([
     productsQuery,
     supabase.from('categories').select('id, name, icon').order('name'),
     supabase.from('follows').select('id', { count: 'exact', head: true }).eq('following_id', profile.id),
     supabase.from('follows').select('id', { count: 'exact', head: true }).eq('follower_id', profile.id),
     supabase.from('products').select('id', { count: 'exact', head: true }).eq('seller_id', profile.id).eq('status', 'approved'),
+    supabase
+      .from('reviews')
+      .select('id, rating, comment, created_at, reviewer:reviewer_id(username, full_name, avatar_url), products(title)')
+      .eq('seller_id', profile.id)
+      .order('created_at', { ascending: false }),
   ])
+
+  const reviews = (rawReviews ?? []) as ReviewRow[]
+  const reviewCount = reviews.length
+  const avgRating = reviewCount > 0
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount
+    : null
 
   if (categoriesError) {
     console.error(`Failed to load categories: ${categoriesError.message}`)
@@ -195,6 +218,15 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                 <span className="text-xs text-[#9CA3AF]">Member since {memberSince}</span>
               </div>
 
+              {avgRating !== null && reviewCount > 0 && (
+                <div className="mt-2 flex items-center gap-2">
+                  <StarRatingDisplay rating={avgRating} size="sm" showNumber />
+                  <span className="text-xs text-[#9CA3AF]">
+                    ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                  </span>
+                </div>
+              )}
+
               {!isOwner && followsYouBack && (
                 <span className="mt-2 inline-block rounded-full bg-[#F3F4F6] px-2.5 py-1 text-xs text-[#6B7280]">
                   Follows you back
@@ -227,6 +259,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             {/* Tabs — ListingsSection contains the "+ New listing" button for owners */}
             <div className="mt-6">
               <ProfileTabs
+                reviewCount={reviewCount}
                 listingsContent={
                   <ListingsSection
                     userId={profile.id}
@@ -236,6 +269,9 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                     sellerUsername={profile.username}
                     initialModalOpen={isOwner && newParam === '1'}
                   />
+                }
+                reviewsContent={
+                  <ReviewsSection reviews={reviews} />
                 }
                 aboutContent={
                   <ProfileAbout
@@ -302,6 +338,65 @@ function ProfileAbout({
       {!bio && !location && (
         <p className="text-sm text-[#6B7280]">No information added yet.</p>
       )}
+    </div>
+  )
+}
+
+function ReviewsSection({ reviews }: { reviews: ReviewRow[] }) {
+  if (reviews.length === 0) {
+    return (
+      <p className="text-sm text-[#9CA3AF]">No reviews yet.</p>
+    )
+  }
+
+  return (
+    <div className="max-w-xl divide-y divide-[#E5E7EB]">
+      {reviews.map((review) => {
+        const reviewer = Array.isArray(review.reviewer) ? review.reviewer[0] : review.reviewer
+        const product = Array.isArray(review.products) ? review.products[0] : review.products
+        const initials = (reviewer?.full_name?.[0] ?? reviewer?.username?.[0] ?? '?').toUpperCase()
+
+        return (
+          <div key={review.id} className="py-4 first:pt-0">
+            <div className="flex items-start gap-3">
+              {reviewer?.avatar_url ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={reviewer.avatar_url}
+                  alt=""
+                  className="size-8 shrink-0 rounded-full bg-[#F3F4F6] object-cover"
+                />
+              ) : (
+                <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[#E5E7EB] text-xs font-semibold text-[#6B7280]">
+                  {initials}
+                </div>
+              )}
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-sm font-medium text-[#1F2937]">
+                    {reviewer?.full_name ?? `@${reviewer?.username}`}
+                  </span>
+                  <StarRatingDisplay rating={review.rating} size="sm" />
+                  <span className="text-xs text-[#9CA3AF]">
+                    {formatRelativeTime(review.created_at)}
+                  </span>
+                </div>
+
+                {product?.title && (
+                  <p className="mt-0.5 text-xs text-[#9CA3AF]">for {product.title}</p>
+                )}
+
+                {review.comment && (
+                  <p className="mt-1.5 text-sm leading-relaxed text-[#4B5563]">
+                    {review.comment}
+                  </p>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

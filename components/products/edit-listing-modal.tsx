@@ -80,7 +80,11 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
 
     startTransition(async () => {
       try {
-        await updateProduct(fd)
+        const result = await updateProduct(fd)
+        if (result?.error) {
+          setError(result.error)
+          return
+        }
         showToast()
         onSuccess?.()
         onClose()
@@ -93,14 +97,14 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 sm:p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm sm:p-4"
         onClick={handleClose}
       >
         <div
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
-          className="relative flex h-full w-full flex-col bg-white sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
+          className="relative flex h-full w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
         >
           <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
             <h2 className="text-lg font-bold text-[#2D2E32]">Edit listing</h2>
@@ -241,7 +245,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
       </div>
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-[60] rounded-xl bg-[#1F9254] px-4 py-3 text-sm font-medium text-white shadow-lg">
+        <div className="fixed bottom-6 right-6 z-60 rounded-xl bg-[#1F9254] px-4 py-3 text-sm font-medium text-white shadow-lg">
           Listing updated
         </div>
       )}
