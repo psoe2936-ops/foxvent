@@ -28,6 +28,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   const [micOn, setMicOn] = useState(true)
   const [camOn, setCamOn] = useState(true)
   const [audioBlocked, setAudioBlocked] = useState(false)
+  const [micLevel, setMicLevel] = useState(0)
 
   useEffect(() => {
     let cancelled = false
@@ -62,6 +63,14 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
     !!token,
   )
   usePublish([localMicrophoneTrack, localCameraTrack])
+
+  useEffect(() => {
+    if (!localMicrophoneTrack) return
+    const interval = setInterval(() => {
+      setMicLevel(localMicrophoneTrack.getVolumeLevel())
+    }, 100)
+    return () => clearInterval(interval)
+  }, [localMicrophoneTrack])
 
   // Log device errors for debugging
   useEffect(() => {
@@ -170,6 +179,17 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
           </button>
         </div>
       )}
+
+      {/* Mic level debug meter */}
+      <div className="absolute left-3 top-14 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
+        <Mic className="size-3 text-white" />
+        <div className="h-2 w-20 overflow-hidden rounded-full bg-white/20">
+          <div
+            className="h-full bg-[#F36D21] transition-all duration-100"
+            style={{ width: `${Math.min(micLevel * 100, 100)}%` }}
+          />
+        </div>
+      </div>
 
       {/* Device-acquiring indicator */}
       {isDeviceLoading && (

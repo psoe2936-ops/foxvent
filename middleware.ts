@@ -38,9 +38,23 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  let user = null
+  try {
+    const { data, error } = await supabase.auth.getUser()
+    if (!error) {
+      user = data.user
+    }
+    // error (e.g. refresh_token_not_found): treat as logged-out.
+    // Supabase already fired _removeSession() which cleared the auth cookies
+    // via the setAll handler above, so no extra cleanup needed.
+  } catch {
+    // Unexpected throw (network failure, etc.) — purge any stale auth cookies.
+    supabaseResponse.cookies.getAll().forEach((c) => {
+      if (c.name.startsWith('sb-')) {
+        supabaseResponse.cookies.set(c.name, '', { maxAge: 0, path: '/' })
+      }
+    })
+  }
 
   const path = request.nextUrl.pathname
 
