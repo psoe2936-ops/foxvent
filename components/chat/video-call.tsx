@@ -65,7 +65,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   usePublish([localMicrophoneTrack, localCameraTrack])
 
   useEffect(() => {
-    console.log('Publish status:', {
+    console.error('DEBUG Publish status:', {
       micOn,
       hasLocalMicTrack: !!localMicrophoneTrack,
       micTrackEnabled: localMicrophoneTrack?.enabled,
@@ -75,7 +75,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
 
   useEffect(() => {
     remoteUsers.forEach((user) => {
-      console.log('Remote user audio status:', {
+      console.error('DEBUG Remote user audio status:', {
         uid: user.uid,
         hasAudioTrack: !!user.audioTrack,
         audioTrackPlaying: user.audioTrack?.isPlaying,
