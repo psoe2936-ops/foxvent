@@ -138,6 +138,20 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
     })
   }, [remoteUsers])
 
+  async function handleToggleMic() {
+    if (localMicrophoneTrack) {
+      await localMicrophoneTrack.setEnabled(!micOn)
+    }
+    setMicOn((prev) => !prev)
+  }
+
+  async function handleToggleCam() {
+    if (localCameraTrack) {
+      await localCameraTrack.setEnabled(!camOn)
+    }
+    setCamOn((prev) => !prev)
+  }
+
   function handleUnblockAudio() {
     // Called from a click handler — satisfies user-gesture requirement on all browsers
     remoteUsers.forEach((user) => {
@@ -304,7 +318,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
       {/* Call controls */}
       <div className="flex items-center justify-center gap-4 bg-black py-5">
         <button
-          onClick={() => setMicOn((prev) => !prev)}
+          onClick={handleToggleMic}
           className={`flex size-12 items-center justify-center rounded-full transition-colors ${
             micOn ? 'bg-[#333] text-white' : 'bg-[#C0392B] text-white'
           }`}
@@ -330,7 +344,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
         </button>
 
         <button
-          onClick={() => setCamOn((prev) => !prev)}
+          onClick={handleToggleCam}
           className={`flex size-12 items-center justify-center rounded-full transition-colors ${
             camOn ? 'bg-[#333] text-white' : 'bg-[#C0392B] text-white'
           }`}
