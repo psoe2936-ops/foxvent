@@ -1,11 +1,14 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { Phone, PhoneOff } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 type IncomingCallPopupProps = {
   callerName: string
   callerAvatar: string | null
+  conversationId: string
+  currentUserId: string
   onAccept: () => void
   onDecline: () => void
 }
@@ -13,17 +16,48 @@ type IncomingCallPopupProps = {
 export function IncomingCallPopup({
   callerName,
   callerAvatar,
+  conversationId,
+  currentUserId,
   onAccept,
   onDecline,
 }: IncomingCallPopupProps) {
-  // Auto-dismiss after 30 seconds if not answered
+  const declinedRef = useRef(false)
+
+  // Auto-dismiss after 30 seconds if not answered — insert 'missed' call log
   useEffect(() => {
-    const timer = setTimeout(onDecline, 30_000)
+    const timer = setTimeout(async () => {
+      if (!declinedRef.current) {
+        const supabase = createClient()
+        await supabase.from('messages').insert({
+          conversation_id: conversationId,
+          sender_id: currentUserId,
+          content: '',
+          message_type: 'call_log',
+          call_duration_seconds: 0,
+          call_status: 'missed',
+        })
+      }
+      onDecline()
+    }, 30_000)
     return () => clearTimeout(timer)
-  }, [onDecline])
+  }, [conversationId, currentUserId, onDecline])
+
+  const handleDecline = async () => {
+    declinedRef.current = true
+    const supabase = createClient()
+    await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      sender_id: currentUserId,
+      content: '',
+      message_type: 'call_log',
+      call_duration_seconds: 0,
+      call_status: 'declined',
+    })
+    onDecline()
+  }
 
   return (
-    <div className="fixed bottom-24 right-6 z-50 w-[300px] rounded-2xl border border-white/40 bg-white/90 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl">
+    <div className="fixed bottom-24 right-6 z-50 w-75 rounded-2xl border border-white/40 bg-white/90 p-4 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl">
       <div className="flex items-center gap-3">
         <div className="relative shrink-0">
           {callerAvatar ? (
@@ -53,7 +87,7 @@ export function IncomingCallPopup({
 
       <div className="mt-4 flex gap-2">
         <button
-          onClick={onDecline}
+          onClick={handleDecline}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#FDEDEC] py-2.5 text-sm font-semibold text-[#C0392B] hover:opacity-90"
         >
           <PhoneOff className="size-4" />

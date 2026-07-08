@@ -68,7 +68,7 @@ export default async function ChatPage({ params, searchParams }: ChatPageProps) 
   ] = await Promise.all([
     supabase
       .from('messages')
-      .select('id, sender_id, content, created_at, is_read')
+      .select('id, sender_id, content, created_at, is_read, message_type, call_duration_seconds, call_status')
       .eq('conversation_id', id)
       .order('created_at', { ascending: true }),
     supabase

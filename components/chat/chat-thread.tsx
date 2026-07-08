@@ -25,6 +25,16 @@ type Message = {
   content: string
   created_at: string
   is_read: boolean
+  message_type: 'text' | 'call_log'
+  call_duration_seconds: number | null
+  call_status: 'completed' | 'missed' | 'declined' | null
+}
+
+function formatCallDuration(seconds: number): string {
+  if (seconds < 60) return `${seconds}s`
+  const m = Math.floor(seconds / 60)
+  const s = seconds % 60
+  return s === 0 ? `${m}m` : `${m}m ${s}s`
 }
 
 type Person = {
@@ -541,6 +551,26 @@ export function ChatThread({
               }
 
               const msg = item.data
+
+              if (msg.message_type === 'call_log') {
+                return (
+                  <div key={item.id} className="flex justify-center py-2">
+                    <div className="flex items-center gap-2 rounded-full bg-[#F3F4F6] px-4 py-2 text-xs text-[#6B7280]">
+                      <Video className="size-3.5" />
+                      {msg.call_status === 'completed' && (
+                        <span>Video call · {formatCallDuration(msg.call_duration_seconds ?? 0)}</span>
+                      )}
+                      {msg.call_status === 'missed' && (
+                        <span className="text-[#C0392B]">Missed video call</span>
+                      )}
+                      {msg.call_status === 'declined' && (
+                        <span className="text-[#C0392B]">Video call declined</span>
+                      )}
+                    </div>
+                  </div>
+                )
+              }
+
               const isMine = msg.sender_id === currentUserId
               return (
                 <div key={item.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
@@ -681,13 +711,15 @@ export function ChatThread({
         <IncomingCallPopup
           callerName={incomingCall.callerName}
           callerAvatar={incomingCall.callerAvatar}
+          conversationId={conversationId}
+          currentUserId={currentUserId}
           onAccept={() => { setIncomingCall(null); setInCall(true) }}
           onDecline={() => setIncomingCall(null)}
         />
       )}
 
       {inCall && (
-        <VideoCall conversationId={conversationId} onEnd={() => setInCall(false)} />
+        <VideoCall conversationId={conversationId} currentUserId={currentUserId} onEnd={() => setInCall(false)} />
       )}
 
       {reportOpen && otherPerson && (

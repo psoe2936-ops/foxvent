@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import AgoraRTC, {
   AgoraRTCProvider,
   useRTCClient,
@@ -13,15 +13,17 @@ import AgoraRTC, {
   LocalVideoTrack,
 } from 'agora-rtc-react'
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Volume2 } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!
 
 type CallUIProps = {
   conversationId: string
+  currentUserId: string
   onEnd: () => void
 }
 
-function CallUI({ conversationId, onEnd }: CallUIProps) {
+function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   const [token, setToken] = useState<string | null>(null)
   const [tokenError, setTokenError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
@@ -29,6 +31,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   const [camOn, setCamOn] = useState(true)
   const [audioBlocked, setAudioBlocked] = useState(false)
   const [micLevel, setMicLevel] = useState(0)
+  const callStartTimeRef = useRef<number>(Date.now())
 
   useEffect(() => {
     let cancelled = false
@@ -137,6 +140,20 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
       }
     })
   }, [remoteUsers])
+
+  const handleEndCall = async () => {
+    const durationSeconds = Math.floor((Date.now() - callStartTimeRef.current) / 1000)
+    const supabase = createClient()
+    await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      sender_id: currentUserId,
+      content: '',
+      message_type: 'call_log',
+      call_duration_seconds: durationSeconds,
+      call_status: durationSeconds < 5 ? 'missed' : 'completed',
+    })
+    onEnd()
+  }
 
   async function handleToggleMic() {
     if (localMicrophoneTrack) {
@@ -336,7 +353,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
         </button>
 
         <button
-          onClick={onEnd}
+          onClick={handleEndCall}
           className="flex size-14 items-center justify-center rounded-full bg-[#C0392B] text-white hover:opacity-90"
           aria-label="End call"
         >
@@ -359,9 +376,11 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
 
 export function VideoCall({
   conversationId,
+  currentUserId,
   onEnd,
 }: {
   conversationId: string
+  currentUserId: string
   onEnd: () => void
 }) {
   const client = useRTCClient(
@@ -370,7 +389,7 @@ export function VideoCall({
 
   return (
     <AgoraRTCProvider client={client}>
-      <CallUI conversationId={conversationId} onEnd={onEnd} />
+      <CallUI conversationId={conversationId} currentUserId={currentUserId} onEnd={onEnd} />
     </AgoraRTCProvider>
   )
 }
