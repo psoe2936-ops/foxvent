@@ -78,7 +78,7 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
       console.log('Remote user audio status:', {
         uid: user.uid,
         hasAudioTrack: !!user.audioTrack,
-        audioTrackEnabled: user.audioTrack?.enabled,
+        audioTrackPlaying: user.audioTrack?.isPlaying,
       })
     })
   }, [remoteUsers])
