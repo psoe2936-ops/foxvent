@@ -84,6 +84,29 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
   }, [remoteUsers])
 
   useEffect(() => {
+    if (localMicrophoneTrack) {
+      console.error('DEBUG Mic track created:', {
+        enabled: localMicrophoneTrack.enabled,
+        muted: localMicrophoneTrack.muted,
+        trackLabel: localMicrophoneTrack.getTrackLabel?.(),
+      })
+    }
+  }, [localMicrophoneTrack])
+
+  useEffect(() => {
+    if (!localMicrophoneTrack) return
+    const interval = setInterval(async () => {
+      try {
+        const stats = localMicrophoneTrack.getStats()
+        console.error('DEBUG Local mic track stats:', stats)
+      } catch (e) {
+        console.error('DEBUG Failed to get mic stats:', e)
+      }
+    }, 2000)
+    return () => clearInterval(interval)
+  }, [localMicrophoneTrack])
+
+  useEffect(() => {
     if (!localMicrophoneTrack) return
     const interval = setInterval(() => {
       setMicLevel(localMicrophoneTrack.getVolumeLevel())
