@@ -147,6 +147,17 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
     setAudioBlocked(false)
   }
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      remoteUsers.forEach((user) => {
+        if (user.audioTrack && !user.audioTrack.isPlaying) {
+          ;(user.audioTrack.play as () => void | Promise<void>)()
+        }
+      })
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [remoteUsers])
+
   // ── Loading / connecting ────────────────────────────────────────────────────
   if (!token && !tokenError) {
     return (
@@ -300,6 +311,14 @@ function CallUI({ conversationId, onEnd }: CallUIProps) {
           aria-label={micOn ? 'Mute' : 'Unmute'}
         >
           {micOn ? <Mic className="size-5" /> : <MicOff className="size-5" />}
+        </button>
+
+        <button
+          onClick={handleUnblockAudio}
+          className="flex size-12 items-center justify-center rounded-full bg-[#333] text-white"
+          aria-label="Fix audio"
+        >
+          <Volume2 className="size-5" />
         </button>
 
         <button
