@@ -71,6 +71,8 @@ export function GlobalCallListener({ currentUserId }: { currentUserId: string })
     <IncomingCallPopup
       callerName={incomingCall.callerName}
       callerAvatar={incomingCall.callerAvatar}
+      conversationId={incomingCall.conversationId}
+      currentUserId={currentUserId}
       onAccept={() => {
         const id = incomingCall.conversationId
         setIncomingCall(null)
