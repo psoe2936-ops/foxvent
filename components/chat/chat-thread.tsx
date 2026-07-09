@@ -221,12 +221,12 @@ export function ChatThread({
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
         (payload) => {
-          console.error('DEBUG realtime UPDATE received:', payload)
+          console.error('DEBUG realtime UPDATE received, looking for id:', payload.new.id, typeof payload.new.id)
           setMessages((prev) => {
+            console.error('DEBUG current messages in state:', prev.map((m) => ({ id: m.id, idType: typeof m.id, is_read: m.is_read })))
             const updated = prev.map((m) =>
               m.id === payload.new.id ? { ...m, is_read: payload.new.is_read as boolean } : m
             )
-            console.error('DEBUG messages state after update:', updated.find((m) => m.id === payload.new.id))
             return updated
           })
         }
