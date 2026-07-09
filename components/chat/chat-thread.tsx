@@ -222,11 +222,13 @@ export function ChatThread({
         { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
         (payload) => {
           console.error('DEBUG realtime UPDATE received:', payload)
-          setMessages((prev) =>
-            prev.map((m) =>
+          setMessages((prev) => {
+            const updated = prev.map((m) =>
               m.id === payload.new.id ? { ...m, is_read: payload.new.is_read as boolean } : m
             )
-          )
+            console.error('DEBUG messages state after update:', updated.find((m) => m.id === payload.new.id))
+            return updated
+          })
         }
       )
       .subscribe()
