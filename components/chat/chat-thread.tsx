@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { Check, CheckCheck, MoreVertical, Send, Shield, Video, X } from 'lucide-react'
+import { Check, CheckCheck, ImagePlus, Loader2, MoreVertical, Send, Shield, Video, X } from 'lucide-react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage } from '@/app/chat/actions'
@@ -13,6 +13,8 @@ import { IncomingCallPopup } from '@/components/chat/incoming-call-popup'
 import { ReportUserModal } from '@/components/users/report-user-modal'
 import { OfferCard } from '@/components/chat/offer-card'
 import { ReviewModal } from '@/components/reviews/review-modal'
+import { ImageLightbox } from '@/components/products/image-lightbox'
+import { checkRateLimit, formatRetryTime } from '@/lib/rate-limit'
 
 const VideoCall = dynamic(
   () => import('@/components/chat/video-call').then((mod) => mod.VideoCall),
@@ -25,9 +27,10 @@ type Message = {
   content: string
   created_at: string
   is_read: boolean
-  message_type: 'text' | 'call_log'
+  message_type: 'text' | 'call_log' | 'image'
   call_duration_seconds: number | null
   call_status: 'completed' | 'missed' | 'declined' | null
+  image_url: string | null
 }
 
 function formatCallDuration(seconds: number): string {
@@ -111,6 +114,11 @@ export function ChatThread({
   const [rateLimitError, setRateLimitError] = useState<string | null>(null)
   const [blockPending, startBlockTransition] = useTransition()
 
+  // Image upload state
+  const [imageUploading, setImageUploading] = useState(false)
+  const [imageError, setImageError] = useState<string | null>(null)
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null)
+
   // Kebab menu state
   const [kebabOpen, setKebabOpen] = useState(false)
   const [kebabMode, setKebabMode] = useState<'menu' | 'block-confirm'>('menu')
@@ -119,6 +127,7 @@ export function ChatThread({
   const [reviewOpen, setReviewOpen] = useState(false)
   const [justReviewed, setJustReviewed] = useState(false)
   const kebabRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const bottomRef = useRef<HTMLDivElement>(null)
   const callChannelRef = useRef<RealtimeChannel | null>(null)
@@ -175,13 +184,22 @@ export function ChatThread({
 
   // Mark messages as read on mount
   useEffect(() => {
-    supabase
-      .from('messages')
-      .update({ is_read: true })
-      .eq('conversation_id', conversationId)
-      .neq('sender_id', currentUserId)
-      .eq('is_read', false)
-      .then(() => {})
+    async function markAsRead() {
+      const { data, error, count } = await supabase
+        .from('messages')
+        .update({ is_read: true }, { count: 'exact' })
+        .eq('conversation_id', conversationId)
+        .neq('sender_id', currentUserId)
+        .eq('is_read', false)
+        .select()
+
+      if (error) {
+        console.error('DEBUG mark-as-read FAILED:', error)
+      } else {
+        console.error('DEBUG mark-as-read SUCCESS, rows updated:', count, data)
+      }
+    }
+    markAsRead()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [conversationId, currentUserId])
 
@@ -203,6 +221,7 @@ export function ChatThread({
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
         (payload) => {
+          console.error('DEBUG realtime UPDATE received:', payload)
           setMessages((prev) =>
             prev.map((m) =>
               m.id === payload.new.id ? { ...m, is_read: payload.new.is_read as boolean } : m
@@ -391,6 +410,55 @@ export function ChatThread({
     })
   }
 
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    e.target.value = ''
+
+    const VALID_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+    if (!VALID_TYPES.includes(file.type)) {
+      setImageError('Only JPEG, PNG, WebP and GIF images are supported.')
+      return
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageError('Image must be under 5MB.')
+      return
+    }
+
+    setImageError(null)
+    setImageUploading(true)
+
+    const rateCheck = await checkRateLimit(supabase, currentUserId, 'send_image', 20, 10)
+    if (!rateCheck.allowed) {
+      setImageError(`Too many images sent. Try again in ${formatRetryTime(rateCheck.retryAfterSeconds ?? 600)}.`)
+      setImageUploading(false)
+      return
+    }
+
+    const ext = file.type.split('/')[1].replace('jpeg', 'jpg')
+    const path = `${conversationId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+
+    const { error: uploadError } = await supabase.storage.from('chat-images').upload(path, file)
+    if (uploadError) {
+      setImageError('Upload failed. Please try again.')
+      setImageUploading(false)
+      return
+    }
+
+    const { data: { publicUrl } } = supabase.storage.from('chat-images').getPublicUrl(path)
+
+    const { error: insertError } = await supabase.from('messages').insert({
+      conversation_id: conversationId,
+      sender_id: currentUserId,
+      content: '',
+      message_type: 'image',
+      image_url: publicUrl,
+    })
+
+    if (insertError) setImageError('Failed to send image. Please try again.')
+    setImageUploading(false)
+  }
+
   return (
     <>
       <div className="flex h-[calc(100vh-160px)] flex-col rounded-2xl border border-[#E5E7EB] bg-white">
@@ -572,6 +640,34 @@ export function ChatThread({
               }
 
               const isMine = msg.sender_id === currentUserId
+
+              if (msg.message_type === 'image' && msg.image_url) {
+                return (
+                  <div key={item.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={msg.image_url}
+                      alt="Sent image"
+                      loading="lazy"
+                      onClick={() => setLightboxUrl(msg.image_url!)}
+                      className={`max-w-[240px] cursor-pointer rounded-2xl object-cover ${
+                        isMine ? 'rounded-br-sm' : 'rounded-bl-sm'
+                      }`}
+                    />
+                    <div className="mt-1 flex items-center gap-1">
+                      <span className="text-[10px] text-[#9CA3AF]">
+                        {mounted ? new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </span>
+                      {isMine && (
+                        msg.is_read
+                          ? <CheckCheck className="size-3 text-[#F36D21]" />
+                          : <Check className="size-3 text-[#9CA3AF]" />
+                      )}
+                    </div>
+                  </div>
+                )
+              }
+
               return (
                 <div key={item.id} className={`flex flex-col ${isMine ? 'items-end' : 'items-start'}`}>
                   <div
@@ -676,7 +772,19 @@ export function ChatThread({
             {rateLimitError && (
               <p className="px-4 pt-2 text-[11px] text-[#C0392B]">{rateLimitError}</p>
             )}
+            {imageError && (
+              <p className="px-4 pt-2 text-[11px] text-[#C0392B]">{imageError}</p>
+            )}
             <div className="flex items-center gap-2 p-3">
+              {/* Hidden file input */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleImageSelect}
+                disabled={isInputDisabled || imageUploading}
+              />
               {isBuyer && !showOfferPanel && (
                 <button
                   type="button"
@@ -686,6 +794,18 @@ export function ChatThread({
                   💰 Offer
                 </button>
               )}
+              <button
+                type="button"
+                onClick={() => { setImageError(null); fileInputRef.current?.click() }}
+                disabled={isInputDisabled || imageUploading}
+                className="shrink-0 rounded-lg border border-[#E5E7EB] p-2 text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-50"
+                aria-label="Send image"
+              >
+                {imageUploading
+                  ? <Loader2 className="size-4 animate-spin" />
+                  : <ImagePlus className="size-4" />
+                }
+              </button>
               <input
                 value={input}
                 onChange={handleInputChange}
@@ -740,6 +860,14 @@ export function ChatThread({
           productTitle={product?.title}
           onClose={() => setReviewOpen(false)}
           onSuccess={() => setJustReviewed(true)}
+        />
+      )}
+
+      {lightboxUrl && (
+        <ImageLightbox
+          images={[lightboxUrl]}
+          alt="Chat image"
+          onClose={() => setLightboxUrl(null)}
         />
       )}
     </>
