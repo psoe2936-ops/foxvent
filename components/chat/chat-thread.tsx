@@ -463,7 +463,7 @@ export function ChatThread({
 
   return (
     <>
-      <div className="flex h-[calc(100vh-160px)] flex-col rounded-2xl border border-[#E5E7EB] bg-white">
+      <div className="flex h-[calc(100dvh-160px)] flex-col rounded-2xl border border-[#E5E7EB] bg-white">
         {/* Header */}
         <div className="flex items-center gap-3 border-b border-[#E5E7EB] p-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}

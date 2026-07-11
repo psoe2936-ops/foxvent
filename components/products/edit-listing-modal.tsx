@@ -104,7 +104,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
-          className="relative flex h-full w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
+          className="relative flex h-dvh w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90dvh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
         >
           <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
             <h2 className="text-lg font-bold text-[#2D2E32]">Edit listing</h2>
@@ -119,7 +119,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto px-6 py-4">
+          <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4">
             {willResubmit && (
               <div className="mb-4 rounded-lg bg-[#FEF3E2] px-4 py-3 text-sm text-[#C26A08]">
                 {product.status === 'approved'
@@ -128,7 +128,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form id="edit-listing-form" onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Title</label>
                 <input
@@ -221,25 +221,32 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
               {error && (
                 <div className="rounded-lg bg-[#FDEDEC] px-3 py-2 text-xs text-[#C0392B]">{error}</div>
               )}
-
-              <button
-                type="submit"
-                disabled={isPending}
-                className={cn(
-                  'w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors',
-                  'bg-[#F36D21] hover:bg-[#E0631D] disabled:opacity-70'
-                )}
-              >
-                {isPending ? (
-                  <span className="inline-flex items-center justify-center gap-2">
-                    <Loader2 className="size-4 animate-spin" />
-                    Saving…
-                  </span>
-                ) : (
-                  'Save changes'
-                )}
-              </button>
             </form>
+          </div>
+
+          {/* Fixed footer — always visible, never scrolls off-screen */}
+          <div
+            className="shrink-0 border-t border-[#E5E7EB] px-6 pt-3"
+            style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
+          >
+            <button
+              type="submit"
+              form="edit-listing-form"
+              disabled={isPending}
+              className={cn(
+                'w-full rounded-lg px-4 py-2.5 text-sm font-semibold text-white transition-colors',
+                'bg-[#F36D21] hover:bg-[#E0631D] disabled:opacity-70'
+              )}
+            >
+              {isPending ? (
+                <span className="inline-flex items-center justify-center gap-2">
+                  <Loader2 className="size-4 animate-spin" />
+                  Saving…
+                </span>
+              ) : (
+                'Save changes'
+              )}
+            </button>
           </div>
         </div>
       </div>

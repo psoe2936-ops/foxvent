@@ -283,7 +283,7 @@ export function NewListingModal({
             aria-modal="true"
             aria-labelledby="new-listing-title"
             onClick={(event) => event.stopPropagation()}
-            className="relative flex h-full w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90vh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
+            className="relative flex h-dvh w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90dvh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
           >
             <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
               <h2 id="new-listing-title" className="text-lg font-bold text-[#2D2E32]">
@@ -301,8 +301,9 @@ export function NewListingModal({
             </div>
 
             <form
+              id="new-listing-form"
               onSubmit={(e) => { e.preventDefault(); void handleSubmit() }}
-              className="flex-1 space-y-4 overflow-y-auto px-6 py-4"
+              className="min-h-0 flex-1 space-y-4 overflow-y-auto px-6 py-4"
             >
               <div>
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
@@ -522,14 +523,21 @@ export function NewListingModal({
                 )}
               </div>
 
+            </form>
+
+            {/* Fixed footer — always visible, never scrolls off-screen */}
+            <div
+              className="shrink-0 border-t border-[#E5E7EB] px-6 pt-3"
+              style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 16px)' }}
+            >
               {submitError && (
-                <div className="rounded-lg bg-[#FDEDEC] px-3 py-2 text-xs text-[#C0392B]">
+                <div className="mb-3 rounded-lg bg-[#FDEDEC] px-3 py-2 text-xs text-[#C0392B]">
                   {submitError}
                 </div>
               )}
-
               <button
                 type="submit"
+                form="new-listing-form"
                 disabled={submitting}
                 className="w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#E0631D] disabled:cursor-not-allowed disabled:opacity-70"
               >
@@ -542,7 +550,7 @@ export function NewListingModal({
                   'Post listing'
                 )}
               </button>
-            </form>
+            </div>
           </div>
         </div>
       )}

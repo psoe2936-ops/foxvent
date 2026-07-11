@@ -12,7 +12,7 @@ import AgoraRTC, {
   RemoteUser,
   LocalVideoTrack,
 } from 'agora-rtc-react'
-import { Mic, MicOff, Video, VideoOff, PhoneOff, Volume2 } from 'lucide-react'
+import { Mic, MicOff, Video, VideoOff, PhoneOff, Volume2, SwitchCamera } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!
@@ -31,7 +31,15 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   const [camOn, setCamOn] = useState(true)
   const [audioBlocked, setAudioBlocked] = useState(false)
   const [micLevel, setMicLevel] = useState(0)
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
+  const [hasMultipleCameras, setHasMultipleCameras] = useState(false)
   const callStartTimeRef = useRef<number>(Date.now())
+
+  useEffect(() => {
+    AgoraRTC.getCameras()
+      .then((cameras) => setHasMultipleCameras(cameras.length > 1))
+      .catch(() => {})
+  }, [])
 
   useEffect(() => {
     let cancelled = false
@@ -117,7 +125,6 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
     return () => clearInterval(interval)
   }, [localMicrophoneTrack])
 
-  // Log device errors for debugging
   useEffect(() => {
     if (camError) console.error('Camera error:', camError)
   }, [camError])
@@ -125,9 +132,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
     if (micError) console.error('Mic error:', micError)
   }, [micError])
 
-  // Proactively play each remote audio track and catch autoplay blocks on any
-  // browser/device. IRemoteAudioTrack.play() is typed void but returns a Promise
-  // at runtime in browsers that implement the Promises-based autoplay policy.
+  // Proactively play each remote audio track
   useEffect(() => {
     remoteUsers.forEach((user) => {
       if (!user.audioTrack) return
@@ -139,6 +144,18 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
         })
       }
     })
+  }, [remoteUsers])
+
+  // Silent auto-retry for stalled audio
+  useEffect(() => {
+    const interval = setInterval(() => {
+      remoteUsers.forEach((user) => {
+        if (user.audioTrack && !user.audioTrack.isPlaying) {
+          ;(user.audioTrack.play as () => void | Promise<void>)()
+        }
+      })
+    }, 3000)
+    return () => clearInterval(interval)
   }, [remoteUsers])
 
   const handleEndCall = async () => {
@@ -170,7 +187,6 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   }
 
   function handleUnblockAudio() {
-    // Called from a click handler — satisfies user-gesture requirement on all browsers
     remoteUsers.forEach((user) => {
       if (!user.audioTrack) return
       ;(user.audioTrack.play as () => void | Promise<void>)()
@@ -178,16 +194,24 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
     setAudioBlocked(false)
   }
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      remoteUsers.forEach((user) => {
-        if (user.audioTrack && !user.audioTrack.isPlaying) {
-          ;(user.audioTrack.play as () => void | Promise<void>)()
-        }
-      })
-    }, 3000)
-    return () => clearInterval(interval)
-  }, [remoteUsers])
+  const handleFlipCamera = async () => {
+    if (!localCameraTrack || !camOn) return
+    const newMode = facingMode === 'user' ? 'environment' : 'user'
+    try {
+      const cameras = await AgoraRTC.getCameras()
+      const target = cameras.find((cam) =>
+        newMode === 'environment'
+          ? /back|rear|environment/i.test(cam.label)
+          : /front|user|face/i.test(cam.label)
+      )
+      if (target) {
+        await localCameraTrack.setDevice(target.deviceId)
+        setFacingMode(newMode)
+      }
+    } catch (err) {
+      console.error('Camera flip failed:', err)
+    }
+  }
 
   // ── Loading / connecting ────────────────────────────────────────────────────
   if (!token && !tokenError) {
@@ -245,26 +269,58 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
     )
   }
 
-  // True when tracks are being acquired (mic or cam toggle just happened)
   const isDeviceLoading = (micOn && micLoading) || (camOn && camLoading)
 
-  // ── Main call UI ────────────────────────────────────────────────────────────
+  // ── Main call UI — Messenger-style ──────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black">
-      {/* Tap-to-enable-audio overlay — appears when mobile autoplay is blocked */}
-      {audioBlocked && remoteUsers.length > 0 && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center">
-          <button
-            onClick={handleUnblockAudio}
-            className="flex items-center gap-2 rounded-2xl bg-black/70 px-6 py-4 text-white backdrop-blur-sm"
-          >
-            <Volume2 className="size-6 text-[#F36D21]" />
-            <span className="text-sm font-semibold">Tap to enable audio</span>
-          </button>
+    <div className="fixed inset-0 z-50 bg-black" style={{ height: '100dvh' }}>
+
+      {/* === FULLSCREEN BACKGROUND VIDEO === */}
+      {remoteUsers.length > 0 ? (
+        /* Remote video fills the entire screen */
+        <div className="absolute inset-0">
+          <RemoteUser
+            user={remoteUsers[0]}
+            playAudio={false}
+            className="size-full object-cover"
+          />
+        </div>
+      ) : (
+        /* No remote user yet — local video fills the screen */
+        <div className="absolute inset-0">
+          {camOn && localCameraTrack ? (
+            <LocalVideoTrack track={localCameraTrack} play className="size-full object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center bg-[#1a1a1a]">
+              <div className="flex size-24 items-center justify-center rounded-full bg-[#F36D21] text-4xl font-bold text-white">
+                U
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Mic level debug meter */}
+      {/* === TOP GRADIENT + STATUS TEXT === */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent pb-10 pt-12 px-5">
+        {remoteUsers.length === 0 && (
+          <p className="text-sm text-white/80">Waiting for other person to join…</p>
+        )}
+      </div>
+
+      {/* === LOCAL PIP — top-right, only when remote user is present === */}
+      {remoteUsers.length > 0 && (
+        <div className="absolute right-4 top-4 z-10 h-40 w-28 overflow-hidden rounded-2xl border-2 border-white/30 shadow-lg sm:h-52 sm:w-36">
+          {camOn && localCameraTrack ? (
+            <LocalVideoTrack track={localCameraTrack} play className="size-full object-cover" />
+          ) : (
+            <div className="flex size-full items-center justify-center bg-[#1a1a1a]">
+              <VideoOff className="size-7 text-white/40" />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* === DEBUG: Mic level meter === */}
       <div className="absolute left-3 top-14 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
         <Mic className="size-3 text-white" />
         <div className="h-2 w-20 overflow-hidden rounded-full bg-white/20">
@@ -275,100 +331,85 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
         </div>
       </div>
 
-      {/* Device-acquiring indicator */}
+      {/* === DEBUG: Device acquiring indicator === */}
       {isDeviceLoading && (
-        <div className="absolute left-3 top-3 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
+        <div className="absolute left-3 top-24 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
           <div className="size-3 animate-spin rounded-full border border-white border-t-transparent" />
-          <span className="text-xs text-white">Waiting for camera/microphone permission…</span>
+          <span className="text-xs text-white">Waiting for camera/microphone…</span>
         </div>
       )}
 
-      <div className="flex flex-1 gap-1 overflow-hidden p-1">
-        {/* Local video tile */}
-        <div className="relative flex-1 overflow-hidden rounded-xl bg-[#1a1a1a]">
-          {camOn && localCameraTrack ? (
-            <LocalVideoTrack
-              track={localCameraTrack}
-              play
-              className="size-full object-cover"
-            />
-          ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="flex size-16 items-center justify-center rounded-full bg-[#F36D21] text-2xl font-bold text-white">
-                U
-              </div>
-            </div>
-          )}
-          <span className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-0.5 text-xs text-white">
-            You
-          </span>
+      {/* === Tap-to-enable-audio overlay === */}
+      {audioBlocked && remoteUsers.length > 0 && (
+        <div className="absolute inset-0 z-20 flex items-center justify-center">
+          <button
+            onClick={handleUnblockAudio}
+            className="flex items-center gap-2 rounded-2xl bg-black/70 px-6 py-4 text-white backdrop-blur-sm"
+          >
+            <Volume2 className="size-6 text-[#F36D21]" />
+            <span className="text-sm font-semibold">Tap to enable audio</span>
+          </button>
         </div>
+      )}
 
-        {/* Remote video tiles — playAudio={false} so we own audio play() manually above */}
-        {remoteUsers.length > 0 ? (
-          remoteUsers.map((user) => (
-            <div
-              key={user.uid}
-              className="relative flex-1 overflow-hidden rounded-xl bg-[#1a1a1a]"
+      {/* === CONTROLS BAR — absolute bottom, always visible, safe-area aware === */}
+      <div
+        className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 to-transparent pt-20"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 20px)' }}
+      >
+        <div className="flex items-center justify-center gap-5 pb-2">
+          {/* Camera flip — only on devices with multiple cameras */}
+          {hasMultipleCameras && (
+            <button
+              onClick={handleFlipCamera}
+              disabled={!camOn}
+              aria-label="Flip camera"
+              className="flex size-14 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md disabled:opacity-40"
             >
-              <RemoteUser user={user} playAudio={false} className="size-full object-cover" />
-              <span className="absolute bottom-2 left-2 rounded-md bg-black/50 px-2 py-0.5 text-xs text-white">
-                Them
-              </span>
-            </div>
-          ))
-        ) : (
-          <div className="flex flex-1 items-center justify-center rounded-xl bg-[#1a1a1a]">
-            <div className="text-center">
-              <div className="mx-auto mb-3 flex size-16 items-center justify-center rounded-full bg-[#333]">
-                <Video className="size-8 text-[#666]" />
-              </div>
-              <p className="text-sm text-white">Waiting for other person...</p>
-              <p className="mt-1 text-xs text-[#666]">
-                Ask them to click &quot;Video call&quot; in the chat
-              </p>
-            </div>
-          </div>
-        )}
-      </div>
+              <SwitchCamera className="size-6" />
+            </button>
+          )}
 
-      {/* Call controls */}
-      <div className="flex items-center justify-center gap-4 bg-black py-5">
-        <button
-          onClick={handleToggleMic}
-          className={`flex size-12 items-center justify-center rounded-full transition-colors ${
-            micOn ? 'bg-[#333] text-white' : 'bg-[#C0392B] text-white'
-          }`}
-          aria-label={micOn ? 'Mute' : 'Unmute'}
-        >
-          {micOn ? <Mic className="size-5" /> : <MicOff className="size-5" />}
-        </button>
+          {/* Mic toggle */}
+          <button
+            onClick={handleToggleMic}
+            aria-label={micOn ? 'Mute' : 'Unmute'}
+            className={`flex size-14 items-center justify-center rounded-full backdrop-blur-md ${
+              micOn ? 'bg-white/20 text-white' : 'bg-white text-black'
+            }`}
+          >
+            {micOn ? <Mic className="size-6" /> : <MicOff className="size-6" />}
+          </button>
 
-        <button
-          onClick={handleUnblockAudio}
-          className="flex size-12 items-center justify-center rounded-full bg-[#333] text-white"
-          aria-label="Fix audio"
-        >
-          <Volume2 className="size-5" />
-        </button>
+          {/* End call — larger red button */}
+          <button
+            onClick={handleEndCall}
+            aria-label="End call"
+            className="flex size-16 items-center justify-center rounded-full bg-red-500 text-white shadow-lg"
+          >
+            <PhoneOff className="size-7" />
+          </button>
 
-        <button
-          onClick={handleEndCall}
-          className="flex size-14 items-center justify-center rounded-full bg-[#C0392B] text-white hover:opacity-90"
-          aria-label="End call"
-        >
-          <PhoneOff className="size-6" />
-        </button>
+          {/* Camera toggle */}
+          <button
+            onClick={handleToggleCam}
+            aria-label={camOn ? 'Turn off camera' : 'Turn on camera'}
+            className={`flex size-14 items-center justify-center rounded-full backdrop-blur-md ${
+              camOn ? 'bg-white/20 text-white' : 'bg-white text-black'
+            }`}
+          >
+            {camOn ? <Video className="size-6" /> : <VideoOff className="size-6" />}
+          </button>
 
-        <button
-          onClick={handleToggleCam}
-          className={`flex size-12 items-center justify-center rounded-full transition-colors ${
-            camOn ? 'bg-[#333] text-white' : 'bg-[#C0392B] text-white'
-          }`}
-          aria-label={camOn ? 'Turn off camera' : 'Turn on camera'}
-        >
-          {camOn ? <Video className="size-5" /> : <VideoOff className="size-5" />}
-        </button>
+          {/* Fix audio */}
+          <button
+            onClick={handleUnblockAudio}
+            aria-label="Fix audio"
+            className="flex size-14 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md"
+          >
+            <Volume2 className="size-6" />
+          </button>
+        </div>
       </div>
     </div>
   )
