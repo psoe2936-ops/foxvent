@@ -185,19 +185,12 @@ export function ChatThread({
   // Mark messages as read on mount
   useEffect(() => {
     async function markAsRead() {
-      const { data, error, count } = await supabase
+      await supabase
         .from('messages')
-        .update({ is_read: true }, { count: 'exact' })
+        .update({ is_read: true })
         .eq('conversation_id', conversationId)
         .neq('sender_id', currentUserId)
         .eq('is_read', false)
-        .select()
-
-      if (error) {
-        console.error('DEBUG mark-as-read FAILED:', error)
-      } else {
-        console.error('DEBUG mark-as-read SUCCESS, rows updated:', count, data)
-      }
     }
     markAsRead()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -221,14 +214,11 @@ export function ChatThread({
         'postgres_changes',
         { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${conversationId}` },
         (payload) => {
-          console.error('DEBUG realtime UPDATE received, looking for id:', payload.new.id, typeof payload.new.id)
-          setMessages((prev) => {
-            console.error('DEBUG current messages in state:', prev.map((m) => ({ id: m.id, idType: typeof m.id, is_read: m.is_read })))
-            const updated = prev.map((m) =>
+          setMessages((prev) =>
+            prev.map((m) =>
               m.id === payload.new.id ? { ...m, is_read: payload.new.is_read as boolean } : m
             )
-            return updated
-          })
+          )
         }
       )
       .subscribe()

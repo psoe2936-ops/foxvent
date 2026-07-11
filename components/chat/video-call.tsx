@@ -76,48 +76,6 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   usePublish([localMicrophoneTrack, localCameraTrack])
 
   useEffect(() => {
-    console.error('DEBUG Publish status:', {
-      micOn,
-      hasLocalMicTrack: !!localMicrophoneTrack,
-      micTrackEnabled: localMicrophoneTrack?.enabled,
-      micMuted: localMicrophoneTrack?.muted,
-    })
-  }, [micOn, localMicrophoneTrack])
-
-  useEffect(() => {
-    remoteUsers.forEach((user) => {
-      console.error('DEBUG Remote user audio status:', {
-        uid: user.uid,
-        hasAudioTrack: !!user.audioTrack,
-        audioTrackPlaying: user.audioTrack?.isPlaying,
-      })
-    })
-  }, [remoteUsers])
-
-  useEffect(() => {
-    if (localMicrophoneTrack) {
-      console.error('DEBUG Mic track created:', {
-        enabled: localMicrophoneTrack.enabled,
-        muted: localMicrophoneTrack.muted,
-        trackLabel: localMicrophoneTrack.getTrackLabel?.(),
-      })
-    }
-  }, [localMicrophoneTrack])
-
-  useEffect(() => {
-    if (!localMicrophoneTrack) return
-    const interval = setInterval(async () => {
-      try {
-        const stats = localMicrophoneTrack.getStats()
-        console.error('DEBUG Local mic track stats:', stats)
-      } catch (e) {
-        console.error('DEBUG Failed to get mic stats:', e)
-      }
-    }, 2000)
-    return () => clearInterval(interval)
-  }, [localMicrophoneTrack])
-
-  useEffect(() => {
     if (!localMicrophoneTrack) return
     const interval = setInterval(() => {
       setMicLevel(localMicrophoneTrack.getVolumeLevel())
@@ -320,7 +278,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
         </div>
       )}
 
-      {/* === DEBUG: Mic level meter === */}
+      {/* Mic level meter */}
       <div className="absolute left-3 top-14 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
         <Mic className="size-3 text-white" />
         <div className="h-2 w-20 overflow-hidden rounded-full bg-white/20">
@@ -331,7 +289,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
         </div>
       </div>
 
-      {/* === DEBUG: Device acquiring indicator === */}
+      {/* Device acquiring indicator */}
       {isDeviceLoading && (
         <div className="absolute left-3 top-24 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
           <div className="size-3 animate-spin rounded-full border border-white border-t-transparent" />
