@@ -25,6 +25,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
   const [sending, setSending] = useState(false)
   const [sendError, setSendError] = useState<string | null>(null)
   const [unreadCount, setUnreadCount] = useState(0)
+  const [callActive, setCallActive] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
   const openRef = useRef(false)
   const supabase = useMemo(() => createClient(), [])
@@ -41,6 +42,22 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     const handleOpenSupport = () => { setOpen(true); setUnreadCount(0) }
     window.addEventListener('open-support-chat', handleOpenSupport)
     return () => window.removeEventListener('open-support-chat', handleOpenSupport)
+  }, [])
+
+  useEffect(() => {
+    const onStart = () => {
+      setCallActive(true)
+      setOpen(false)
+    }
+    const onEnd = () => setCallActive(false)
+
+    window.addEventListener('foxvent-call-started', onStart)
+    window.addEventListener('foxvent-call-ended', onEnd)
+
+    return () => {
+      window.removeEventListener('foxvent-call-started', onStart)
+      window.removeEventListener('foxvent-call-ended', onEnd)
+    }
   }, [])
 
   // On mount: pre-load conversation id + unread badge count
@@ -190,7 +207,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     setSending(false)
   }
 
-  if (isHidden) return null
+  if (isHidden || callActive) return null
 
   return (
     <>
@@ -202,7 +219,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
             <FoxIcon className="size-8 shrink-0" />
             <div className="min-w-0 flex-1">
               <p className="font-medium text-[#1F2937]">FoxVent Support</p>
-              <p className="text-xs text-[#6B7280]">We'll reply as soon as we can</p>
+              <p className="text-xs text-[#6B7280]">We&apos;ll reply as soon as we can</p>
             </div>
             <button
               onClick={() => setOpen(false)}
@@ -279,7 +296,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
       {!open && (
         <button
           onClick={() => { setOpen(true); setUnreadCount(0) }}
-          className="fixed bottom-6 right-6 z-50 flex size-14 items-center justify-center rounded-full bg-[#F36D21] shadow-lg transition-transform hover:scale-105 active:scale-95"
+          className="fixed bottom-24 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-[#F36D21] shadow-lg transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6"
           aria-label="Open support chat"
         >
           <MessageCircle className="size-6 text-white" />

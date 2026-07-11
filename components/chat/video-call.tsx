@@ -33,7 +33,11 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   const [micLevel, setMicLevel] = useState(0)
   const [facingMode, setFacingMode] = useState<'user' | 'environment'>('user')
   const [hasMultipleCameras, setHasMultipleCameras] = useState(false)
-  const callStartTimeRef = useRef<number>(Date.now())
+  const callStartTimeRef = useRef<number>(0)
+
+  useEffect(() => {
+    callStartTimeRef.current = Date.now()
+  }, [])
 
   useEffect(() => {
     AgoraRTC.getCameras()
@@ -117,7 +121,8 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   }, [remoteUsers])
 
   const handleEndCall = async () => {
-    const durationSeconds = Math.floor((Date.now() - callStartTimeRef.current) / 1000)
+    const startedAt = callStartTimeRef.current || Date.now()
+    const durationSeconds = Math.floor((Date.now() - startedAt) / 1000)
     const supabase = createClient()
     await supabase.from('messages').insert({
       conversation_id: conversationId,
@@ -174,7 +179,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   // ── Loading / connecting ────────────────────────────────────────────────────
   if (!token && !tokenError) {
     return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black">
+      <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black">
         <div className="text-center text-white">
           <div className="mx-auto mb-3 size-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
           <p className="text-sm">Connecting...</p>
@@ -186,7 +191,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   // ── Token error ─────────────────────────────────────────────────────────────
   if (tokenError) {
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-3 bg-black text-white">
+      <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-black text-white">
         <p className="text-sm">Failed to connect. Please try again.</p>
         <button
           onClick={() => { setToken(null); setRetryCount((c) => c + 1) }}
@@ -207,7 +212,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
       camError && micError ? 'Camera and microphone' : camError ? 'Camera' : 'Microphone'
 
     return (
-      <div className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-4 bg-black px-6 text-center text-white">
+      <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-4 bg-black px-6 text-center text-white">
         <div className="flex size-16 items-center justify-center rounded-full bg-[#C0392B]/20">
           <VideoOff className="size-8 text-[#C0392B]" />
         </div>
@@ -228,10 +233,21 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   }
 
   const isDeviceLoading = (micOn && micLoading) || (camOn && camLoading)
+  const micLevelMeter = (
+    <div className="flex items-center gap-2 rounded-lg bg-black/60 px-2.5 py-1.5 backdrop-blur-sm">
+      <Mic className="size-3 text-white" />
+      <div className="h-2 w-16 overflow-hidden rounded-full bg-white/20 sm:w-20">
+        <div
+          className="h-full bg-[#F36D21] transition-all duration-100"
+          style={{ width: `${Math.min(micLevel * 100, 100)}%` }}
+        />
+      </div>
+    </div>
+  )
 
   // ── Main call UI — Messenger-style ──────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-50 bg-black" style={{ height: '100dvh' }}>
+    <div className="fixed inset-0 z-[60] bg-black" style={{ height: '100dvh' }}>
 
       {/* === FULLSCREEN BACKGROUND VIDEO === */}
       {remoteUsers.length > 0 ? (
@@ -275,19 +291,18 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
               <VideoOff className="size-7 text-white/40" />
             </div>
           )}
+          <div className="absolute inset-x-2 bottom-2 origin-bottom-right scale-75 sm:scale-100">
+            {micLevelMeter}
+          </div>
         </div>
       )}
 
       {/* Mic level meter */}
-      <div className="absolute left-3 top-14 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
-        <Mic className="size-3 text-white" />
-        <div className="h-2 w-20 overflow-hidden rounded-full bg-white/20">
-          <div
-            className="h-full bg-[#F36D21] transition-all duration-100"
-            style={{ width: `${Math.min(micLevel * 100, 100)}%` }}
-          />
+      {remoteUsers.length === 0 && (
+        <div className="absolute left-3 top-14 z-10 origin-top-left scale-75 sm:scale-100">
+          {micLevelMeter}
         </div>
-      </div>
+      )}
 
       {/* Device acquiring indicator */}
       {isDeviceLoading && (
@@ -312,10 +327,10 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
 
       {/* === CONTROLS BAR — absolute bottom, always visible, safe-area aware === */}
       <div
-        className="absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 to-transparent pt-20"
-        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 20px)' }}
+        className="absolute bottom-0 left-0 right-0 z-[70] bg-gradient-to-t from-black/70 to-transparent pt-20 pb-8"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 24px)' }}
       >
-        <div className="flex items-center justify-center gap-5 pb-2">
+        <div className="flex items-center justify-center gap-2 sm:gap-5">
           {/* Camera flip — only on devices with multiple cameras */}
           {hasMultipleCameras && (
             <button
@@ -385,6 +400,13 @@ export function VideoCall({
   const client = useRTCClient(
     AgoraRTC.createClient({ codec: 'vp8', mode: 'rtc' })
   )
+
+  useEffect(() => {
+    window.dispatchEvent(new Event('foxvent-call-started'))
+    return () => {
+      window.dispatchEvent(new Event('foxvent-call-ended'))
+    }
+  }, [])
 
   return (
     <AgoraRTCProvider client={client}>

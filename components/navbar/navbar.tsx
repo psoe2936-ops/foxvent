@@ -60,10 +60,13 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
   useEffect(() => {
     if (searchParams.get('login') === '1') {
       const next = searchParams.get('next')
-      setModalMode('login')
-      setPendingNext(next)
-      setModalOpen(true)
-      router.replace('/')
+      const timer = window.setTimeout(() => {
+        setModalMode('login')
+        setPendingNext(next)
+        setModalOpen(true)
+        router.replace('/')
+      }, 0)
+      return () => window.clearTimeout(timer)
     }
   }, [searchParams, router])
 
@@ -95,14 +98,17 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 border-b border-white/40 bg-white/70 p-3 backdrop-blur-xl shadow-[0_1px_16px_rgba(0,0,0,0.04)]">
+      <header className="sticky top-0 z-40 overflow-x-hidden border-b border-white/40 bg-white/70 p-2 backdrop-blur-xl shadow-[0_1px_16px_rgba(0,0,0,0.04)] sm:p-3">
         <nav
-          className="mx-auto flex h-16 max-w-7xl items-center gap-3 px-4 sm:gap-4 sm:px-6"
+          className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 sm:h-16 sm:gap-4 sm:px-6"
           aria-label="Main navigation"
         >
           {/* Left: logo + hamburger (mobile) */}
-          <div className="flex shrink-0 items-center gap-2">
-            <Logo />
+          <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
+            <Logo
+              iconClassName="size-8 sm:size-9"
+              textClassName="hidden text-lg sm:inline sm:text-[1.35rem]"
+            />
             {/* Hamburger — mobile only */}
             <button
               type="button"
@@ -120,7 +126,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
           </div>
 
           {/* Right actions */}
-          <div className="ml-auto flex shrink-0 items-center gap-2 sm:gap-3">
+          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3">
             {/* Mobile: search icon button */}
             <button
               type="button"
@@ -140,26 +146,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             {isLoggedIn && user && <UtilityIcons userId={user.id} />}
 
             {isLoggedIn ? (
-              /* Mobile: avatar only; desktop: full ProfileBlock */
-              <>
-                <ProfileBlock profile={profile} className="hidden md:flex" />
-                {/* Mobile avatar button — opens drawer */}
-                <button
-                  type="button"
-                  aria-label="Open profile menu"
-                  onClick={() => setDrawerOpen(true)}
-                  className="flex size-9 shrink-0 items-center justify-center overflow-hidden rounded-full ring-2 ring-white md:hidden"
-                >
-                  {avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={avatarUrl} alt="" className="size-full object-cover" />
-                  ) : (
-                    <span className="flex size-full items-center justify-center bg-[#FEF3E2] text-xs font-bold text-[#C26A08]">
-                      {initial}
-                    </span>
-                  )}
-                </button>
-              </>
+              <ProfileBlock profile={profile} className="hidden md:flex" />
             ) : (
               <SignUpButton onClick={() => openModal('register')} />
             )}
