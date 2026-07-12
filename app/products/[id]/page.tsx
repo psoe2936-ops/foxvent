@@ -235,7 +235,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               </Link>
 
               {!isOwnListing && seller && !product.is_sold && (
-                <div className="mt-5 grid grid-cols-3 gap-3">
+                <div className="mt-5 grid grid-cols-2 gap-3">
                   <MessageSellerButton
                     productId={product.id}
                     sellerId={seller.id}
@@ -244,9 +244,12 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
                     productId={product.id}
                     sellerId={seller.id}
                   />
-                  <ShareButton title={product.title} price={product.price} />
                 </div>
               )}
+
+              <div className="mt-3">
+                <ShareButton title={product.title} price={product.price} />
+              </div>
 
               {!isOwnListing && viewer && (
                 <div className="mt-3 flex justify-center">
