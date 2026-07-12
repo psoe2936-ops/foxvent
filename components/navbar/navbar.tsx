@@ -98,7 +98,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 overflow-x-hidden overflow-y-visible border-b border-white/50 bg-white/70 p-2 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:p-3">
+      <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 p-2 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:p-3">
         <nav
           className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 sm:h-16 sm:gap-4 sm:px-6"
           aria-label="Main navigation"
