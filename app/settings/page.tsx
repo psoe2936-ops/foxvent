@@ -17,6 +17,7 @@ import { createClient } from '@/lib/supabase/server'
 import { LogoutButton } from '@/components/settings/logout-button'
 import { PasswordResetButton } from '@/components/settings/password-reset-button'
 import { DeleteAccountModal } from '@/components/settings/delete-account-modal'
+import { NotificationToggles } from '@/components/settings/notification-toggles'
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -36,6 +37,34 @@ export default async function SettingsPage() {
     .single()
 
   const initial = (profile?.full_name ?? profile?.username ?? 'U')[0].toUpperCase()
+
+  let { data: notificationPreferences } = await supabase
+    .from('notification_preferences')
+    .select('new_messages, listing_updates, new_followers')
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (!notificationPreferences) {
+    const { data: createdPreferences } = await supabase
+      .from('notification_preferences')
+      .upsert(
+        {
+          user_id: user.id,
+          new_messages: true,
+          listing_updates: true,
+          new_followers: true,
+        },
+        { onConflict: 'user_id' }
+      )
+      .select('new_messages, listing_updates, new_followers')
+      .single()
+
+    notificationPreferences = createdPreferences ?? {
+      new_messages: true,
+      listing_updates: true,
+      new_followers: true,
+    }
+  }
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 pb-24 sm:px-6 md:pb-8">
@@ -86,18 +115,9 @@ export default async function SettingsPage() {
         </SettingsRow>
       </SettingsGroup>
 
-      {/* Group 3 — Notifications (coming soon) */}
-      <SettingsGroup
-        label="Notifications"
-        badge={<span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-[10px] font-semibold text-[#9CA3AF]">Coming soon</span>}
-      >
-        <ToggleRow label="New messages" description="When someone sends you a message" on={true} />
-        <SettingsDivider />
-        <ToggleRow label="Listing updates" description="When your listing is approved or rejected" on={true} />
-        <SettingsDivider />
-        <ToggleRow label="New followers" description="When someone follows you" on={false} />
-        <SettingsDivider />
-        <ToggleRow label="Wishlist price drops" description="When a saved item changes price" on={false} />
+      {/* Group 3 — Notifications */}
+      <SettingsGroup label="Notifications">
+        <NotificationToggles initialPreferences={notificationPreferences} userId={user.id} />
       </SettingsGroup>
 
       {/* Group 4 — Privacy & Security */}
@@ -149,18 +169,15 @@ export default async function SettingsPage() {
 
 function SettingsGroup({
   label,
-  badge,
   children,
 }: {
   label: string
-  badge?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
     <div className="mb-4">
       <div className="mb-1.5 flex items-center gap-2 px-1">
         <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF]">{label}</p>
-        {badge}
       </div>
       <div className="overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white shadow-sm">
         {children}
@@ -212,35 +229,3 @@ function SettingsLinkRow({
   )
 }
 
-function ToggleSwitch({ on }: { on: boolean }) {
-  return (
-    <div
-      className={`relative h-6 w-10 rounded-full transition-colors ${on ? 'bg-[#F36D21]' : 'bg-[#D1D5DB]'}`}
-      aria-hidden="true"
-    >
-      <span
-        className={`absolute top-0.5 size-5 rounded-full bg-white shadow-sm transition-transform ${on ? 'translate-x-4' : 'translate-x-0.5'}`}
-      />
-    </div>
-  )
-}
-
-function ToggleRow({
-  label,
-  description,
-  on,
-}: {
-  label: string
-  description: string
-  on: boolean
-}) {
-  return (
-    <div className="flex min-h-14 items-center gap-3 px-4 py-3 opacity-60">
-      <div className="flex-1">
-        <p className="text-sm font-medium text-[#1F2937]">{label}</p>
-        <p className="text-xs text-[#9CA3AF]">{description}</p>
-      </div>
-      <ToggleSwitch on={on} />
-    </div>
-  )
-}

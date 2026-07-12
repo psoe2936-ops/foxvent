@@ -10,6 +10,10 @@ type SearchParams = Promise<{
   category?: string
   q?: string
   sort?: string
+  minPrice?: string
+  maxPrice?: string
+  condition?: string
+  hideSold?: string
 }>
 
 export default async function FeedPage({

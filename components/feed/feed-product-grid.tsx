@@ -1,16 +1,21 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import { SlidersHorizontal, X } from 'lucide-react'
+import { X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { CategoryPills } from '@/components/feed/category-pills'
 import { ProductCard } from '@/components/feed/product-card'
-import { SortTabs } from '@/components/feed/sort-tabs'
+import { FilterPanel } from '@/components/feed/filter-panel'
+import { RecentlyViewedRow } from '@/components/feed/recently-viewed-row'
 import { UserCard } from '@/components/search/user-card'
 
 type SearchParams = {
   category?: string
   q?: string
   sort?: string
+  minPrice?: string
+  maxPrice?: string
+  condition?: string
+  hideSold?: string
 }
 
 const CONDITION_LABEL: Record<string, string> = {
@@ -42,9 +47,10 @@ export async function FeedProductGrid({
   searchParams: SearchParams
   basePath?: string
 }) {
-  const { category, q, sort: sortParam } = searchParams
+  const { category, q, sort: sortParam, minPrice, maxPrice, condition, hideSold } = searchParams
   const sort: SortOption =
     sortParam === 'price_asc' || sortParam === 'price_desc' ? sortParam : 'newest'
+  const conditionArray = condition ? condition.split(',').filter(Boolean) : []
 
   const supabase = await createClient()
   const {
@@ -66,6 +72,19 @@ export async function FeedProductGrid({
     .from('categories')
     .select('id, name, icon')
     .order('name')
+
+  // Real per-category listing counts (approved only) — powers the "(N)" count in each pill
+  const { data: categoryCountRows } = await supabase
+    .from('products')
+    .select('category_id')
+    .eq('status', 'approved')
+
+  const categoryCounts: Record<string, number> = {}
+  for (const row of (categoryCountRows ?? []) as { category_id: string | null }[]) {
+    if (!row.category_id) continue
+    categoryCounts[row.category_id] = (categoryCounts[row.category_id] ?? 0) + 1
+  }
+  const totalCount = (categoryCountRows ?? []).length
 
   // --- SEARCH MODE ---
   if (q) {
@@ -126,6 +145,8 @@ export async function FeedProductGrid({
           activeCategory={undefined}
           filterParams={{ q, sort: 'newest' }}
           basePath={basePath}
+          categoryCounts={categoryCounts}
+          totalCount={totalCount}
         />
 
         {/* Summary bar */}
@@ -248,6 +269,10 @@ export async function FeedProductGrid({
   }
 
   if (effectiveCategory) query = query.eq('category_id', effectiveCategory)
+  if (minPrice) query = query.gte('price', Number(minPrice))
+  if (maxPrice) query = query.lte('price', Number(maxPrice))
+  if (conditionArray.length > 0) query = query.in('condition', conditionArray)
+  if (hideSold === 'true') query = query.eq('is_sold', false)
 
   const { data: products } = await query
 
@@ -269,11 +294,15 @@ export async function FeedProductGrid({
     agg.forEach((v, k) => sellerRatingMap.set(k, { avg: v.sum / v.count, count: v.count }))
   }
 
-  const filterParams = { category, q, sort }
+  const filterParams = { category, q, sort, minPrice, maxPrice, condition, hideSold }
 
   const clearSearchParams = new URLSearchParams()
   if (category) clearSearchParams.set('category', category)
   if (sort !== 'newest') clearSearchParams.set('sort', sort)
+  if (minPrice) clearSearchParams.set('minPrice', minPrice)
+  if (maxPrice) clearSearchParams.set('maxPrice', maxPrice)
+  if (condition) clearSearchParams.set('condition', condition)
+  if (hideSold) clearSearchParams.set('hideSold', hideSold)
   const clearSearchUrl = clearSearchParams.size > 0
     ? `${basePath}?${clearSearchParams}`
     : basePath
@@ -285,20 +314,28 @@ export async function FeedProductGrid({
         activeCategory={effectiveCategory}
         filterParams={filterParams}
         basePath={basePath}
+        categoryCounts={categoryCounts}
+        totalCount={totalCount}
       />
+
+      {user && <RecentlyViewedRow userId={user.id} />}
 
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-lg font-bold text-[#1F2937] sm:text-xl">All Listings</h1>
-          <div className="relative w-full sm:w-56">
+          <div className="relative w-full sm:w-56 md:hidden">
             <form action={basePath} method="get">
               {category && <input type="hidden" name="category" value={category} />}
               {sort !== 'newest' && <input type="hidden" name="sort" value={sort} />}
+              {minPrice && <input type="hidden" name="minPrice" value={minPrice} />}
+              {maxPrice && <input type="hidden" name="maxPrice" value={maxPrice} />}
+              {condition && <input type="hidden" name="condition" value={condition} />}
+              {hideSold && <input type="hidden" name="hideSold" value={hideSold} />}
               <input
                 type="text"
                 name="q"
                 defaultValue={q ?? ''}
-                placeholder="Search listings..."
+                placeholder="Search products, categories or users"
                 className={`w-full rounded-lg border border-[#E8EAED] bg-white py-2 text-sm text-[#374151] shadow-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20 ${q ? 'pl-3.5 pr-8' : 'px-3.5'}`}
               />
             </form>
@@ -314,18 +351,7 @@ export async function FeedProductGrid({
           </div>
         </div>
 
-        <div className="flex items-center justify-between border-b border-[#E8EAED] pb-1">
-          <SortTabs sort={sort} filterParams={filterParams} basePath={basePath} />
-          <button
-            type="button"
-            disabled
-            className="mb-2 hidden shrink-0 items-center gap-1.5 rounded-lg border border-[#E8EAED] bg-white px-3 py-1.5 text-xs font-medium text-[#9CA3AF] sm:flex"
-            title="Filters coming soon"
-          >
-            <SlidersHorizontal className="size-3.5" />
-            Filter
-          </button>
-        </div>
+        <FilterPanel sort={sort} filterParams={filterParams} basePath={basePath} />
 
         <p className="text-xs text-[#9CA3AF]">
           {products?.length ?? 0} listing{products?.length === 1 ? '' : 's'}

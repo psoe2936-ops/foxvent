@@ -1,4 +1,4 @@
-import { buildMarketplaceHref } from '@/lib/marketplace-url'
+import { buildMarketplaceHref, type MarketplaceFilterParams } from '@/lib/marketplace-url'
 import { HoverEdgeScroll } from '@/components/feed/hover-edge-scroll'
 
 type Category = {
@@ -10,8 +10,10 @@ type Category = {
 type CategoryPillsProps = {
   categories: Category[]
   activeCategory?: string
-  filterParams: { category?: string; q?: string; sort?: string }
+  filterParams: MarketplaceFilterParams
   basePath?: string
+  categoryCounts?: Record<string, number>
+  totalCount?: number
 }
 
 export function CategoryPills({
@@ -19,6 +21,8 @@ export function CategoryPills({
   activeCategory,
   filterParams,
   basePath = '/',
+  categoryCounts,
+  totalCount,
 }: CategoryPillsProps) {
   return (
     <HoverEdgeScroll className="-mx-1 px-1 pb-0.5">
@@ -31,10 +35,11 @@ export function CategoryPills({
               : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:border-[#D1D5DB] hover:bg-white'
           }`}
         >
-          All
+          All{typeof totalCount === 'number' && <span className="ml-1 font-normal opacity-70">({totalCount})</span>}
         </a>
         {categories.map((cat) => {
           const isActive = activeCategory === cat.id
+          const count = categoryCounts?.[cat.id]
           return (
             <a
               key={cat.id}
@@ -46,6 +51,7 @@ export function CategoryPills({
               }`}
             >
               {cat.name}
+              {typeof count === 'number' && <span className="ml-1 font-normal opacity-70">({count})</span>}
             </a>
           )
         })}

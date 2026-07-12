@@ -9,6 +9,8 @@ import { SellerActionBar } from '@/components/products/seller-action-bar'
 import { ReportButton } from '@/components/products/report-button'
 import { ImageGallery } from '@/components/products/image-gallery'
 import { MoreFromSeller } from '@/components/products/more-from-seller'
+import { SimilarListings } from '@/components/products/similar-listings'
+import { ShareButton } from '@/components/products/share-button'
 import { FeedSidebar } from '@/components/feed/sidebar'
 import { TrendingPanel, type TrendingItem } from '@/components/feed/trending-panel'
 import type { Category } from '@/components/profile/new-listing-modal'
@@ -90,6 +92,14 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
       .from('products')
       .update({ views_count: (product.views_count ?? 0) + 1 })
       .eq('id', id)
+  }
+
+  // Fire-and-forget recently-viewed tracking (logged-in, non-owner views only)
+  if (viewer && !isOwnListing) {
+    void supabase.from('recently_viewed').upsert(
+      { user_id: viewer.id, product_id: id, viewed_at: new Date().toISOString() },
+      { onConflict: 'user_id,product_id' },
+    )
   }
 
   let categories: Category[] = []
@@ -225,7 +235,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               </Link>
 
               {!isOwnListing && seller && !product.is_sold && (
-                <div className="mt-5 grid grid-cols-2 gap-3">
+                <div className="mt-5 grid grid-cols-3 gap-3">
                   <MessageSellerButton
                     productId={product.id}
                     sellerId={seller.id}
@@ -234,6 +244,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
                     productId={product.id}
                     sellerId={seller.id}
                   />
+                  <ShareButton title={product.title} price={product.price} />
                 </div>
               )}
 
@@ -262,6 +273,12 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               )}
             </div>
           </div>
+
+          <SimilarListings
+            currentProductId={product.id}
+            categoryId={product.category_id}
+            viewerId={viewer?.id ?? null}
+          />
         </div>
 
         {/* Right panel */}

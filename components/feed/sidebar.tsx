@@ -1,5 +1,5 @@
 'use client'
-
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
@@ -12,7 +12,7 @@ import {
   Store,
   Users,
 } from 'lucide-react'
-import { FoxIcon } from '@/components/navbar/fox-icon'
+
 import { SidebarUnreadBadge } from '@/components/feed/sidebar-unread-badge'
 
 type FeedSidebarProps = {
@@ -147,7 +147,13 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
 
       <div className="mt-8 rounded-xl bg-gradient-to-br from-[#FEF3E2] to-[#FDE8D4] p-6">
         <div className="flex justify-center">
-          <FoxIcon className="size-12" />
+          <Image 
+    src="/welcome.png(1).png" 
+    alt="FoxVent mascot" 
+    width={80} 
+    height={80} 
+    className={('size-12 shrink-0 rounded-full object-cover')}
+  />
         </div>
         <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#1F2937]">
           Shop smart. Sell easy.

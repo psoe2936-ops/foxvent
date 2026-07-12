@@ -106,7 +106,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
           {/* Left: logo + hamburger (mobile) */}
           <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
             <Logo
-              iconClassName="size-8 sm:size-9"
+              iconClassName="size-9"
               textClassName="hidden text-lg sm:inline sm:text-[1.35rem]"
             />
             {/* Hamburger — mobile only */}
@@ -192,7 +192,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                   </div>
                 </div>
               ) : (
-                <Logo />
+                <Logo iconClassName="size-9" />
               )}
               <button
                 type="button"
