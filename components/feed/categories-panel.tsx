@@ -31,7 +31,7 @@ export function CategoriesPanel({
   sort,
 }: CategoriesPanelProps & { sort?: string }) {
   return (
-    <section className="rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <section className="rounded-2xl border border-white/40 bg-white/60 p-4 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl">
       <h2 className="text-sm font-semibold text-[#2D2E32]">Categories</h2>
 
       <ul className="mt-3 space-y-1">

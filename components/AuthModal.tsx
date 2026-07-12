@@ -489,7 +489,7 @@ function AuthModalContent({
         aria-modal="true"
         aria-labelledby="auth-modal-title"
         onClick={(e) => e.stopPropagation()}
-        className="relative h-full w-full overflow-y-auto rounded-t-3xl bg-white/95 p-8 backdrop-blur-2xl sm:h-auto sm:max-h-[90vh] sm:w-95 sm:max-w-[90vw] sm:rounded-[14px] sm:shadow-[0_8px_32px_rgba(0,0,0,0.12)]"
+        className="relative h-full w-full overflow-y-auto rounded-t-3xl border border-white/60 bg-white/90 p-8 backdrop-blur-2xl backdrop-saturate-150 sm:h-auto sm:max-h-[90vh] sm:w-95 sm:max-w-[90vw] sm:rounded-[14px] sm:shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
       >
         <button type="button" onClick={onClose} style={closeButtonStyle} aria-label="Close">
           ×
@@ -926,9 +926,9 @@ function AuthModalContent({
 const overlayStyle: CSSProperties = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(20,18,16,0.4)',
-  backdropFilter: 'blur(4px)',
-  WebkitBackdropFilter: 'blur(4px)',
+  background: 'rgba(0,0,0,0.3)',
+  backdropFilter: 'blur(12px)',
+  WebkitBackdropFilter: 'blur(12px)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',

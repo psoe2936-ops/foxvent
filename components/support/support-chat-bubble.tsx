@@ -213,7 +213,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     <>
       {/* Chat popup */}
       {open && (
-        <div className="fixed bottom-0 right-0 z-50 flex h-[60vh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/40 bg-white/90 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-xl sm:bottom-24 sm:right-6 sm:h-105 sm:w-[320px] sm:rounded-2xl">
+        <div className="fixed bottom-0 right-0 z-50 flex h-[60vh] w-full flex-col overflow-hidden rounded-t-3xl border border-white/60 bg-white/80 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 sm:bottom-24 sm:right-6 sm:h-105 sm:w-[320px] sm:rounded-2xl">
           {/* Header */}
           <div className="flex shrink-0 items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
             <FoxIcon className="size-8 shrink-0" />

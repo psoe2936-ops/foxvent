@@ -193,7 +193,7 @@ export function MessagesPanel({ userId }: { userId: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-85 overflow-hidden rounded-xl border border-[#E5E7EB] bg-white shadow-lg">
+        <div className="absolute right-0 top-full z-50 mt-2 w-85 overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
           {/* Header */}
           <div className="flex items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
             <h2 className="shrink-0 text-[15px] font-bold text-[#1F2937]">Messages</h2>

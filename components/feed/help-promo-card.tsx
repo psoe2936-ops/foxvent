@@ -4,7 +4,7 @@ import { ContactSupportButton } from '@/components/support/contact-support-butto
 
 export function HelpPromoCard() {
   return (
-    <section className="rounded-xl border border-[#E8EAED] bg-gradient-to-br from-[#F9FAFB] to-white p-5 shadow-sm">
+    <section className="rounded-xl border border-white/40 bg-white/60 p-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl">
       <div className="flex items-start gap-4">
         <div className="relative shrink-0">
           <FoxIcon className="size-10" />

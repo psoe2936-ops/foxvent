@@ -10,10 +10,9 @@ export function SignUpButton({ onClick, className }: SignUpButtonProps) {
     <button
       type="button"
       onClick={onClick}
-      
       className={cn(
-        className="bg-white text-[#f16522] border-2 border-[#f16522] rounded-lg px-3 py-1 text-base font-[500] transition-all duration-200 ease-in-out hover:bg-[#fdf3ed]",
-        
+        'bg-white text-[#F36D21] border-2 border-[#F36D21] rounded-lg px-3 py-1 text-base font-medium transition-all duration-200 ease-in-out hover:bg-[#FEF3E2]',
+        className
       )}
     >
       Sign Up

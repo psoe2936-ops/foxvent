@@ -80,7 +80,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
 
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md p-4"
           onClick={closeModal}
         >
           <div
@@ -88,7 +88,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
             aria-modal="true"
             aria-labelledby="edit-profile-title"
             onClick={(event) => event.stopPropagation()}
-            className="relative w-full max-w-md rounded-2xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
+            className="relative w-full max-w-md rounded-2xl border border-white/60 bg-white/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150"
           >
             <button
               type="button"

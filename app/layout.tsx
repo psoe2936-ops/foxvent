@@ -67,7 +67,7 @@ export default async function RootLayout({
       <body suppressHydrationWarning className="overflow-x-hidden">
         <ThemeProvider>
           <ToastProvider>
-            <div className="min-h-screen bg-[#F9FAFB]">
+            <div className="min-h-screen bg-gradient-to-br from-[#FDF6F0] via-[#F9FAFB] to-[#FEF3E2]">
               <NavbarServer />
               <div className="pb-16 md:pb-0">
                 {children}

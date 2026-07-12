@@ -17,7 +17,7 @@ export function FeedRightSidebar({
   isLoggedIn,
 }: FeedRightSidebarProps) {
   return (
-    <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-[300px] shrink-0 flex-col overflow-y-auto border-l border-[#E8EAED] bg-[#F9FAFB] py-6 pl-4 pr-5 xl:flex xl:pr-6">
+    <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-[300px] shrink-0 flex-col overflow-y-auto border-l border-white/40 bg-white/60 py-6 pl-4 pr-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl xl:flex xl:pr-6">
       <div className="space-y-6">
         <TrendingPanel items={trendingItems} label={trendingLabel} />
         <SellPromoCard />

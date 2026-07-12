@@ -19,10 +19,10 @@ export function DeleteAccountModal() {
       {open && (
         <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
           <div
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-black/30 backdrop-blur-md"
             onClick={() => setOpen(false)}
           />
-          <div className="relative z-10 w-full max-w-sm rounded-t-3xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl sm:rounded-2xl">
+          <div className="relative z-10 w-full max-w-sm rounded-t-3xl border border-white/60 bg-white/90 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 sm:rounded-2xl">
             <button
               type="button"
               onClick={() => setOpen(false)}

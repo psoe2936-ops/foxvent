@@ -51,7 +51,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
 
   return (
     <nav
-      className="fixed inset-x-0 bottom-0 z-40 bg-white/80 backdrop-blur-xl border-t border-white/40 shadow-[0_-8px_32px_rgba(0,0,0,0.06)] md:hidden"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-white/70 shadow-[0_-8px_32px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-150 md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
       <div className="flex items-center justify-around pt-1 pb-2">

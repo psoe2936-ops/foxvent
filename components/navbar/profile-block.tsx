@@ -93,7 +93,7 @@ export function ProfileBlock({
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full mt-2 w-56 rounded-xl border border-[#E5E7EB] bg-white py-1 shadow-lg z-50"
+          className="absolute right-0 top-full z-50 mt-2 w-56 rounded-2xl border border-white/60 bg-white/90 py-1 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150"
         >
           <div className="px-4 py-2 border-b border-[#E5E7EB]">
             <p className="text-sm font-semibold text-[#2D2E32] truncate">{displayName}</p>

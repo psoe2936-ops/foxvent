@@ -337,7 +337,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
               onClick={handleFlipCamera}
               disabled={!camOn}
               aria-label="Flip camera"
-              className="flex size-14 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md disabled:opacity-40"
+              className="flex size-14 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-lg border border-white/10 disabled:opacity-40"
             >
               <SwitchCamera className="size-6" />
             </button>
@@ -347,8 +347,8 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           <button
             onClick={handleToggleMic}
             aria-label={micOn ? 'Mute' : 'Unmute'}
-            className={`flex size-14 items-center justify-center rounded-full backdrop-blur-md ${
-              micOn ? 'bg-white/20 text-white' : 'bg-white text-black'
+            className={`flex size-14 items-center justify-center rounded-full ${
+              micOn ? 'bg-white/15 text-white backdrop-blur-lg border border-white/10' : 'bg-white text-black'
             }`}
           >
             {micOn ? <Mic className="size-6" /> : <MicOff className="size-6" />}
@@ -367,8 +367,8 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           <button
             onClick={handleToggleCam}
             aria-label={camOn ? 'Turn off camera' : 'Turn on camera'}
-            className={`flex size-14 items-center justify-center rounded-full backdrop-blur-md ${
-              camOn ? 'bg-white/20 text-white' : 'bg-white text-black'
+            className={`flex size-14 items-center justify-center rounded-full ${
+              camOn ? 'bg-white/15 text-white backdrop-blur-lg border border-white/10' : 'bg-white text-black'
             }`}
           >
             {camOn ? <Video className="size-6" /> : <VideoOff className="size-6" />}
@@ -378,7 +378,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           <button
             onClick={handleUnblockAudio}
             aria-label="Fix audio"
-            className="flex size-14 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-md"
+            className="flex size-14 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-lg border border-white/10"
           >
             <Volume2 className="size-6" />
           </button>

@@ -97,14 +97,14 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm sm:p-4"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md sm:p-4"
         onClick={handleClose}
       >
         <div
           role="dialog"
           aria-modal="true"
           onClick={(e) => e.stopPropagation()}
-          className="relative flex h-dvh w-full flex-col rounded-t-3xl bg-white/95 backdrop-blur-2xl sm:h-auto sm:max-h-[90dvh] sm:max-w-lg sm:rounded-2xl sm:shadow-xl"
+          className="relative flex h-dvh w-full flex-col rounded-t-3xl border border-white/60 bg-white/90 backdrop-blur-2xl backdrop-saturate-150 sm:h-auto sm:max-h-[90dvh] sm:max-w-lg sm:rounded-2xl sm:shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
         >
           <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
             <h2 className="text-lg font-bold text-[#2D2E32]">Edit listing</h2>

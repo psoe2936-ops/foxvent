@@ -722,7 +722,7 @@ export function ChatThread({
           <div className="flex shrink-0 flex-col border-t border-[#E5E7EB]">
             {/* Offer input panel — buyer only */}
             {isBuyer && showOfferPanel && (
-              <div className="border-b border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3">
+              <div className="border-b border-white/60 bg-white/90 px-4 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
                 <div className="mb-2 flex items-center justify-between">
                   <p className="text-sm font-semibold text-[#2D2E32]">Make an offer</p>
                   <button

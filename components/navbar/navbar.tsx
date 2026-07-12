@@ -98,7 +98,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 overflow-x-hidden border-b border-white/40 bg-white/70 p-2 backdrop-blur-xl shadow-[0_1px_16px_rgba(0,0,0,0.04)] sm:p-3">
+      <header className="sticky top-0 z-40 overflow-x-hidden overflow-y-visible border-b border-white/50 bg-white/70 p-2 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:p-3">
         <nav
           className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 sm:h-16 sm:gap-4 sm:px-6"
           aria-label="Main navigation"
@@ -169,7 +169,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             onClick={() => setDrawerOpen(false)}
             aria-hidden="true"
           />
-          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white shadow-xl lg:hidden">
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/60 bg-white/80 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 lg:hidden">
             {/* Drawer header: user info */}
             <div className="flex items-center justify-between border-b border-[#E5E7EB] px-4 py-4">
               {isLoggedIn ? (

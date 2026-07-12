@@ -44,7 +44,7 @@ export function ActivityPanel({
   isLoggedIn: boolean
 }) {
   return (
-    <section className="rounded-xl border border-[#E8EAED] bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-white/40 bg-white/60 p-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl">
       <h2 className="text-sm font-semibold text-[#1F2937]">Recent Activity</h2>
 
       {!isLoggedIn ? (

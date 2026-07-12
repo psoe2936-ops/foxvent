@@ -21,7 +21,7 @@ export async function SellPromoCard() {
   }
 
   return (
-    <section className="rounded-xl border border-[#E8EAED] bg-white p-5 shadow-sm">
+    <section className="rounded-xl border border-white/40 bg-white/60 p-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl">
       <div className="flex flex-col items-center px-2 py-2 text-center">
         <FoxIcon className="size-10" />
         <p className="mt-3 text-sm font-semibold text-[#1F2937]">

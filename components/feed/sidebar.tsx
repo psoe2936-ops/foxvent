@@ -44,7 +44,7 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
   }
 
   return (
-    <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-[220px] shrink-0 flex-col overflow-y-auto border-r border-[#E8EAED] bg-[#F9FAFB] py-6 pl-4 pr-3 lg:flex lg:pl-5">
+    <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-[220px] shrink-0 flex-col overflow-y-auto border-r border-white/40 bg-white/60 py-6 pl-4 pr-3 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl lg:flex lg:pl-5">
       <nav className="space-y-1">
 
         {/* Home */}
