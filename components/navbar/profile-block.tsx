@@ -57,17 +57,14 @@ export function ProfileBlock({
   }
 
   return (
-    <div className="relative" ref={menuRef}>
+    <div className={cn('relative', className)} ref={menuRef}>
       <button
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
         aria-label={`${displayName} profile menu`}
         onClick={() => setOpen((prev) => !prev)}
-        className={cn(
-          'flex items-center gap-2 rounded-xl p-1 pr-2 transition-colors hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30',
-          className
-        )}
+        className="flex items-center gap-2 rounded-xl p-1 pr-2 transition-colors hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img

@@ -406,21 +406,30 @@ export function NewListingModal({
                     MMK
                   </span>
                   <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    inputMode="numeric"
-                    value={price}
-                    disabled={submitting}
-                    onChange={(event: ChangeEvent<HTMLInputElement>) =>
-                      setPrice(event.target.value)
-                    }
-                    className="w-full rounded-lg border border-[#E5E7EB] py-2 pl-14 pr-3 text-sm text-[#2D2E32] outline-none focus:border-[#F36D21] disabled:opacity-60"
-                  />
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  value={price}
+  disabled={submitting}
+  placeholder="0"
+  onChange={(event: ChangeEvent<HTMLInputElement>) => {
+    // Only allow digits, no letters, no decimals, no e/+/-
+    const raw = event.target.value.replace(/[^0-9]/g, '')
+    // Remove leading zeros
+    const cleaned = raw.replace(/^0+(\d)/, '$1')
+    setPrice(cleaned)
+  }}
+  className="w-full rounded-lg border border-[#E5E7EB] py-2 pl-14 pr-3 text-sm text-[#2D2E32] outline-none focus:border-[#F36D21] disabled:opacity-60"
+/>
                 </div>
-                {errors.price && (
-                  <p className="mt-1 text-xs text-[#C0392B]">{errors.price}</p>
-                )}
+                <div className="mt-1 flex items-center justify-between">
+  <span className="text-xs text-[#C0392B]">{errors.price}</span>
+  {price && !errors.price && (
+    <span className="text-xs text-[#6B7280]">
+      = MMK {Number(price).toLocaleString()}
+    </span>
+  )}
+</div>
               </div>
 
               <div>
@@ -433,6 +442,7 @@ export function NewListingModal({
                 <input
                   type="text"
                   value={location}
+                  maxLength={100}
                   disabled={submitting}
                   placeholder="e.g. Yangon, Mandalay, Mawlamyine"
                   onChange={(event: ChangeEvent<HTMLInputElement>) =>

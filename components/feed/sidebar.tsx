@@ -1,7 +1,8 @@
 'use client'
 import Image from 'next/image'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import {
   Bell,
   Heart,
@@ -30,6 +31,7 @@ const lockedClass =
 export function FeedSidebar({ userId }: FeedSidebarProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('sidebar')
   const isLoggedIn = !!userId
 
   const ctaHref = isLoggedIn ? '/feed/listings' : '/?login=1'
@@ -50,19 +52,19 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
         {/* Home */}
         <Link href="/feed" className={lc('/feed')}>
           <Home className="size-4.5 shrink-0" strokeWidth={1.75} />
-          Home
+          {t('home')}
         </Link>
 
         {/* Wishlist */}
         {isLoggedIn ? (
           <Link href="/feed/wishlist" className={lc('/feed/wishlist')}>
             <Heart className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Wishlist
+            {t('wishlist')}
           </Link>
         ) : (
           <button type="button" onClick={() => onLock('/feed/wishlist')} className={lockedClass}>
             <Heart className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Wishlist
+            {t('wishlist')}
             <Lock className="ml-auto size-3 text-[#D1D5DB]" />
           </button>
         )}
@@ -71,12 +73,12 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
         {isLoggedIn ? (
           <Link href="/feed/listings" className={lc('/feed/listings')}>
             <Store className="size-4.5 shrink-0" strokeWidth={1.75} />
-            My Listings
+            {t('myListings')}
           </Link>
         ) : (
           <button type="button" onClick={() => onLock('/feed/listings')} className={lockedClass}>
             <Store className="size-4.5 shrink-0" strokeWidth={1.75} />
-            My Listings
+            {t('myListings')}
             <Lock className="ml-auto size-3 text-[#D1D5DB]" />
           </button>
         )}
@@ -85,12 +87,12 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
         {isLoggedIn ? (
           <Link href="/feed/following" className={lc('/feed/following')}>
             <Users className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Following
-          </Link>  
+            {t('following')}
+          </Link>
         ) : (
           <button type="button" onClick={() => onLock('/feed/following')} className={lockedClass}>
             <Users className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Following
+            {t('following')}
             <Lock className="ml-auto size-3 text-[#D1D5DB]" />
           </button>
         )}
@@ -102,12 +104,13 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
               <MessageCircle className="size-4.5" strokeWidth={1.75} />
               {userId && <SidebarUnreadBadge userId={userId} type="messages" />}
             </span>
-            Messages
+            {t('messages')}
           </Link>
         ) : (
           <button type="button" onClick={() => onLock('/feed/messages')} className={lockedClass}>
-            <MessageCircle className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Messages
+            <MessageCircle className="size-4.
+            5 shrink-0" strokeWidth={1.75} />
+            {t('messages')}
             <Lock className="ml-auto size-3 text-[#D1D5DB]" />
           </button>
         )}
@@ -119,12 +122,12 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
               <Bell className="size-4.5" strokeWidth={1.75} />
               {userId && <SidebarUnreadBadge userId={userId} type="notifications" />}
             </span>
-            Notifications
+            {t('notifications')}
           </Link>
         ) : (
           <button type="button" onClick={() => onLock('/feed/notifications')} className={lockedClass}>
             <Bell className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Notifications
+            {t('notifications')}
             <Lock className="ml-auto size-3 text-[#D1D5DB]" />
           </button>
         )}
@@ -133,56 +136,48 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
         {isLoggedIn ? (
           <Link href="/settings" className={lc('/settings')}>
             <Settings className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Settings
+            {t('settings')}
           </Link>
         ) : (
           <button type="button" onClick={() => onLock('/settings')} className={lockedClass}>
             <Settings className="size-4.5 shrink-0" strokeWidth={1.75} />
-            Settings
+            {t('settings')}
             <Lock className="ml-auto size-3 text-[#D1D5DB]" />
           </button>
         )}
-
       </nav>
 
+      {/* CTA card */}
       <div className="mt-8 rounded-xl bg-gradient-to-br from-[#FEF3E2] to-[#FDE8D4] p-6">
         <div className="flex justify-center">
-          <Image 
-    src="/welcome.png(1).png" 
-    alt="FoxVent mascot" 
-    width={80} 
-    height={80} 
-    className={('size-12 shrink-0 rounded-full object-cover')}
-  />
+          <Image
+            src="/fox-welcome.png"
+            alt="FoxVent mascot"
+            width={80}
+            height={80}
+            className="size-12 object-contain"
+          />
         </div>
         <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#1F2937]">
-          Shop smart. Sell easy.
+          {t('shopSmartTitle')}
         </p>
         <p className="mt-1 text-center text-xs leading-relaxed text-[#6B7280]">
-          Join the FoxVent community today.
+          {t('shopSmartBody')}
         </p>
         <Link
           href={ctaHref}
           className="mt-4 flex w-full items-center justify-center rounded-lg bg-[#F36D21] px-4 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
-          {isLoggedIn ? 'My Listings' : 'Get Started'}
+          {isLoggedIn ? t('myListings') : t('getStarted')}
         </Link>
       </div>
 
       <footer className="mt-auto space-y-3 px-1 pt-10">
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#9CA3AF]">
-          <Link href="/about" className="hover:text-[#6B7280]">
-            About
-          </Link>
-          <Link href="/settings" className="hover:text-[#6B7280]">
-            Help
-          </Link>
-          <Link href="/terms" className="hover:text-[#6B7280]">
-            Terms
-          </Link>
-          <Link href="/privacy" className="hover:text-[#6B7280]">
-            Privacy
-          </Link>
+          <Link href="/about" className="hover:text-[#6B7280]">About</Link>
+          <Link href="/settings" className="hover:text-[#6B7280]">Help</Link>
+          <Link href="/terms" className="hover:text-[#6B7280]">Terms</Link>
+          <Link href="/privacy" className="hover:text-[#6B7280]">Privacy</Link>
         </div>
         <p className="text-[10px] text-[#D1D5DB]">© 2026 FoxVent</p>
       </footer>

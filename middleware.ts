@@ -1,5 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import createIntlMiddleware from 'next-intl/middleware'
+import { routing } from '@/i18n/routing'
 
 const PROTECTED_ROUTES = [
   '/profile',
@@ -14,9 +16,36 @@ const PROTECTED_ROUTES = [
   '/feed/following',
 ]
 
-export async function middleware(request: NextRequest) {
-  let supabaseResponse = NextResponse.next({ request })
+// Paths that must NOT go through locale routing — they stay unlocalized/English
+const NO_LOCALE_PREFIXES = ['/admin', '/api', '/auth', '/banned', '/_next']
 
+function shouldSkipIntl(pathname: string) {
+  if (NO_LOCALE_PREFIXES.some((p) => pathname.startsWith(p))) return true
+  if (pathname === '/favicon.ico') return true
+  if (/\.(?:svg|png|jpg|jpeg|gif|webp|ico|css|js|json|txt|xml)$/.test(pathname)) {
+    return true
+  }
+  return false
+}
+
+const intlMiddleware = createIntlMiddleware(routing)
+
+export async function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname
+  const skipIntl = shouldSkipIntl(path)
+
+  // Run next-intl locale detection FIRST (unless this path stays unlocalized)
+  let intlResponse: NextResponse | null = null
+  if (!skipIntl) {
+    intlResponse = intlMiddleware(request)
+    // If next-intl needs to redirect (e.g. adding/correcting the locale prefix),
+    // honor that immediately — Supabase logic will run on the next request.
+    if (intlResponse.status === 307 || intlResponse.status === 308) {
+      return intlResponse
+    }
+  }
+
+  let supabaseResponse = NextResponse.next({ request })
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -56,8 +85,6 @@ export async function middleware(request: NextRequest) {
     })
   }
 
-  const path = request.nextUrl.pathname
-
   // Fetch user profile once for all logged-in users (reused for ban check + admin check)
   let userProfile: {
     role: string
@@ -65,7 +92,6 @@ export async function middleware(request: NextRequest) {
     banned_until: string | null
     ban_reason: string | null
   } | null = null
-
   if (user && !path.startsWith('/banned')) {
     const { data } = await supabase
       .from('users')
@@ -85,7 +111,6 @@ export async function middleware(request: NextRequest) {
   ) {
     const bannedUntil = userProfile.banned_until
     const isExpired = bannedUntil !== null && new Date(bannedUntil) <= new Date()
-
     if (isExpired) {
       // Auto-unban expired temporary ban; allow through
       await supabase
@@ -102,7 +127,6 @@ export async function middleware(request: NextRequest) {
   }
 
   const isProtected = PROTECTED_ROUTES.some((route) => path.startsWith(route))
-
   if (isProtected && !user) {
     const redirectUrl = new URL('/feed', request.url)
     redirectUrl.searchParams.set('login', '1')
@@ -119,10 +143,19 @@ export async function middleware(request: NextRequest) {
     if (!user) {
       return NextResponse.redirect(new URL('/', request.url))
     }
-
     if (!userProfile || userProfile.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url))
     }
+  }
+
+  // Merge next-intl's locale rewrite headers/cookies onto the final response
+  if (intlResponse) {
+    intlResponse.headers.forEach((value, key) => {
+      supabaseResponse.headers.set(key, value)
+    })
+    intlResponse.cookies.getAll().forEach((c) => {
+      supabaseResponse.cookies.set(c.name, c.value, c)
+    })
   }
 
   return supabaseResponse

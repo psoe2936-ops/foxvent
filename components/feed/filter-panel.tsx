@@ -6,7 +6,7 @@ import { SlidersHorizontal } from 'lucide-react'
 import { SortTabs } from '@/components/feed/sort-tabs'
 import { buildMarketplaceHref, type MarketplaceFilterParams } from '@/lib/marketplace-url'
 
-type SortOption = 'newest' | 'price_asc' | 'price_desc'
+type SortOption = 'newest' |'popular'| 'price_asc' | 'price_desc'
 
 const CONDITIONS: { id: string; label: string }[] = [
   { id: 'new', label: 'New' },

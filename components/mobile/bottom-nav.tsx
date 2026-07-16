@@ -2,7 +2,8 @@
 
 import Link from 'next/link'
 import { House, Search, Plus, MessageCircle, User } from 'lucide-react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
+import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { SidebarUnreadBadge } from '@/components/feed/sidebar-unread-badge'
 
@@ -14,15 +15,14 @@ type BottomNavProps = {
 export function BottomNav({ username, userId }: BottomNavProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('bottomNav')
   const [callActive, setCallActive] = useState(false)
 
   useEffect(() => {
     const onStart = () => setCallActive(true)
     const onEnd = () => setCallActive(false)
-
     window.addEventListener('foxvent-call-started', onStart)
     window.addEventListener('foxvent-call-ended', onEnd)
-
     return () => {
       window.removeEventListener('foxvent-call-started', onStart)
       window.removeEventListener('foxvent-call-ended', onEnd)
@@ -61,7 +61,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
           <span className={pillCls(activeHome)}>
             <House className="size-5" strokeWidth={activeHome ? 2.5 : 1.75} />
           </span>
-          <span>Home</span>
+          <span>{t('home')}</span>
         </Link>
 
         {/* Search */}
@@ -69,24 +69,24 @@ export function BottomNav({ username, userId }: BottomNavProps) {
           type="button"
           onClick={() => router.push('/feed')}
           className={itemCls(false)}
-          aria-label="Search"
+          aria-label={t('search')}
         >
           <span className={pillCls(false)}>
             <Search className="size-5" strokeWidth={1.75} />
           </span>
-          <span>Search</span>
+          <span>{t('search')}</span>
         </button>
 
-        {/* Sell — elevated above bar */}
+        {/* Sell — elevated */}
         <div className="-translate-y-2 flex flex-col items-center gap-0.5">
           <Link
             href={username ? `/profile/${username}?new=1` : '/?login=1'}
             className="flex size-14 items-center justify-center rounded-full bg-[#F36D21] text-white shadow-[0_4px_20px_rgba(243,109,33,0.4)] transition-transform active:scale-90"
-            aria-label="Sell"
+            aria-label={t('sell')}
           >
             <Plus className="size-6" strokeWidth={2.5} />
           </Link>
-          <span className="text-[10px] font-medium text-[#9CA3AF]">Sell</span>
+          <span className="text-[10px] font-medium text-[#9CA3AF]">{t('sell')}</span>
         </div>
 
         {/* Messages */}
@@ -95,7 +95,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
             <MessageCircle className="size-5" strokeWidth={activeChat ? 2.5 : 1.75} />
             {userId && <SidebarUnreadBadge userId={userId} type="messages" />}
           </span>
-          <span>Messages</span>
+          <span>{t('messages')}</span>
         </Link>
 
         {/* Profile */}
@@ -106,7 +106,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
           <span className={pillCls(activeProfile)}>
             <User className="size-5" strokeWidth={activeProfile ? 2.5 : 1.75} />
           </span>
-          <span>Profile</span>
+          <span>{t('profile')}</span>
         </Link>
 
       </div>

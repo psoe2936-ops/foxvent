@@ -31,8 +31,8 @@ export function CategoriesPanel({
   sort,
 }: CategoriesPanelProps & { sort?: string }) {
   return (
-    <section className="rounded-2xl border border-white/40 bg-white/60 p-4 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-      <h2 className="text-sm font-semibold text-[#2D2E32]">Categories</h2>
+    <section className="glass-card rounded-3xl p-4">
+      <h2 className="text-sm font-semibold text-slate-950 dark:text-white">Categories</h2>
 
       <ul className="mt-3 space-y-1">
         {categories.map((cat) => {
@@ -41,10 +41,10 @@ export function CategoriesPanel({
             <li key={cat.id}>
               <Link
                 href={categoryHref(cat.id, searchQuery, sort)}
-                className={`flex items-center gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors ${
+                className={`apple-press flex items-center gap-2.5 rounded-2xl px-2.5 py-2 text-sm transition-colors ${
                   isActive
-                    ? 'bg-[#FEF3E2] font-medium text-[#F36D21]'
-                    : 'text-[#2D2E32] hover:bg-[#F9FAFB]'
+                    ? 'bg-orange-500/10 font-medium text-[var(--apple-orange)]'
+                    : 'text-slate-950 hover:bg-white/55 dark:text-white dark:hover:bg-white/10'
                 }`}
               >
                 <span className="text-base" aria-hidden>

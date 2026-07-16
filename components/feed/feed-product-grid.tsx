@@ -48,8 +48,8 @@ export async function FeedProductGrid({
   basePath?: string
 }) {
   const { category, q, sort: sortParam, minPrice, maxPrice, condition, hideSold } = searchParams
-  const sort: SortOption =
-    sortParam === 'price_asc' || sortParam === 'price_desc' ? sortParam : 'newest'
+   type SortOption = 'newest' | 'popular' | 'price_asc' | 'price_desc'
+const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'||  sortParam === 'popular' ? sortParam : 'newest'
   const conditionArray = condition ? condition.split(',').filter(Boolean) : []
 
   const supabase = await createClient()
@@ -250,13 +250,15 @@ export async function FeedProductGrid({
     )
     .eq('status', 'approved')
 
-  if (sort === 'price_asc') {
-    query = query.order('is_sold', { ascending: true }).order('price', { ascending: true })
-  } else if (sort === 'price_desc') {
-    query = query.order('is_sold', { ascending: true }).order('price', { ascending: false })
-  } else {
-    query = query.order('is_sold', { ascending: true }).order('created_at', { ascending: false })
-  }
+ if (sort === 'price_asc') {
+  query = query.order('price', { ascending: true })
+} else if (sort === 'price_desc') {
+  query = query.order('price', { ascending: false })
+} else if (sortParam === 'popular') {
+  query = query.order('views_count', { ascending: false })
+} else {
+  query = query.order('created_at', { ascending: false })
+}
 
   // Auto-match category name from search term (e.g. "Electronics" → select that category)
   let effectiveCategory = category

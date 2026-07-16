@@ -3,15 +3,14 @@
 import { HoverEdgeScroll } from '@/components/feed/hover-edge-scroll'
 import { buildMarketplaceHref } from '@/lib/marketplace-url'
 
-type SortOption = 'newest' | 'price_asc' | 'price_desc'
+type SortOption = 'newest' | 'popular' | 'price_asc' | 'price_desc'
 
 const SORT_TABS: {
-  id: SortOption | 'popular'
+  id: SortOption
   label: string
-  disabled?: boolean
 }[] = [
   { id: 'newest', label: 'Newest' },
-  { id: 'popular', label: 'Popular', disabled: true },
+  { id: 'popular', label: 'Popular' },
   { id: 'price_asc', label: 'Price: Low to High' },
   { id: 'price_desc', label: 'Price: High to Low' },
 ]
@@ -27,21 +26,8 @@ export function SortTabs({ sort, filterParams, basePath = '/' }: SortTabsProps) 
     <HoverEdgeScroll className="min-w-0 flex-1 cursor-default">
       <div className="flex w-max gap-6">
         {SORT_TABS.map((tab) => {
-          const isActive = !tab.disabled && tab.id === sort
-          if (tab.disabled) {
-            return (
-              <span
-                key={tab.id}
-                className="flex shrink-0 cursor-not-allowed items-center gap-1.5 pb-4 text-sm text-[#D1D5DB]"
-                title="Coming soon"
-              >
-                {tab.label}
-                <span className="rounded bg-[#F3F4F6] px-1.5 py-px text-[9px] font-semibold uppercase text-[#9CA3AF]">
-                  Soon
-                </span>
-              </span>
-            )
-          }
+          const isActive = tab.id === sort
+          
           return (
             <a
               key={tab.id}

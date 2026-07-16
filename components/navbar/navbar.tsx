@@ -4,6 +4,7 @@ import { Menu, Search, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import {
   Bell,
   Heart,
@@ -14,6 +15,7 @@ import {
   Users,
 } from 'lucide-react'
 import { Logo } from '@/components/navbar/logo'
+import { LanguageSwitcher } from '@/components/language-switcher'
 import { ProfileBlock } from '@/components/navbar/profile-block'
 import { SearchBar } from '@/components/navbar/search-bar'
 import { SellButton } from '@/components/navbar/sell-button'
@@ -37,17 +39,10 @@ type NavbarProps = {
   categories?: Category[]
 }
 
-const DRAWER_LINKS = [
-  { href: '/feed', label: 'Home', Icon: Home },
-  { href: '/feed/wishlist', label: 'Wishlist', Icon: Heart },
-  { href: '/feed/listings', label: 'My Listings', Icon: Store },
-  { href: '/feed/following', label: 'Following', Icon: Users },
-  { href: '/chat', label: 'Messages', Icon: MessageCircle, badge: 'messages' as const },
-  { href: '/feed/notifications', label: 'Notifications', Icon: Bell, badge: 'notifications' as const },
-  { href: '/settings', label: 'Settings', Icon: Settings },
-]
-
 export function Navbar({ user, profile, categories = [] }: NavbarProps) {
+  const t = useTranslations('sidebar')
+  const tNav = useTranslations('navbar')
+
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
@@ -56,6 +51,17 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
   const searchParams = useSearchParams()
   const router = useRouter()
+
+  // Build drawer links dynamically using translations
+  const DRAWER_LINKS = [
+    { href: '/feed', label: t('home'), Icon: Home },
+    { href: '/feed/wishlist', label: t('wishlist'), Icon: Heart },
+    { href: '/feed/listings', label: t('myListings'), Icon: Store },
+    { href: '/feed/following', label: t('following'), Icon: Users },
+    { href: '/chat', label: t('messages'), Icon: MessageCircle, badge: 'messages' as const },
+    { href: '/feed/notifications', label: t('notifications'), Icon: Bell, badge: 'notifications' as const },
+    { href: '/settings', label: t('settings'), Icon: Settings },
+  ]
 
   useEffect(() => {
     if (searchParams.get('login') === '1') {
@@ -70,7 +76,6 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
     }
   }, [searchParams, router])
 
-  // Close drawer on escape key
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === 'Escape') setDrawerOpen(false)
@@ -79,7 +84,6 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
     return () => window.removeEventListener('keydown', onKey)
   }, [drawerOpen])
 
-  // Prevent body scroll when drawer is open
   useEffect(() => {
     document.body.style.overflow = drawerOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
@@ -103,16 +107,14 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
           className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 sm:h-16 sm:gap-4 sm:px-6"
           aria-label="Main navigation"
         >
-          {/* Left: logo + hamburger (mobile) */}
+          {/* Left: logo + hamburger */}
           <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
             <Logo
               iconClassName="size-9"
               textClassName="hidden text-lg sm:inline sm:text-[1.35rem]"
             />
-            {/* Hamburger — mobile only */}
             <button
-              type="button"
-              aria-label="Open menu"
+              type="button"aria-label="Open menu"
               onClick={() => setDrawerOpen(true)}
               className="inline-flex size-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#2D2E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30 lg:hidden"
             >
@@ -127,10 +129,9 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
           {/* Right actions */}
           <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3">
-            {/* Mobile: search icon button */}
             <button
               type="button"
-              aria-label="Search"
+              aria-label={tNav('searchPlaceholder')}
               onClick={() => setMobileSearchOpen((prev) => !prev)}
               className="inline-flex size-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#2D2E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30 md:hidden"
             >
@@ -145,6 +146,8 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
             {isLoggedIn && user && <UtilityIcons userId={user.id} />}
 
+            <LanguageSwitcher userId={user?.id ?? null} />
+
             {isLoggedIn ? (
               <ProfileBlock profile={profile} className="hidden md:flex" />
             ) : (
@@ -153,7 +156,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
           </div>
         </nav>
 
-        {/* Mobile search bar (expands below navbar) */}
+        {/* Mobile search bar */}
         {mobileSearchOpen && (
           <div className="border-t border-[#E5E7EB] px-4 py-3 md:hidden">
             <SearchBar categories={categories} />
@@ -161,7 +164,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
         )}
       </header>
 
-      {/* Mobile drawer overlay */}
+      {/* Mobile drawer */}
       {drawerOpen && (
         <>
           <div
@@ -170,7 +173,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             aria-hidden="true"
           />
           <aside className="fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-white/60 bg-white/80 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 lg:hidden">
-            {/* Drawer header: user info */}
+            {/* Drawer header */}
             <div className="flex items-center justify-between border-b border-[#E5E7EB] px-4 py-4">
               {isLoggedIn ? (
                 <div className="flex items-center gap-3">
@@ -205,8 +208,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             </div>
 
             {/* Nav links */}
-            <nav className="flex-1 overflow-y-auto px-2 py-3">
-              {isLoggedIn ? (
+            <nav className="flex-1 overflow-y-auto px-2 py-3">{isLoggedIn ? (
                 DRAWER_LINKS.map(({ href, label, Icon, badge }) => (
                   <Link
                     key={href}
@@ -225,16 +227,20 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                 ))
               ) : (
                 <>
-                  <Link href="/feed" onClick={() => setDrawerOpen(false)} className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]">
+                  <Link
+                    href="/feed"
+                    onClick={() => setDrawerOpen(false)}
+                    className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]"
+                  >
                     <Home className="size-5" strokeWidth={1.75} />
-                    Browse listings
+                    {t('home')}
                   </Link>
                   <button
                     type="button"
                     onClick={() => { setDrawerOpen(false); openModal('login') }}
                     className="flex w-full min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#F36D21] hover:bg-[#FEF3E2]"
                   >
-                    Log in
+                    {tNav('logIn') ?? 'Log in'}
                   </button>
                 </>
               )}
@@ -248,7 +254,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                   onClick={() => setDrawerOpen(false)}
                   className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]"
                 >
-                  View my profile
+                  {tNav('viewMyProfile') ?? 'View my profile'}
                 </Link>
               </div>
             )}
