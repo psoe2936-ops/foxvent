@@ -10,7 +10,7 @@ export function PasswordResetButton({ email }: { email: string }) {
   async function handleReset() {
     setStatus('loading')
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/callback?next=/settings`,
+      redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
     })
     setStatus(error ? 'error' : 'sent')
   }
