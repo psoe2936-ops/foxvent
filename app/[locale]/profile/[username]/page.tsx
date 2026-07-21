@@ -16,6 +16,8 @@ import { FeedSidebar } from '@/components/feed/sidebar'
 import { SellPromoCard } from '@/components/feed/sell-promo-card'
 import { HelpPromoCard } from '@/components/feed/help-promo-card'
 import { UserSafetyMenu } from '@/components/users/user-safety-menu'
+import { MessageCircle } from 'lucide-react'
+import { MessageButton } from '@/components/profile/message-button'
 
 type ReviewRow = {
   id: string
@@ -168,7 +170,14 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                 {isOwner ? (
                   <EditProfileModal profile={profile} />
                 ) : (
+
                   <>
+                  {viewer && (
+                    <MessageButton 
+                      viewerId={viewer.id}
+                      profileId={profile.id}
+                     />
+                  )}
                     <FollowButton
                       targetUserId={profile.id}
                       viewerId={viewer?.id ?? null}
