@@ -128,16 +128,7 @@ export default async function SettingsPage() {
         <SettingsDivider />
         <SettingsLinkRow icon={<Shield className="size-4" />} label="Block list" href="/settings/blocked" />
         <SettingsDivider />
-        <SettingsRow icon={<Database className="size-4" />} label="Download my data">
-          <button
-            type="button"
-            disabled
-            className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#9CA3AF]"
-            title="Feature coming soon"
-          >
-            Coming soon
-          </button>
-        </SettingsRow>
+       
       </SettingsGroup>
 
       {/* Group 5 — Support */}
