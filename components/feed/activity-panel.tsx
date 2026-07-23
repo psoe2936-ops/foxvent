@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { AlertTriangle, Bell, CheckCircle2, Lock, MessageCircle, UserPlus } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/format-relative-time'
 import { NotificationItem } from '@/components/notifications/notification-item'
@@ -36,24 +37,33 @@ const TYPE_CONFIG: Record<string, { Icon: React.ElementType; colorClass: string 
   },
 }
 
-export function ActivityPanel({
+export async function ActivityPanel({
   notifications,
   isLoggedIn,
 }: {
   notifications: ActivityNotification[]
   isLoggedIn: boolean
 }) {
+  const t = await getTranslations('feed')
+  const tNotif = await getTranslations('notifications')
+
   return (
     <section className="rounded-xl border border-white/40 bg-white/60 p-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl">
-      <h2 className="text-sm font-semibold text-[#1F2937]">Recent Activity</h2>
+      <h2 className="text-sm font-semibold text-[#1F2937]">
+        {t('recentActivity')}
+      </h2>
 
       {!isLoggedIn ? (
         <div className="mt-4 flex flex-col items-center gap-2 py-4 text-center">
           <Lock className="size-5 text-[#D1D5DB]" />
-          <p className="text-[13px] text-[#9CA3AF]">Sign in to see your activity</p>
+          <p className="text-[13px] text-[#9CA3AF]">
+            Sign in to see your activity
+          </p>
         </div>
       ) : notifications.length === 0 ? (
-        <p className="mt-4 text-[13px] text-[#9CA3AF]">Nothing here yet.</p>
+        <p className="mt-4 text-[13px] text-[#9CA3AF]">
+          {tNotif('allCaughtUp')}
+        </p>
       ) : (
         <>
           <ul className="mt-3 space-y-0.5">

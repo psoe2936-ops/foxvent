@@ -1,9 +1,11 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { FoxIcon } from '@/components/navbar/fox-icon'
 
 export async function SellPromoCard() {
   const supabase = await createClient()
+  const t = await getTranslations('feed')
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -25,16 +27,16 @@ export async function SellPromoCard() {
       <div className="flex flex-col items-center px-2 py-2 text-center">
         <FoxIcon className="size-10" />
         <p className="mt-3 text-sm font-semibold text-[#1F2937]">
-          List in minutes
+          {t('listInMinutes')}
         </p>
         <p className="mt-1.5 text-xs text-[#9CA3AF]">
-          Sell to your community.
+          {t('sellToCommunity')}
         </p>
         <Link
           href={href}
           className="mt-4 w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
-          Start Selling
+          {t('startSelling') ?? 'Start Selling'}
         </Link>
       </div>
     </section>

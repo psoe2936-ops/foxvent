@@ -57,7 +57,8 @@
     "noListingsFound": "No listings found",
     "tryDifferentSearch": "Try a different search or category",
     "clearFilters": "Clear filters",
-    "mostPopular": "Most popular"
+    "mostPopular": "Most popular",
+    "startSelling":"Start Selling"
   },
   "categories": {
     "all": "All",

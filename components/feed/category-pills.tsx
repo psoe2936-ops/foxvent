@@ -1,3 +1,5 @@
+import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { buildMarketplaceHref, type MarketplaceFilterParams } from '@/lib/marketplace-url'
 import { HoverEdgeScroll } from '@/components/feed/hover-edge-scroll'
 
@@ -16,7 +18,7 @@ type CategoryPillsProps = {
   totalCount?: number
 }
 
-export function CategoryPills({
+export async function CategoryPills({
   categories,
   activeCategory,
   filterParams,
@@ -24,10 +26,12 @@ export function CategoryPills({
   categoryCounts,
   totalCount,
 }: CategoryPillsProps) {
+  const t = await getTranslations('categories')
+
   return (
     <HoverEdgeScroll className="-mx-1 px-1 pb-0.5">
       <div className="flex w-max gap-2">
-        <a
+        <Link
           href={buildMarketplaceHref(filterParams, { category: undefined }, basePath)}
           className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
             !activeCategory
@@ -35,13 +39,19 @@ export function CategoryPills({
               : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:border-[#D1D5DB] hover:bg-white'
           }`}
         >
-          All{typeof totalCount === 'number' && <span className="ml-1 font-normal opacity-70">({totalCount})</span>}
-        </a>
+          {t('all')}
+          {typeof totalCount === 'number' && (
+            <span className="ml-1 font-normal opacity-70">({totalCount})</span>
+          )}
+        </Link>
+
         {categories.map((cat) => {
           const isActive = activeCategory === cat.id
           const count = categoryCounts?.[cat.id]
+          const catKey = cat.name.toLowerCase()
+
           return (
-            <a
+            <Link
               key={cat.id}
               href={buildMarketplaceHref(filterParams, { category: cat.id }, basePath)}
               className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
@@ -50,9 +60,11 @@ export function CategoryPills({
                   : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:border-[#D1D5DB] hover:bg-white'
               }`}
             >
-              {cat.name}
-              {typeof count === 'number' && <span className="ml-1 font-normal opacity-70">({count})</span>}
-            </a>
+              {t.has(catKey) ? t(catKey as any) : cat.name}
+              {typeof count === 'number' && (
+                <span className="ml-1 font-normal opacity-70">({count})</span>
+              )}
+            </Link>
           )
         })}
       </div>
