@@ -1,0 +1,1 @@
+export {default} from '@/app/[locale]/auth/reset-password/page'
