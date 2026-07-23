@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { WishlistHeart } from '@/components/feed/wishlist-heart'
 import { formatRelativeTime } from '@/lib/format-relative-time'
 import { StarRatingDisplay } from '@/components/reviews/star-rating-display'
@@ -45,6 +48,8 @@ export function ProductCard({
   sellerRating = null,
   sellerReviewCount = 0,
 }: ProductCardProps) {
+  const t = useTranslations('product')
+
   const badgeStyle =
     CONDITION_STYLES[conditionKey] ??
     'bg-gray-50 text-gray-600 ring-gray-500/20'
@@ -74,7 +79,7 @@ export function ProductCard({
         </span>
         {isSold && (
           <span className="absolute right-2.5 top-2.5 rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-            Sold
+            {t('sold')}
           </span>
         )}
         <WishlistHeart productId={id} initialSaved={initialSaved} />
@@ -113,13 +118,12 @@ export function ProductCard({
             <span className="min-w-0 truncate text-xs font-medium text-[#4B5563]">
               @{sellerUsername}
             </span>
-            {sellerRating !== null && sellerReviewCount > 0 ? (
-              <span className="ml-auto shrink-0">
+            {sellerRating !== null && sellerReviewCount > 0 ? (<span className="ml-auto shrink-0">
                 <StarRatingDisplay rating={sellerRating} size="sm" showNumber />
               </span>
             ) : isFollowingSeller ? (
               <span className="ml-auto shrink-0 rounded-full bg-[#FEF3E2] px-1.5 py-0.5 text-[10px] font-medium text-[#F36D21]">
-                Following
+                {t('following') ?? 'Following'}
               </span>
             ) : null}
           </div>
