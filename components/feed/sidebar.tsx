@@ -150,13 +150,13 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
       {/* CTA card */}
       <div className="mt-8 rounded-xl bg-gradient-to-br from-[#FEF3E2] to-[#FDE8D4] p-6">
         <div className="flex justify-center">
-          <Image
-            src="/fox-welcome.png"
+          {/*<Image
+            src="/welcome.png(1).png"
             alt="FoxVent mascot"
             width={80}
             height={80}
             className="size-12 object-contain"
-          />
+          />*/}
         </div>
         <p className="mt-3 text-center text-sm font-semibold leading-snug text-[#1F2937]">
           {t('shopSmartTitle')}
