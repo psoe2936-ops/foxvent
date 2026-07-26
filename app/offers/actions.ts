@@ -9,6 +9,7 @@ export type Offer = {
   conversation_id: string
   buyer_id: string
   seller_id: string
+  sender_id: string
   amount: number
   status: 'pending' | 'accepted' | 'rejected' | 'countered' | 'expired'
   parent_offer_id: string | null
@@ -52,6 +53,7 @@ export async function makeOffer(data: {
       conversation_id: data.conversationId,
       buyer_id: user.id,
       seller_id: conv.seller_id,
+      sender_id: user.id, // buyer always sends the root offer
       amount,
       status: 'pending',
     })
@@ -79,12 +81,19 @@ export async function respondToOffer(data: {
 
   const { data: offer } = await supabase
     .from('offers')
-    .select('id, seller_id, buyer_id, conversation_id, product_id, status')
+    .select('id, seller_id, buyer_id, sender_id, conversation_id, product_id, status')
     .eq('id', data.offerId)
     .single()
 
   if (!offer) return { error: 'Offer not found.' }
-  if (offer.seller_id !== user.id) return { error: 'Not authorized.' }
+
+  // Must be one of the two parties on this deal...
+  const isParticipant = offer.buyer_id === user.id || offer.seller_id === user.id
+  if (!isParticipant) return { error: 'Not authorized.' }
+
+  // ...and must NOT be the one who sent this offer — you can't accept/reject/counter your own offer.
+  if (offer.sender_id === user.id) return { error: 'Not authorized.' }
+
   if (offer.status !== 'pending') return { error: 'This offer is no longer pending.' }
 
   const now = new Date().toISOString()
@@ -105,6 +114,7 @@ export async function respondToOffer(data: {
       conversation_id: offer.conversation_id,
       buyer_id: offer.buyer_id,
       seller_id: offer.seller_id,
+      sender_id: user.id, // whoever is countering right now
       amount: counterAmount,
       status: 'pending',
       parent_offer_id: data.offerId,

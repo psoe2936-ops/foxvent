@@ -73,7 +73,7 @@ export default async function ChatPage({ params, searchParams }: ChatPageProps) 
       .order('created_at', { ascending: true }),
     supabase
       .from('offers')
-      .select('id, product_id, conversation_id, buyer_id, seller_id, amount, status, parent_offer_id, created_at, responded_at')
+      .select('id, product_id, conversation_id, buyer_id, seller_id, sender_id, amount, status, parent_offer_id, created_at, responded_at')
       .eq('conversation_id', id)
       .order('created_at', { ascending: true }),
     otherPerson

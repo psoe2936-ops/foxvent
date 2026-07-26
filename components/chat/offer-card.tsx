@@ -28,13 +28,17 @@ export function OfferCard({
   currentUserId: string
   onUpdate: (updated: Offer) => void
 }) {
-  const isSeller = offer.seller_id === currentUserId
   const isCounterOffer = offer.parent_offer_id !== null
-  // From the buyer's perspective (initial offer) or seller's (counter)
-  const isMine = isCounterOffer ? isSeller : !isSeller
 
-  // Seller can respond to a pending initial offer from buyer
-  const canRespond = isSeller && offer.status === 'pending' && !isCounterOffer
+  // Who sent this offer? Use sender_id if available, 
+  // fallback to buyer_id for initial offers
+  const senderId = offer.sender_id ?? offer.buyer_id
+
+  // I sent this offer if I am the sender
+  const iMadethisOffer = senderId === currentUserId
+
+  // I can respond if: I did NOT send this offer AND it's pending
+  const canRespond = !iMadethisOffer && offer.status === 'pending'
 
   const [mode, setMode] = useState<'view' | 'counter'>('view')
   const [counterAmount, setCounterAmount] = useState('')
@@ -53,7 +57,6 @@ export function OfferCard({
         setError(result.error)
         return
       }
-      // Optimistically update local status; realtime will confirm
       onUpdate({
         ...offer,
         status: action === 'countered' ? 'countered' : action,
@@ -65,8 +68,8 @@ export function OfferCard({
   }
 
   return (
-    <div className={`flex flex-col ${isMine ? 'items-end' : 'items-start'} my-1`}>
-      <div className="w-64 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
+    <div className={`flex flex-col ${iMadethisOffer ? 'items-end' : 'items-start'} my-1`}>
+      <div className="w-64 rounded-2xl border-2 border-[#F36D21] bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
             {isCounterOffer ? 'Counter offer' : 'Offer'}
@@ -82,6 +85,12 @@ export function OfferCard({
           MMK {offer.amount.toLocaleString()}
         </p>
 
+        {/* Show who is waiting */}
+        {offer.status === 'pending' && iMadethisOffer && (
+          <p className="mt-2 text-xs text-[#9CA3AF]">Waiting for response...</p>
+        )}
+
+        {/* Accept / Counter / Reject buttons for the responder */}
         {canRespond && mode === 'view' && (
           <div className="mt-3 flex gap-2">
             <button
@@ -111,6 +120,7 @@ export function OfferCard({
           </div>
         )}
 
+        {/* Counter input */}
         {canRespond && mode === 'counter' && (
           <div className="mt-3">
             <div className="relative">
@@ -118,10 +128,13 @@ export function OfferCard({
                 MMK
               </span>
               <input
-                type="number"
-                min="1"
+                type="text"
+                inputMode="numeric"
                 value={counterAmount}
-                onChange={(e) => { setCounterAmount(e.target.value); setError(null) }}
+                onChange={(e) => {
+                  setCounterAmount(e.target.value.replace(/[^0-9]/g, ''))
+                  setError(null)
+                }}
                 placeholder="Counter amount"
                 className="w-full rounded-lg border border-[#E5E7EB] py-2 pl-12 pr-3 text-sm outline-none focus:border-[#F36D21]"
               />
@@ -150,6 +163,18 @@ export function OfferCard({
 
         {error && mode === 'view' && (
           <p className="mt-2 text-xs text-[#C0392B]">{error}</p>
+        )}
+
+        {/* Accepted state */}
+        {offer.status === 'accepted' && (
+          <p className="mt-2 text-xs font-medium text-[#1A7A4A]">
+            ✓ Offer accepted! Coordinate your meetup in chat.
+          </p>
+        )}
+
+        {/* Rejected state */}
+        {offer.status === 'rejected' && (
+          <p className="mt-2 text-xs text-[#9CA3AF]">Offer declined.</p>
         )}
       </div>
     </div>
