@@ -35,7 +35,7 @@ export function AdminProductFilters({
       <select
         value={currentCategory}
         onChange={(e) => navigate('category', e.target.value)}
-        className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#2D2E32] focus:border-[#F36D21] focus:outline-none"
+        className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#1F2937] focus:border-[#F36D21] focus:outline-none"
       >
         <option value="">All categories</option>
         {categories.map((c) => (
@@ -48,7 +48,7 @@ export function AdminProductFilters({
       <select
         value={currentSort}
         onChange={(e) => navigate('sort', e.target.value)}
-        className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#2D2E32] focus:border-[#F36D21] focus:outline-none"
+        className="rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm text-[#1F2937] focus:border-[#F36D21] focus:outline-none"
       >
         <option value="newest">Newest first</option>
         <option value="oldest">Oldest first</option>

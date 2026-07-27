@@ -13,6 +13,7 @@ import {
   Smartphone,
   User,
 } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { LogoutButton } from '@/components/settings/logout-button'
 import { PasswordResetButton } from '@/components/settings/password-reset-button'
@@ -20,6 +21,10 @@ import { DeleteAccountModal } from '@/components/settings/delete-account-modal'
 import { NotificationToggles } from '@/components/settings/notification-toggles'
 
 export default async function SettingsPage() {
+  const t = await getTranslations('settings')
+  const tAuth = await getTranslations('auth')
+  const tChat = await getTranslations('chat')
+  const tNotif = await getTranslations('notifications')
   const supabase = await createClient()
 
   const {
@@ -68,7 +73,7 @@ export default async function SettingsPage() {
 
   return (
     <main className="mx-auto max-w-2xl px-4 py-6 pb-24 sm:px-6 md:pb-8">
-      <h1 className="mb-5 text-xl font-bold text-[#1F2937]">Settings</h1>
+      <h1 className="mb-5 text-xl font-bold text-[#1F2937]">{t('title')}</h1>
 
       {/* Group 1 — Profile card */}
       <div className="mb-4 flex items-center gap-4 rounded-2xl border border-[#E5E7EB] bg-white p-4 shadow-sm">
@@ -95,57 +100,57 @@ export default async function SettingsPage() {
           href={`/profile/${profile?.username}`}
           className="shrink-0 rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#4B5563] hover:bg-[#F9FAFB]"
         >
-          View profile
+          {tChat('viewProfile')}
         </Link>
       </div>
 
       {/* Group 2 — Account */}
-      <SettingsGroup label="Account">
-        <SettingsRow icon={<Mail className="size-4" />} label="Email">
+      <SettingsGroup label={t('accountGroup')}>
+        <SettingsRow icon={<Mail className="size-4" />} label={tAuth('email')}>
           <span className="text-sm text-[#9CA3AF]">{user.email}</span>
-          <span className="ml-2 rounded bg-[#F3F4F6] px-1.5 py-0.5 text-[10px] text-[#9CA3AF]">Read-only</span>
+          <span className="ml-2 rounded bg-[#F3F4F6] px-1.5 py-0.5 text-[10px] text-[#9CA3AF]">{t('readOnly')}</span>
         </SettingsRow>
         <SettingsDivider />
-        <SettingsRow icon={<User className="size-4" />} label="Username">
+        <SettingsRow icon={<User className="size-4" />} label={tAuth('username')}>
           <span className="text-sm text-[#6B7280]">@{profile?.username}</span>
         </SettingsRow>
         <SettingsDivider />
-        <SettingsRow icon={<KeyRound className="size-4" />} label="Password">
+        <SettingsRow icon={<KeyRound className="size-4" />} label={tAuth('password')}>
           <PasswordResetButton email={user.email!} />
         </SettingsRow>
       </SettingsGroup>
 
       {/* Group 3 — Notifications */}
-      <SettingsGroup label="Notifications">
+      <SettingsGroup label={tNotif('title')}>
         <NotificationToggles initialPreferences={notificationPreferences} userId={user.id} />
       </SettingsGroup>
 
       {/* Group 4 — Privacy & Security */}
-      <SettingsGroup label="Privacy & Security">
-        <SettingsRow icon={<Smartphone className="size-4" />} label="Active sessions">
-          <span className="text-sm text-[#9CA3AF]">Current device</span>
+      <SettingsGroup label={t('privacySecurityGroup')}>
+        <SettingsRow icon={<Smartphone className="size-4" />} label={t('activeSessions')}>
+          <span className="text-sm text-[#9CA3AF]">{t('currentDevice')}</span>
         </SettingsRow>
         <SettingsDivider />
-        <SettingsLinkRow icon={<Shield className="size-4" />} label="Block list" href="/settings/blocked" />
+        <SettingsLinkRow icon={<Shield className="size-4" />} label={t('blockList')} href="/settings/blocked" />
         <SettingsDivider />
-       
+
       </SettingsGroup>
 
       {/* Group 5 — Support */}
-      <SettingsGroup label="Support">
-        <SettingsLinkRow icon={<HelpCircle className="size-4" />} label="Help & FAQ" href="/about" />
+      <SettingsGroup label={t('supportGroup')}>
+        <SettingsLinkRow icon={<HelpCircle className="size-4" />} label={t('helpFaq')} href="/about" />
         <SettingsDivider />
-        <SettingsLinkRow icon={<MessageCircle className="size-4" />} label="Report a problem" href="/about" />
+        <SettingsLinkRow icon={<MessageCircle className="size-4" />} label={t('reportProblem')} href="/about" />
         <SettingsDivider />
-        <SettingsLinkRow icon={<Lock className="size-4" />} label="Terms of Service" href="/terms" />
+        <SettingsLinkRow icon={<Lock className="size-4" />} label={t('termsOfService')} href="/terms" />
         <SettingsDivider />
-        <SettingsLinkRow icon={<ShieldAlert className="size-4" />} label="Privacy Policy" href="/privacy" />
+        <SettingsLinkRow icon={<ShieldAlert className="size-4" />} label={t('privacyPolicy')} href="/privacy" />
       </SettingsGroup>
 
       {/* Group 6 — Danger zone */}
       <div className="rounded-2xl border border-[#FDEDEC] bg-white shadow-sm">
         <p className="border-b border-[#FDEDEC] px-4 pt-4 pb-2 text-[11px] font-semibold uppercase tracking-wide text-[#C0392B]">
-          Danger zone
+          {t('dangerZone')}
         </p>
         <div className="p-4">
           <LogoutButton />

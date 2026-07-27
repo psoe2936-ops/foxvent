@@ -13,6 +13,7 @@ import AgoraRTC, {
   LocalVideoTrack,
 } from 'agora-rtc-react'
 import { Mic, MicOff, Video, VideoOff, PhoneOff, Volume2, SwitchCamera } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 const APP_ID = process.env.NEXT_PUBLIC_AGORA_APP_ID!
@@ -24,6 +25,8 @@ type CallUIProps = {
 }
 
 function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
+  const t = useTranslations('call')
+  const tCommon = useTranslations('common')
   const [token, setToken] = useState<string | null>(null)
   const [tokenError, setTokenError] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
@@ -182,7 +185,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
       <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black">
         <div className="text-center text-white">
           <div className="mx-auto mb-3 size-8 animate-spin rounded-full border-2 border-white border-t-transparent" />
-          <p className="text-sm">Connecting...</p>
+          <p className="text-sm">{t('connecting')}</p>
         </div>
       </div>
     )
@@ -192,15 +195,15 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
   if (tokenError) {
     return (
       <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-3 bg-black text-white">
-        <p className="text-sm">Failed to connect. Please try again.</p>
+        <p className="text-sm">{t('failedToConnect')}</p>
         <button
           onClick={() => { setToken(null); setRetryCount((c) => c + 1) }}
           className="rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
         >
-          Retry
+          {t('retry')}
         </button>
         <button onClick={onEnd} className="text-sm text-[#9CA3AF] hover:text-white">
-          Cancel
+          {tCommon('cancel')}
         </button>
       </div>
     )
@@ -208,8 +211,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
 
   // ── Camera / mic permission denied ──────────────────────────────────────────
   if (camError || micError) {
-    const label =
-      camError && micError ? 'Camera and microphone' : camError ? 'Camera' : 'Microphone'
+    const label = camError && micError ? t('cameraAndMic') : camError ? t('camera') : t('microphone')
 
     return (
       <div className="fixed inset-0 z-[60] flex flex-col items-center justify-center gap-4 bg-black px-6 text-center text-white">
@@ -217,16 +219,16 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           <VideoOff className="size-8 text-[#C0392B]" />
         </div>
         <div>
-          <p className="text-base font-semibold">{label} access denied</p>
+          <p className="text-base font-semibold">{t('accessDenied', { device: label })}</p>
           <p className="mt-2 max-w-xs text-sm text-[#9CA3AF]">
-            Please allow access in your browser settings and reload the page to try again.
+            {t('allowAccessInstructions')}
           </p>
         </div>
         <button
           onClick={onEnd}
           className="mt-2 rounded-lg border border-[#444] px-5 py-2 text-sm text-[#9CA3AF] hover:bg-[#1a1a1a] hover:text-white"
         >
-          Leave call
+          {t('leaveCall')}
         </button>
       </div>
     )
@@ -277,7 +279,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
       {/* === TOP GRADIENT + STATUS TEXT === */}
       <div className="pointer-events-none absolute inset-x-0 top-0 bg-gradient-to-b from-black/60 to-transparent pb-10 pt-12 px-5">
         {remoteUsers.length === 0 && (
-          <p className="text-sm text-white/80">Waiting for other person to join…</p>
+          <p className="text-sm text-white/80">{t('waitingForOtherPerson')}</p>
         )}
       </div>
 
@@ -308,7 +310,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
       {isDeviceLoading && (
         <div className="absolute left-3 top-24 z-10 flex items-center gap-2 rounded-lg bg-black/60 px-3 py-1.5 backdrop-blur-sm">
           <div className="size-3 animate-spin rounded-full border border-white border-t-transparent" />
-          <span className="text-xs text-white">Waiting for camera/microphone…</span>
+          <span className="text-xs text-white">{t('waitingForDevices')}</span>
         </div>
       )}
 
@@ -320,7 +322,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
             className="flex items-center gap-2 rounded-2xl bg-black/70 px-6 py-4 text-white backdrop-blur-sm"
           >
             <Volume2 className="size-6 text-[#F36D21]" />
-            <span className="text-sm font-semibold">Tap to enable audio</span>
+            <span className="text-sm font-semibold">{t('tapToEnableAudio')}</span>
           </button>
         </div>
       )}
@@ -336,7 +338,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
             <button
               onClick={handleFlipCamera}
               disabled={!camOn}
-              aria-label="Flip camera"
+              aria-label={t('flipCamera')}
               className="flex size-14 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-lg border border-white/10 disabled:opacity-40"
             >
               <SwitchCamera className="size-6" />
@@ -346,7 +348,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           {/* Mic toggle */}
           <button
             onClick={handleToggleMic}
-            aria-label={micOn ? 'Mute' : 'Unmute'}
+            aria-label={micOn ? t('mute') : t('unmute')}
             className={`flex size-14 items-center justify-center rounded-full ${
               micOn ? 'bg-white/15 text-white backdrop-blur-lg border border-white/10' : 'bg-white text-black'
             }`}
@@ -357,7 +359,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           {/* End call — larger red button */}
           <button
             onClick={handleEndCall}
-            aria-label="End call"
+            aria-label={t('endCall')}
             className="flex size-16 items-center justify-center rounded-full bg-red-500 text-white shadow-lg"
           >
             <PhoneOff className="size-7" />
@@ -366,7 +368,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           {/* Camera toggle */}
           <button
             onClick={handleToggleCam}
-            aria-label={camOn ? 'Turn off camera' : 'Turn on camera'}
+            aria-label={camOn ? t('turnOffCamera') : t('turnOnCamera')}
             className={`flex size-14 items-center justify-center rounded-full ${
               camOn ? 'bg-white/15 text-white backdrop-blur-lg border border-white/10' : 'bg-white text-black'
             }`}
@@ -377,7 +379,7 @@ function CallUI({ conversationId, currentUserId, onEnd }: CallUIProps) {
           {/* Fix audio */}
           <button
             onClick={handleUnblockAudio}
-            aria-label="Fix audio"
+            aria-label={t('fixAudio')}
             className="flex size-14 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur-lg border border-white/10"
           >
             <Volume2 className="size-6" />

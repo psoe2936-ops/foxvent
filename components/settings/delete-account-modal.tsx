@@ -2,8 +2,11 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 export function DeleteAccountModal() {
+  const t = useTranslations('settings')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
 
   return (
@@ -13,7 +16,7 @@ export function DeleteAccountModal() {
         onClick={() => setOpen(true)}
         className="text-xs text-[#9CA3AF] underline underline-offset-2 hover:text-[#C0392B]"
       >
-        Delete account
+        {t('deleteAccount')}
       </button>
 
       {open && (
@@ -27,26 +30,24 @@ export function DeleteAccountModal() {
               type="button"
               onClick={() => setOpen(false)}
               className="absolute right-4 top-4 text-[#9CA3AF] hover:text-[#6B7280]"
-              aria-label="Close"
+              aria-label={tCommon('close')}
             >
               <X className="size-5" />
             </button>
 
-            <h2 className="text-base font-bold text-[#1F2937]">Delete account</h2>
+            <h2 className="text-base font-bold text-[#1F2937]">{t('deleteAccount')}</h2>
             <p className="mt-2 text-sm leading-relaxed text-[#6B7280]">
-              Account deletion is handled by our support team to protect your data
-              and active listings.
+              {t('accountDeletionHandled')}
             </p>
             <p className="mt-3 text-sm text-[#6B7280]">
-              Please email{' '}
+              {t('pleaseEmail')}{' '}
               <a
                 href="mailto:support@foxvent.com"
                 className="font-medium text-[#F36D21] hover:underline"
               >
                 support@foxvent.com
               </a>{' '}
-              from your registered address and we&apos;ll process your request within
-              48 hours.
+              {t('fromRegisteredAddress')}
             </p>
 
             <button
@@ -54,7 +55,7 @@ export function DeleteAccountModal() {
               onClick={() => setOpen(false)}
               className="mt-5 w-full rounded-xl bg-[#F3F4F6] py-2.5 text-sm font-medium text-[#4B5563] hover:bg-[#E5E7EB]"
             >
-              Got it
+              {t('gotIt')}
             </button>
           </div>
         </div>

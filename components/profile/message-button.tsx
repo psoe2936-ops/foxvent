@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { MessageCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { useRouter } from '@/i18n/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -11,6 +12,7 @@ type MessageButtonProps = {
 }
 
 export function MessageButton({ viewerId, profileId }: MessageButtonProps) {
+  const t = useTranslations('profile')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
   const supabase = createClient()
@@ -63,7 +65,7 @@ export function MessageButton({ viewerId, profileId }: MessageButtonProps) {
       className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F9FAFB] disabled:opacity-60"
     >
       <MessageCircle className="size-4" />
-      {loading ? 'Opening...' : 'Message'}
+      {loading ? t('opening') : t('message')}
     </button>
   )
 }

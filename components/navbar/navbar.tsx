@@ -105,7 +105,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
       <header className="sticky top-0 z-40 border-b border-white/50 bg-white/70 p-2 backdrop-blur-2xl backdrop-saturate-150 shadow-[0_8px_32px_rgba(0,0,0,0.08)] sm:p-3">
         <nav
           className="mx-auto flex h-14 max-w-7xl items-center gap-1 px-2 sm:h-16 sm:gap-4 sm:px-6"
-          aria-label="Main navigation"
+          aria-label={tNav('mainNavigation')}
         >
           {/* Left: logo + hamburger */}
           <div className="flex min-w-0 shrink-0 items-center gap-1 sm:gap-2">
@@ -114,7 +114,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
               textClassName="hidden text-lg sm:inline sm:text-[1.35rem]"
             />
             <button
-              type="button"aria-label="Open menu"
+              type="button" aria-label={tNav('openMenu')}
               onClick={() => setDrawerOpen(true)}
               className="inline-flex size-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#2D2E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30 lg:hidden"
             >
@@ -201,7 +201,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                 type="button"
                 onClick={() => setDrawerOpen(false)}
                 className="flex size-8 items-center justify-center rounded-lg text-[#9CA3AF] hover:bg-[#F3F4F6]"
-                aria-label="Close menu"
+                aria-label={tNav('closeMenu')}
               >
                 <X className="size-4" />
               </button>
@@ -240,7 +240,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                     onClick={() => { setDrawerOpen(false); openModal('login') }}
                     className="flex w-full min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#F36D21] hover:bg-[#FEF3E2]"
                   >
-                    {tNav('logIn') ?? 'Log in'}
+                    {tNav('logIn')}
                   </button>
                 </>
               )}
@@ -254,7 +254,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                   onClick={() => setDrawerOpen(false)}
                   className="flex min-h-11 w-full items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[#4B5563] hover:bg-[#F3F4F6]"
                 >
-                  {tNav('viewMyProfile') ?? 'View my profile'}
+                  {tNav('viewMyProfile')}
                 </Link>
               </div>
             )}

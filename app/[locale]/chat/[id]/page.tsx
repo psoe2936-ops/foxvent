@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { ChatThread } from '@/components/chat/chat-thread'
 import { FeedSidebar } from '@/components/feed/sidebar'
@@ -12,6 +13,7 @@ type ChatPageProps = {
 export default async function ChatPage({ params, searchParams }: ChatPageProps) {
   const { id } = await params
   const { call: callParam, offer: offerParam } = await searchParams
+  const t = await getTranslations('chat')
   const supabase = await createClient()
 
   const {
@@ -114,7 +116,7 @@ export default async function ChatPage({ params, searchParams }: ChatPageProps) 
         <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-75 shrink-0 flex-col overflow-y-auto border-l border-[#E8EAED] bg-[#F9FAFB] py-6 pl-4 pr-5 xl:flex xl:pr-6">
           {product ? (
             <section className="rounded-xl border border-[#E8EAED] bg-white p-5 shadow-sm">
-              <h2 className="text-sm font-semibold text-[#1F2937]">About this listing</h2>
+              <h2 className="text-sm font-semibold text-[#1F2937]">{t('aboutThisListing')}</h2>
               {product.images?.[0] && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
@@ -133,7 +135,7 @@ export default async function ChatPage({ params, searchParams }: ChatPageProps) 
                 href={`/products/${product.id}`}
                 className="mt-3 block w-full rounded-lg border border-[#F36D21] px-4 py-2 text-center text-xs font-semibold text-[#F36D21] hover:bg-[#FEF3E2]"
               >
-                View full listing
+                {t('viewFullListing')}
               </Link>
             </section>
           ) : null}

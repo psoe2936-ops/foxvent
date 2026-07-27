@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/toast'
 
@@ -21,6 +22,8 @@ export function FollowButton({
   followerCount,
   followsYouBack = false,
 }: Props) {
+  const t = useTranslations('profile')
+  const tCommon = useTranslations('common')
   const [following, setFollowing] = useState(initialFollowing)
   const [count, setCount] = useState(followerCount ?? 0)
   const [loading, setLoading] = useState(false)
@@ -60,7 +63,7 @@ export function FollowButton({
     } catch {
       setFollowing(!next)
       if (followerCount !== undefined) setCount((c) => (next ? c - 1 : c + 1))
-      showToast('Something went wrong. Please try again.', 'error')
+      showToast(tCommon('somethingWentWrong'), 'error')
     } finally {
       setLoading(false)
     }
@@ -80,20 +83,19 @@ export function FollowButton({
           }`}
         >
           {following && <Check className="size-3.5" strokeWidth={2.5} />}
-          {following ? 'Following' : 'Follow'}
+          {following ? t('unfollow') : t('follow')}
         </button>
 
         {followerCount !== undefined && (
           <span className="text-sm text-[#6B7280]">
-            <span className="font-semibold text-[#1F2937]">{count}</span>{' '}
-            follower{count !== 1 ? 's' : ''}
+            {t('followerCount', { count })}
           </span>
         )}
       </div>
 
       {followsYouBack && (
         <span className="rounded-full bg-[#F3F4F6] px-2 py-0.5 text-xs text-[#6B7280]">
-          Follows you back
+          {t('followsYouBack')}
         </span>
       )}
     </div>

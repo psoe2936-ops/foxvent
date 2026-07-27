@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 export function MessageSellerButton({
@@ -11,6 +12,7 @@ export function MessageSellerButton({
   productId: string
   sellerId: string
 }) {
+  const t = useTranslations('product')
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
@@ -73,7 +75,7 @@ export function MessageSellerButton({
       disabled={loading}
       className="w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-60"
     >
-      {loading ? 'Opening chat…' : 'Message seller'}
+      {loading ? t('openingChat') : t('messageSeller')}
     </button>
   )
 }

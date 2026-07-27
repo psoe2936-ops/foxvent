@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { Shield } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { UnblockButton } from '@/components/users/unblock-button'
 
 export default async function BlockedPage() {
+  const t = await getTranslations('settings')
+  const tChat = await getTranslations('chat')
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/?login=1')
@@ -19,20 +22,20 @@ export default async function BlockedPage() {
     <main className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       <div className="mb-4">
         <Link href="/settings" className="text-sm text-[#9CA3AF] hover:text-[#6B7280]">
-          ← Settings
+          ← {t('title')}
         </Link>
       </div>
-      <h1 className="text-xl font-bold text-[#1F2937]">Blocked users</h1>
+      <h1 className="text-xl font-bold text-[#1F2937]">{t('blockedUsers')}</h1>
       <p className="mt-1 text-sm text-[#6B7280]">
-        Blocked users cannot message you or see your listings.
+        {t('blockedUsersDescription')}
       </p>
 
       {!blocks || blocks.length === 0 ? (
         <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
           <Shield className="size-10 text-[#D1D5DB]" />
-          <p className="mt-3 text-sm font-medium text-[#4B5563]">No blocked users</p>
+          <p className="mt-3 text-sm font-medium text-[#4B5563]">{t('noBlockedUsers')}</p>
           <p className="mt-1 text-xs text-[#9CA3AF]">
-            Users you block will appear here. You can unblock them at any time.
+            {t('blockedUsersWillAppearHere')}
           </p>
         </div>
       ) : (
@@ -60,10 +63,10 @@ export default async function BlockedPage() {
                 )}
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium text-[#1F2937]">
-                    {person?.full_name ?? person?.username ?? 'Unknown user'}
+                    {person?.full_name ?? person?.username ?? tChat('unknownUser')}
                   </p>
                   <p className="text-xs text-[#9CA3AF]">
-                    @{person?.username ?? '—'} · Blocked {blockedOn}
+                    @{person?.username ?? '—'} · {t('blockedOn', { date: blockedOn })}
                   </p>
                 </div>
                 <UnblockButton blockerId={user.id} blockedId={block.blocked_id} />

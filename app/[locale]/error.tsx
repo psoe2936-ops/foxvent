@@ -4,27 +4,26 @@ import Link from 'next/link'
 import { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 
-export default function ProductError({
+export default function Error({
   error,
   reset,
 }: {
   error: Error & { digest?: string }
   reset: () => void
 }) {
-  const t = useTranslations('product')
-  const tChat = useTranslations('chat')
+  const t = useTranslations('errors')
   const tCommon = useTranslations('common')
 
   useEffect(() => {
-    console.error('Product page error:', error)
+    console.error('App error:', error)
   }, [error])
 
   return (
-    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 p-6 text-center">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-[#F9FAFB] p-6 text-center">
       <div className="text-5xl">🦊</div>
-      <h2 className="text-xl font-semibold text-[#1F2937]">{t('couldntLoadListing')}</h2>
+      <h2 className="text-xl font-semibold text-[#1F2937]">{t('somethingWentWrongTitle')}</h2>
       <p className="max-w-sm text-sm text-[#6B7280]">
-        {t('listingLoadErrorBody')}
+        {t('unexpectedErrorBody')}
       </p>
       <div className="flex gap-3">
         <button
@@ -35,9 +34,9 @@ export default function ProductError({
         </button>
         <Link
           href="/feed"
-          className="rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F3F4F6]"
+          className="rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-white"
         >
-          {tChat('browseListings')}
+          {t('goToHomepage')}
         </Link>
       </div>
     </div>

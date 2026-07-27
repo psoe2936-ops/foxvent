@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 type SellButtonProps = {
@@ -17,6 +18,7 @@ export function SellButton({
   username,
   className,
 }: SellButtonProps) {
+  const t = useTranslations('navbar')
   const router = useRouter()
 
   const handleClick = () => {
@@ -37,7 +39,7 @@ export function SellButton({
       )}
     >
       <Plus className="size-4" aria-hidden="true" />
-      <span className="hidden sm:inline">Sell</span>
+      <span className="hidden sm:inline">{t('sell')}</span>
     </button>
   )
 }

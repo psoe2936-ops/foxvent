@@ -34,7 +34,7 @@ export default async function AdminOverviewPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#2D2E32]">Overview</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-[#1F2937]">Overview</h1>
       <p className="mt-1 text-sm text-[#6B7280]">
         A snapshot of your marketplace right now.
       </p>
@@ -49,10 +49,12 @@ export default async function AdminOverviewPage() {
                 : 'border-[#E5E7EB]'
             }`}
           >
-            <p className="text-sm text-[#6B7280]">{stat.label}</p>
+            <p className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
+              {stat.label}
+            </p>
             <p
-              className={`mt-2 text-3xl font-bold ${
-                stat.accent ? 'text-[#C26A08]' : 'text-[#2D2E32]'
+              className={`mt-1.5 text-2xl font-semibold ${
+                stat.accent ? 'text-[#C26A08]' : 'text-[#1F2937]'
               }`}
             >
               {stat.value}

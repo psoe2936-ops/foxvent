@@ -1,10 +1,12 @@
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { ChatInboxContent } from '@/components/chat/chat-inbox-content'
 import { FeedSidebar } from '@/components/feed/sidebar'
 import { TrendingPanel, type TrendingItem } from '@/components/feed/trending-panel'
 
 export default async function ChatInboxPage() {
+  const t = await getTranslations('feed')
   const supabase = await createClient()
   const {
     data: { user },
@@ -54,7 +56,7 @@ export default async function ChatInboxPage() {
         </div>
 
         <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-75 shrink-0 flex-col overflow-y-auto border-l border-[#E8EAED] bg-[#F9FAFB] py-6 pl-4 pr-5 xl:flex xl:pr-6">
-          <TrendingPanel items={trendingItems} label="Most popular" />
+          <TrendingPanel items={trendingItems} label={t('mostPopular')} />
         </aside>
       </div>
     </div>

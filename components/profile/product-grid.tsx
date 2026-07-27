@@ -1,3 +1,6 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
 import { ProductCard, type Product } from '@/components/profile/product-card'
 import { ProductOwnerMenu } from '@/components/products/product-owner-menu'
 import type { Category } from '@/components/profile/new-listing-modal'
@@ -10,14 +13,15 @@ type ProductGridProps = {
 }
 
 export function ProductGrid({ products, isOwner, categories = [], sellerUsername = '' }: ProductGridProps) {
+  const t = useTranslations('profile')
   if (products.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-[#E5E7EB] bg-[#F9FAFB] p-10 text-center">
-        <p className="text-sm font-medium text-[#2D2E32]">No listings yet</p>
+        <p className="text-sm font-medium text-[#2D2E32]">{t('noListingsYet')}</p>
         <p className="mt-1 text-sm text-[#6B7280]">
           {isOwner
-            ? 'Items you list for sale will show up here.'
-            : 'This user has not listed anything yet.'}
+            ? t('itemsWillShowHere')
+            : t('userHasNotListedYet')}
         </p>
       </div>
     )

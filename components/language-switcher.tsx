@@ -2,15 +2,15 @@
 
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronDown, Globe } from 'lucide-react'
-import { useLocale } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import { usePathname, useRouter } from '@/i18n/navigation'
 import { type Locale } from '@/i18n/routing'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 
 const LOCALE_OPTIONS: { value: Locale; label: string; flag: string }[] = [
-  { value: 'en', label: 'EN', flag: '🇬🇧' }, // left flag icon
-  { value: 'my', label: 'မြန်မာ', flag: '🇲🇲' },// left flag icon
+  { value: 'en', label: 'EN', flag: '🇬🇧' },
+  { value: 'my', label: 'မြန်မာ', flag: '🇲🇲' },
 ]
 
 function setLocaleCookie(locale: Locale) {
@@ -25,6 +25,7 @@ export function LanguageSwitcher({
   className?: string
 }) {
   const locale = useLocale() as Locale
+  const t = useTranslations('navbar')
   const router = useRouter()
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
@@ -69,7 +70,7 @@ export function LanguageSwitcher({
       {/* Trigger button */}
       <button
         type="button"
-        aria-label="Change language"
+        aria-label={t('changeLanguage')}
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
         disabled={isPending}

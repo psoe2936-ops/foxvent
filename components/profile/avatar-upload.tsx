@@ -3,6 +3,7 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 type AvatarUploadProps = {
@@ -20,6 +21,7 @@ export function AvatarUpload({
   fullName,
   isOwner,
 }: AvatarUploadProps) {
+  const t = useTranslations('profile')
   const [avatarUrl, setAvatarUrl] = useState(initialAvatarUrl)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -41,11 +43,11 @@ export function AvatarUpload({
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Please choose an image file.')
+      setError(t('pleaseChooseImage'))
       return
     }
     if (file.size > MAX_FILE_SIZE) {
-      setError('Image must be smaller than 5MB.')
+      setError(t('imageMustBeUnder5MB'))
       return
     }
 
@@ -102,7 +104,7 @@ export function AvatarUpload({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            aria-label="Change profile photo"
+            aria-label={t('changeProfilePhoto')}
             className="absolute inset-0 flex items-center justify-center transition-colors hover:bg-black/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/50"
           >
             <span className="opacity-0 transition-opacity group-hover/avatar:opacity-100">

@@ -100,7 +100,7 @@ export function BanButton({
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-sm rounded-2xl bg-white/95 p-6 shadow-[0_8px_32px_rgba(0,0,0,0.12)] backdrop-blur-2xl"
           >
-            <h3 className="font-semibold text-[#2D2E32]">Ban @{username}</h3>
+            <h3 className="font-semibold text-[#1F2937]">Ban @{username}</h3>
             <p className="mt-1 text-sm text-[#6B7280]">
               The user will be notified and cannot access FoxVent until the ban expires.
             </p>

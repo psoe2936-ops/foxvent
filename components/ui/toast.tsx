@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useRef, useState } from 'react'
 import { AlertCircle, CheckCircle, Info, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type ToastType = 'success' | 'error' | 'info'
 
@@ -36,6 +37,7 @@ function ToastCard({
   toast: ToastItem
   onDismiss: (id: number) => void
 }) {
+  const t = useTranslations('common')
   const Icon =
     toast.type === 'success' ? CheckCircle : toast.type === 'error' ? AlertCircle : Info
 
@@ -48,7 +50,7 @@ function ToastCard({
       <button
         type="button"
         onClick={() => onDismiss(toast.id)}
-        aria-label="Dismiss"
+        aria-label={t('dismiss')}
         className="shrink-0 text-[#9CA3AF] transition-colors hover:text-[#6B7280]"
       >
         <X className="size-4" />

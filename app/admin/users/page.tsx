@@ -43,7 +43,7 @@ export default async function AdminUsersPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#2D2E32]">Users</h1>
+      <h1 className="text-2xl font-semibold tracking-tight text-[#1F2937]">Users</h1>
       <p className="mt-1 text-sm text-[#6B7280]">
         All registered accounts on FoxVent.
       </p>
@@ -73,7 +73,7 @@ export default async function AdminUsersPage() {
                   key={user.id}
                   className="border-b border-[#E5E7EB] last:border-0 hover:bg-[#F9FAFB]"
                 >
-                  <td className="px-5 py-3 font-medium text-[#2D2E32]">
+                  <td className="px-5 py-3 font-medium text-[#1F2937]">
                     {user.full_name ?? '—'}
                   </td>
                   <td className="px-5 py-3 text-[#6B7280]">

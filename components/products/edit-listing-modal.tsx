@@ -2,16 +2,10 @@
 
 import { useRef, useState, useTransition, type ChangeEvent } from 'react'
 import { Loader2, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { updateProduct } from '@/app/products/actions'
 import type { Category } from '@/components/profile/new-listing-modal'
-
-const CONDITION_OPTIONS = [
-  { value: 'new', label: 'New with tags' },
-  { value: 'like_new', label: 'Like new' },
-  { value: 'good', label: 'Good' },
-  { value: 'fair', label: 'Fair' },
-]
 
 type EditableProduct = {
   id: string
@@ -33,6 +27,15 @@ type Props = {
 }
 
 export function EditListingModal({ product, categories, sellerUsername, onClose, onSuccess }: Props) {
+  const t = useTranslations('listing')
+  const tProduct = useTranslations('product')
+  const tCommon = useTranslations('common')
+  const CONDITION_OPTIONS = [
+    { value: 'new', label: t('conditionNewWithTags') },
+    { value: 'like_new', label: tProduct('conditionLikeNew') },
+    { value: 'good', label: tProduct('conditionGood') },
+    { value: 'fair', label: tProduct('conditionFair') },
+  ]
   const [title, setTitle] = useState(product.title)
   const [description, setDescription] = useState(product.description ?? '')
   const [price, setPrice] = useState(String(product.price))
@@ -61,11 +64,11 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
     e.preventDefault()
     if (isPending) return
 
-    if (!title.trim()) { setError('Title is required.'); return }
-    if (!categoryId) { setError('Please select a category.'); return }
-    if (!condition) { setError('Please select a condition.'); return }
+    if (!title.trim()) { setError(t('titleRequired')); return }
+    if (!categoryId) { setError(t('selectCategory')); return }
+    if (!condition) { setError(t('selectCondition')); return }
     const numPrice = Number(price)
-    if (!price || isNaN(numPrice) || numPrice <= 0) { setError('Enter a valid price.'); return }
+    if (!price || isNaN(numPrice) || numPrice <= 0) { setError(t('enterValidPrice')); return }
 
     setError(null)
     const fd = new FormData()
@@ -89,7 +92,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
         onSuccess?.()
         onClose()
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+        setError(err instanceof Error ? err.message : tCommon('somethingWentWrong'))
       }
     })
   }
@@ -107,12 +110,12 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
           className="relative flex h-dvh w-full flex-col rounded-t-3xl border border-white/60 bg-white/90 backdrop-blur-2xl backdrop-saturate-150 sm:h-auto sm:max-h-[90dvh] sm:max-w-lg sm:rounded-2xl sm:shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
         >
           <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
-            <h2 className="text-lg font-bold text-[#2D2E32]">Edit listing</h2>
+            <h2 className="text-lg font-bold text-[#2D2E32]">{t('editListingTitle')}</h2>
             <button
               type="button"
               onClick={handleClose}
               disabled={isPending}
-              aria-label="Close"
+              aria-label={tCommon('close')}
               className="text-[#9CA3AF] transition-colors hover:text-[#2D2E32] disabled:opacity-50"
             >
               <X className="size-5" />
@@ -123,14 +126,14 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
             {willResubmit && (
               <div className="mb-4 rounded-lg bg-[#FEF3E2] px-4 py-3 text-sm text-[#C26A08]">
                 {product.status === 'approved'
-                  ? 'Saving changes will put this listing back in pending review.'
-                  : 'Saving changes will resubmit this listing for review.'}
+                  ? t('resubmitFromApproved')
+                  : t('resubmitFromRejected')}
               </div>
             )}
 
             <form id="edit-listing-form" onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Title</label>
+                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">{t('titleLabel')}</label>
                 <input
                   type="text"
                   value={title}
@@ -143,7 +146,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Description</label>
+                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">{t('descriptionLabel')}</label>
                 <textarea
                   value={description}
                   maxLength={1000}
@@ -156,14 +159,14 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Category</label>
+                  <label className="mb-1 block text-xs font-medium text-[#2D2E32]">{t('categoryLabel')}</label>
                   <select
                     value={categoryId}
                     disabled={isPending}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setCategoryId(e.target.value)}
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none focus:border-[#F36D21] disabled:opacity-60"
                   >
-                    <option value="">Select</option>
+                    <option value="">{t('selectPlaceholder')}</option>
                     {categories.map((cat) => (
                       <option key={cat.id} value={cat.id}>
                         {cat.icon ? `${cat.icon} ` : ''}{cat.name}
@@ -172,14 +175,14 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
                   </select>
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Condition</label>
+                  <label className="mb-1 block text-xs font-medium text-[#2D2E32]">{tProduct('condition')}</label>
                   <select
                     value={condition}
                     disabled={isPending}
                     onChange={(e: ChangeEvent<HTMLSelectElement>) => setCondition(e.target.value)}
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none focus:border-[#F36D21] disabled:opacity-60"
                   >
-                    <option value="">Select</option>
+                    <option value="">{t('selectPlaceholder')}</option>
                     {CONDITION_OPTIONS.map((o) => (
                       <option key={o.value} value={o.value}>{o.label}</option>
                     ))}
@@ -188,7 +191,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Price</label>
+                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">{t('priceLabel')}</label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-[#6B7280]">
                     MMK
@@ -207,12 +210,12 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
               </div>
 
               <div>
-                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">Location</label>
+                <label className="mb-1 block text-xs font-medium text-[#2D2E32]">{t('locationLabel')}</label>
                 <input
                   type="text"
                   value={location}
                   disabled={isPending}
-                  placeholder="e.g. Yangon, Mandalay"
+                  placeholder={t('locationPlaceholder')}
                   onChange={(e: ChangeEvent<HTMLInputElement>) => setLocation(e.target.value)}
                   className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] disabled:opacity-60"
                 />
@@ -241,10 +244,10 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
               {isPending ? (
                 <span className="inline-flex items-center justify-center gap-2">
                   <Loader2 className="size-4 animate-spin" />
-                  Saving…
+                  {t('saving')}
                 </span>
               ) : (
-                'Save changes'
+                t('saveChanges')
               )}
             </button>
           </div>
@@ -253,7 +256,7 @@ export function EditListingModal({ product, categories, sellerUsername, onClose,
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-60 rounded-xl bg-[#1F9254] px-4 py-3 text-sm font-medium text-white shadow-lg">
-          Listing updated
+          {t('listingUpdated')}
         </div>
       )}
     </>

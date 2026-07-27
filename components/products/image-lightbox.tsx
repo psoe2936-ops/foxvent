@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { ChevronLeft, ChevronRight, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 type Props = {
   images: string[]
@@ -11,6 +12,7 @@ type Props = {
 }
 
 export function ImageLightbox({ images, alt, initialIndex = 0, onClose }: Props) {
+  const t = useTranslations('product')
   const [current, setCurrent] = useState(initialIndex)
   const hasMany = images.length > 1
 
@@ -39,7 +41,7 @@ export function ImageLightbox({ images, alt, initialIndex = 0, onClose }: Props)
         type="button"
         onClick={onClose}
         className="absolute right-4 top-4 z-10 flex size-9 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20"
-        aria-label="Close lightbox"
+        aria-label={t('closeLightbox')}
       >
         <X className="size-5" />
       </button>
@@ -61,7 +63,7 @@ export function ImageLightbox({ images, alt, initialIndex = 0, onClose }: Props)
             type="button"
             onClick={() => setCurrent((i) => Math.max(0, i - 1))}
             disabled={current === 0}
-            aria-label="Previous image"
+            aria-label={t('previousImage')}
             className="absolute left-3 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-30 sm:left-6"
           >
             <ChevronLeft className="size-6" />
@@ -81,7 +83,7 @@ export function ImageLightbox({ images, alt, initialIndex = 0, onClose }: Props)
             type="button"
             onClick={() => setCurrent((i) => Math.min(images.length - 1, i + 1))}
             disabled={current === images.length - 1}
-            aria-label="Next image"
+            aria-label={t('nextImage')}
             className="absolute right-3 z-10 flex size-10 items-center justify-center rounded-full bg-white/10 text-white hover:bg-white/20 disabled:opacity-30 sm:right-6"
           >
             <ChevronRight className="size-6" />
@@ -100,7 +102,7 @@ export function ImageLightbox({ images, alt, initialIndex = 0, onClose }: Props)
               key={i}
               type="button"
               onClick={() => setCurrent(i)}
-              aria-label={`Photo ${i + 1}`}
+              aria-label={t('photoNumber', { number: i + 1 })}
               className={`size-14 shrink-0 overflow-hidden rounded-lg border-2 transition-all ${
                 i === current
                   ? 'border-[#F36D21] opacity-100'

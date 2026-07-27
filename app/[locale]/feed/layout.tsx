@@ -1,3 +1,4 @@
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { FeedSidebar } from '@/components/feed/sidebar'
 import { FeedRightSidebar } from '@/components/feed/right-sidebar'
@@ -30,6 +31,7 @@ export default async function FeedLayout({
 }: {
   children: React.ReactNode
 }) {
+  const t = await getTranslations('feed')
   const supabase = await createClient()
   const {
     data: { user },
@@ -50,7 +52,7 @@ export default async function FeedLayout({
 
   // Trending: location-filtered first, fall back to overall
   let trendingItems: TrendingItem[] = []
-  let trendingLabel = 'Most popular'
+  let trendingLabel = t('mostPopular')
 
   if (userLocation) {
     const { data: locProds } = await supabase
@@ -61,7 +63,7 @@ export default async function FeedLayout({
 
     if (locProds && locProds.length > 0) {
       trendingItems = groupByCategory(locProds)
-      trendingLabel = `In ${userLocation}`
+      trendingLabel = t('inYourLocation', { location: userLocation })
     }
   }
 

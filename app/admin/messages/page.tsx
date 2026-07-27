@@ -38,7 +38,7 @@ export default async function AdminMessagesPage() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <h1 className="mb-6 text-xl font-bold text-[#1F2937]">Support Conversations</h1>
+      <h1 className="mb-6 text-2xl font-semibold tracking-tight text-[#1F2937]">Support Conversations</h1>
 
       {!conversations || conversations.length === 0 ? (
         <div className="rounded-xl border border-dashed border-[#E5E7EB] py-16 text-center">

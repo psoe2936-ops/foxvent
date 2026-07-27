@@ -36,7 +36,7 @@ export default async function AdminUserReportsPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-[#1F2937]">User Reports</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#1F2937]">User Reports</h1>
         <p className="mt-0.5 text-sm text-[#6B7280]">{pendingCount} pending</p>
       </div>
 

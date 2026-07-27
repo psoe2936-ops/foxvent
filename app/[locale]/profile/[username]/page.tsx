@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { MapPin, ShieldCheck } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { StarRatingDisplay } from '@/components/reviews/star-rating-display'
 import { formatRelativeTime } from '@/lib/format-relative-time'
@@ -42,12 +43,16 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
     .eq('username', username)
     .single()
 
-  if (!profile) return { title: 'Profile not found' }
+  if (!profile) {
+    const t = await getTranslations('profile')
+    return { title: t('profileNotFound') }
+  }
 
+  const t = await getTranslations('profile')
   const title = profile.full_name ? `${profile.full_name} (@${username})` : `@${username}`
   const description = profile.bio
     ? profile.bio.slice(0, 160)
-    : `View ${profile.full_name ?? username}'s listings on FoxVent.`
+    : t('viewListingsMetaDescription', { name: profile.full_name ?? username })
 
   return {
     title,
@@ -64,6 +69,7 @@ export async function generateMetadata({ params }: ProfilePageProps): Promise<Me
 export default async function ProfilePage({ params, searchParams }: ProfilePageProps) {
   const { username } = await params
   const { new: newParam } = await searchParams
+  const t = await getTranslations('profile')
   const supabase = await createClient()
 
   const {
@@ -221,24 +227,24 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                 {isVerifiedSeller && (
                   <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-xs font-medium text-green-700">
                     <ShieldCheck className="size-3.5" />
-                    Verified seller
+                    {t('verifiedSeller')}
                   </span>
                 )}
-                <span className="text-xs text-[#9CA3AF]">Member since {memberSince}</span>
+                <span className="text-xs text-[#9CA3AF]">{t('memberSince')} {memberSince}</span>
               </div>
 
               {avgRating !== null && reviewCount > 0 && (
                 <div className="mt-2 flex items-center gap-2">
                   <StarRatingDisplay rating={avgRating} size="sm" showNumber />
                   <span className="text-xs text-[#9CA3AF]">
-                    ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'})
+                    ({t('reviewCount', { count: reviewCount })})
                   </span>
                 </div>
               )}
 
               {!isOwner && followsYouBack && (
                 <span className="mt-2 inline-block rounded-full bg-[#F3F4F6] px-2.5 py-1 text-xs text-[#6B7280]">
-                  Follows you back
+                  {t('followsYouBack')}
                 </span>
               )}
             </div>
@@ -247,21 +253,21 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             <div className="mt-5 flex items-center divide-x divide-[#E5E7EB] border-t border-[#E5E7EB] pt-4">
               <div className="pr-6 text-center">
                 <p className="text-lg font-bold text-[#1F2937]">{products?.length ?? 0}</p>
-                <p className="text-xs text-[#6B7280]">Listings</p>
+                <p className="text-xs text-[#6B7280]">{t('listings')}</p>
               </div>
               <Link
                 href={`/profile/${profile.username}/followers`}
                 className="px-6 text-center transition-opacity hover:opacity-70"
               >
                 <p className="text-lg font-bold text-[#1F2937]">{followerCount ?? 0}</p>
-                <p className="text-xs text-[#6B7280]">Followers</p>
+                <p className="text-xs text-[#6B7280]">{t('followers')}</p>
               </Link>
               <Link
                 href={`/profile/${profile.username}/following`}
                 className="px-6 text-center transition-opacity hover:opacity-70"
               >
                 <p className="text-lg font-bold text-[#1F2937]">{followingCount ?? 0}</p>
-                <p className="text-xs text-[#6B7280]">Following</p>
+                <p className="text-xs text-[#6B7280]">{t('following')}</p>
               </Link>
             </div>
 
@@ -280,7 +286,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                   />
                 }
                 reviewsContent={
-                  <ReviewsSection reviews={reviews} />
+                  <ReviewsSection reviews={reviews} t={t} />
                 }
                 aboutContent={
                   <ProfileAbout
@@ -288,6 +294,7 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
                     location={profile.location}
                     memberSince={memberSince}
                     approvedCount={approvedCount ?? 0}
+                    t={t}
                   />
                 }
               />
@@ -307,22 +314,26 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
   )
 }
 
+type TFunc = (key: string, values?: Record<string, string | number>) => string
+
 function ProfileAbout({
   bio,
   location,
   memberSince,
   approvedCount,
+  t,
 }: {
   bio: string | null
   location: string | null
   memberSince: string
   approvedCount: number
+  t: TFunc
 }) {
   return (
     <div className="max-w-xl space-y-4">
       {bio && (
         <div className="rounded-2xl border border-[#E5E7EB] bg-white p-4">
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">Bio</p>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">{t('bioLabel')}</p>
           <p className="text-sm leading-relaxed text-[#4B5563]">{bio}</p>
         </div>
       )}
@@ -335,26 +346,26 @@ function ProfileAbout({
           </div>
         )}
         <div className="text-sm text-[#4B5563]">
-          <span className="text-[#9CA3AF]">Member since </span>
+          <span className="text-[#9CA3AF]">{t('memberSince')} </span>
           {memberSince}
         </div>
         <div className="text-sm text-[#4B5563]">
-          <span className="text-[#9CA3AF]">Approved listings </span>
+          <span className="text-[#9CA3AF]">{t('approvedListingsLabel')} </span>
           {approvedCount}
         </div>
       </div>
 
       {!bio && !location && (
-        <p className="text-sm text-[#6B7280]">No information added yet.</p>
+        <p className="text-sm text-[#6B7280]">{t('noInfoAddedYet')}</p>
       )}
     </div>
   )
 }
 
-function ReviewsSection({ reviews }: { reviews: ReviewRow[] }) {
+function ReviewsSection({ reviews, t }: { reviews: ReviewRow[]; t: TFunc }) {
   if (reviews.length === 0) {
     return (
-      <p className="text-sm text-[#9CA3AF]">No reviews yet.</p>
+      <p className="text-sm text-[#9CA3AF]">{t('noReviewsYet')}</p>
     )
   }
 
@@ -393,7 +404,7 @@ function ReviewsSection({ reviews }: { reviews: ReviewRow[] }) {
                 </div>
 
                 {product?.title && (
-                  <p className="mt-0.5 text-xs text-[#9CA3AF]">for {product.title}</p>
+                  <p className="mt-0.5 text-xs text-[#9CA3AF]">{t('forProduct', { product: product.title })}</p>
                 )}
 
                 {review.comment && (

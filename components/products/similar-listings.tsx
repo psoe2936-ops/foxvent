@@ -1,12 +1,7 @@
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { getConditionLabel } from '@/lib/condition-label'
 import { ProductCard } from '@/components/feed/product-card'
-
-const CONDITION_LABEL: Record<string, string> = {
-  new: 'New',
-  like_new: 'Like New',
-  good: 'Good',
-  fair: 'Fair',
-}
 
 type RawProduct = {
   id: string
@@ -32,6 +27,7 @@ export async function SimilarListings({
   categoryId: string | null
   viewerId?: string | null
 }) {
+  const t = await getTranslations('product')
   const supabase = await createClient()
 
   const baseSelect =
@@ -88,7 +84,7 @@ export async function SimilarListings({
 
   return (
     <div className="mt-10">
-      <h2 className="mb-4 text-lg font-bold text-[#1F2937]">You might also like</h2>
+      <h2 className="mb-4 text-lg font-bold text-[#1F2937]">{t('youMightAlsoLike')}</h2>
       <div className="flex gap-4 overflow-x-auto pb-2">
         {items.map((product) => {
           const cat = Array.isArray(product.categories) ? product.categories[0] : product.categories
@@ -100,7 +96,7 @@ export async function SimilarListings({
                 title={product.title}
                 price={product.price}
                 images={product.images}
-                conditionLabel={CONDITION_LABEL[product.condition] ?? product.condition}
+                conditionLabel={getConditionLabel(t, product.condition)}
                 conditionKey={product.condition}
                 categoryName={cat?.name}
                 sellerUsername={seller?.username}

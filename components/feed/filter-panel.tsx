@@ -3,17 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SlidersHorizontal } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { SortTabs } from '@/components/feed/sort-tabs'
 import { buildMarketplaceHref, type MarketplaceFilterParams } from '@/lib/marketplace-url'
 
 type SortOption = 'newest' |'popular'| 'price_asc' | 'price_desc'
-
-const CONDITIONS: { id: string; label: string }[] = [
-  { id: 'new', label: 'New' },
-  { id: 'like_new', label: 'Like New' },
-  { id: 'good', label: 'Good' },
-  { id: 'fair', label: 'Fair' },
-]
 
 export function FilterPanel({
   sort,
@@ -24,6 +18,14 @@ export function FilterPanel({
   filterParams: MarketplaceFilterParams
   basePath?: string
 }) {
+  const t = useTranslations('feed')
+  const tProduct = useTranslations('product')
+  const CONDITIONS: { id: string; label: string }[] = [
+    { id: 'new', label: tProduct('conditionNew') },
+    { id: 'like_new', label: tProduct('conditionLikeNew') },
+    { id: 'good', label: tProduct('conditionGood') },
+    { id: 'fair', label: tProduct('conditionFair') },
+  ]
   const router = useRouter()
   const [open, setOpen] = useState(false)
   const [minPrice, setMinPrice] = useState(filterParams.minPrice ?? '')
@@ -77,7 +79,7 @@ export function FilterPanel({
           }`}
         >
           <SlidersHorizontal className="size-3.5" />
-          {activeCount > 0 ? `Filter (${activeCount})` : 'Filter'}
+          {activeCount > 0 ? t('filterWithCount', { count: activeCount }) : t('filter')}
         </button>
       </div>
 
@@ -91,13 +93,13 @@ export function FilterPanel({
             <div className="flex flex-wrap items-start gap-6">
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                  Price range
+                  {t('priceRange')}
                 </p>
                 <div className="flex items-center gap-2">
                   <input
                     type="number"
                     inputMode="numeric"
-                    placeholder="Min MMK"
+                    placeholder={t('minPricePlaceholder')}
                     value={minPrice}
                     onChange={(e) => setMinPrice(e.target.value)}
                     className="w-28 rounded-lg border border-[#E5E7EB] px-2.5 py-1.5 text-sm text-[#374151] outline-none focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20"
@@ -106,7 +108,7 @@ export function FilterPanel({
                   <input
                     type="number"
                     inputMode="numeric"
-                    placeholder="Max MMK"
+                    placeholder={t('maxPricePlaceholder')}
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(e.target.value)}
                     className="w-28 rounded-lg border border-[#E5E7EB] px-2.5 py-1.5 text-sm text-[#374151] outline-none focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20"
@@ -116,7 +118,7 @@ export function FilterPanel({
 
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                  Condition
+                  {tProduct('condition')}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {CONDITIONS.map((c) => {
@@ -141,7 +143,7 @@ export function FilterPanel({
 
               <div>
                 <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                  Sold items
+                  {t('soldItems')}
                 </p>
                 <label className="flex cursor-pointer items-center gap-2 text-sm text-[#374151]">
                   <input
@@ -150,7 +152,7 @@ export function FilterPanel({
                     onChange={(e) => setHideSold(e.target.checked)}
                     className="size-4 rounded border-[#E5E7EB] text-[#F36D21] focus:ring-[#F36D21]/20"
                   />
-                  Hide sold items
+                  {t('hideSoldItems')}
                 </label>
               </div>
             </div>
@@ -161,11 +163,11 @@ export function FilterPanel({
                 onClick={applyFilters}
                 className="rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
               >
-                Apply
+                {t('apply')}
               </button>
               {activeCount > 0 && (
                 <a href={clearHref} className="text-sm text-[#F36D21] hover:underline">
-                  Clear all
+                  {t('clearAll')}
                 </a>
               )}
             </div>

@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 
 export default function ChatError({
   error,
@@ -10,6 +11,9 @@ export default function ChatError({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const t = useTranslations('chat')
+  const tCommon = useTranslations('common')
+
   useEffect(() => {
     console.error('Chat error:', error)
   }, [error])
@@ -18,22 +22,22 @@ export default function ChatError({
     <main className="mx-auto max-w-2xl px-4 py-6 sm:px-6">
       <div className="flex flex-col items-center gap-4 rounded-2xl border border-[#E5E7EB] bg-white p-10 text-center">
         <div className="text-5xl">🦊</div>
-        <h2 className="text-xl font-semibold text-[#1F2937]">Couldn&apos;t load messages</h2>
+        <h2 className="text-xl font-semibold text-[#1F2937]">{t('couldntLoadMessages')}</h2>
         <p className="max-w-sm text-sm text-[#6B7280]">
-          Something went wrong loading this conversation. Please try again.
+          {t('loadErrorBody')}
         </p>
         <div className="flex gap-3">
           <button
             onClick={reset}
             className="rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
           >
-            Try again
+            {tCommon('tryAgain')}
           </button>
           <Link
             href="/chat"
             className="rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#374151] hover:bg-[#F3F4F6]"
           >
-            Back to chats
+            {t('backToChats')}
           </Link>
         </div>
       </div>

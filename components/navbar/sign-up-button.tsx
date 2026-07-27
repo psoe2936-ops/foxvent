@@ -1,3 +1,6 @@
+'use client'
+
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 type SignUpButtonProps = {
@@ -6,6 +9,7 @@ type SignUpButtonProps = {
 }
 
 export function SignUpButton({ onClick, className }: SignUpButtonProps) {
+  const t = useTranslations('navbar')
   return (
     <button
       type="button"
@@ -15,7 +19,7 @@ export function SignUpButton({ onClick, className }: SignUpButtonProps) {
         className
       )}
     >
-      Sign Up
+      {t('signUp')}
     </button>
   )
 }

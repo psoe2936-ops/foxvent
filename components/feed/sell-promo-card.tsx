@@ -36,7 +36,7 @@ export async function SellPromoCard() {
           href={href}
           className="mt-4 w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-xs font-semibold text-white transition-opacity hover:opacity-90"
         >
-          {t('startSelling') ?? 'Start Selling'}
+          {t('startSelling')}
         </Link>
       </div>
     </section>

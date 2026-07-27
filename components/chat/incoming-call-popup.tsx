@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react'
 import { Phone, PhoneOff } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 type IncomingCallPopupProps = {
@@ -21,6 +22,7 @@ export function IncomingCallPopup({
   onAccept,
   onDecline,
 }: IncomingCallPopupProps) {
+  const t = useTranslations('call')
   const declinedRef = useRef(false)
 
   // Auto-dismiss after 30 seconds if not answered — insert 'missed' call log
@@ -77,7 +79,7 @@ export function IncomingCallPopup({
 
         <div className="min-w-0 flex-1">
           <p className="text-[11px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
-            Incoming video call
+            {t('incomingVideoCall')}
           </p>
           <p className="mt-0.5 truncate text-sm font-semibold text-[#1F2937]">
             {callerName}
@@ -91,14 +93,14 @@ export function IncomingCallPopup({
           className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#FDEDEC] py-2.5 text-sm font-semibold text-[#C0392B] hover:opacity-90"
         >
           <PhoneOff className="size-4" />
-          Decline
+          {t('decline')}
         </button>
         <button
           onClick={onAccept}
           className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#E8F5E9] py-2.5 text-sm font-semibold text-[#1A7A4A] hover:opacity-90"
         >
           <Phone className="size-4" />
-          Accept
+          {t('accept')}
         </button>
       </div>
     </div>

@@ -1,15 +1,10 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { getConditionLabel } from '@/lib/condition-label'
 import { ProductCard } from '@/components/feed/product-card'
 import { FollowButton } from '@/components/profile/follow-button'
-
-const CONDITION_LABEL: Record<string, string> = {
-  new: 'New',
-  like_new: 'Like New',
-  good: 'Good',
-  fair: 'Fair',
-}
 
 async function fetchSuggestedSellers(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -50,9 +45,11 @@ async function fetchSuggestedSellers(
 function SuggestedSellerRow({
   seller,
   viewerId,
+  t,
 }: {
   seller: { id: string; username: string; full_name: string; avatar_url: string | null; listing_count: number }
   viewerId: string
+  t: (key: string, values?: Record<string, string | number>) => string
 }) {
   return (
     <li className="flex items-center justify-between gap-4 px-4 py-3.5">
@@ -77,7 +74,7 @@ function SuggestedSellerRow({
           <p className="truncate text-sm text-[#6B7280]">
             @{seller.username}
             {seller.listing_count > 0 && (
-              <> · {seller.listing_count} listing{seller.listing_count !== 1 ? 's' : ''}</>
+              <> · {t('listingsCount', { count: seller.listing_count })}</>
             )}
           </p>
         </div>
@@ -92,6 +89,12 @@ function SuggestedSellerRow({
 }
 
 export async function FollowingContent({ userId }: { userId: string }) {
+  const t = await getTranslations('following')
+  const tSidebar = await getTranslations('sidebar')
+  const tFeed = await getTranslations('feed')
+  const tProduct = await getTranslations('product')
+  const tChat = await getTranslations('chat')
+  const tProfile = await getTranslations('profile')
   const supabase = await createClient()
 
   const { data: followRows } = await supabase
@@ -128,15 +131,15 @@ export async function FollowingContent({ userId }: { userId: string }) {
   if (followedIds.length === 0) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-[#1F2937]">Following</h1>
-        <p className="mt-0.5 text-sm text-[#6B7280]">Listings from sellers you follow</p>
+        <h1 className="text-xl font-bold text-[#1F2937]">{tSidebar('following')}</h1>
+        <p className="mt-0.5 text-sm text-[#6B7280]">{t('listingsFromSellersYouFollow')}</p>
 
         <div className="mt-8 flex flex-col items-center gap-4 rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-12 text-center">
           <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto" />
           <div>
-            <p className="font-semibold text-[#1F2937]">You&apos;re not following anyone yet</p>
+            <p className="font-semibold text-[#1F2937]">{t('notFollowingAnyoneYetHeading')}</p>
             <p className="mt-1 text-sm text-[#6B7280]">
-              When you follow sellers, their listings appear here
+              {t('whenYouFollowSellers')}
             </p>
           </div>
           <div className="flex flex-wrap justify-center gap-3">
@@ -144,23 +147,23 @@ export async function FollowingContent({ userId }: { userId: string }) {
               href="/feed"
               className="rounded-xl border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#1F2937] hover:bg-[#F9FAFB]"
             >
-              Browse listings
+              {tChat('browseListings')}
             </Link>
             <Link
               href="/feed"
               className="rounded-xl bg-[#F36D21] px-4 py-2 text-sm font-medium text-white hover:opacity-90"
             >
-              Discover sellers
+              {t('discoverSellers')}
             </Link>
           </div>
         </div>
 
         {suggestedSellers.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-base font-semibold text-[#1F2937]">Suggested sellers to follow</h2>
+            <h2 className="text-base font-semibold text-[#1F2937]">{t('suggestedSellersToFollow')}</h2>
             <ul className="mt-3 divide-y divide-[#F3F4F6] overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
               {suggestedSellers.map((seller: any) => (
-                <SuggestedSellerRow key={seller.id} seller={seller} viewerId={userId} />
+                <SuggestedSellerRow key={seller.id} seller={seller} viewerId={userId} t={tFeed} />
               ))}
             </ul>
           </div>
@@ -172,20 +175,20 @@ export async function FollowingContent({ userId }: { userId: string }) {
   // ── Non-empty state ──────────────────────────────────────────────────────
   return (
     <div>
-      <h1 className="text-xl font-bold text-[#1F2937]">Following</h1>
-      <p className="mt-0.5 text-sm text-[#6B7280]">Listings from sellers you follow</p>
+      <h1 className="text-xl font-bold text-[#1F2937]">{tSidebar('following')}</h1>
+      <p className="mt-0.5 text-sm text-[#6B7280]">{t('listingsFromSellersYouFollow')}</p>
 
       {products.length === 0 ? (
         <div className="mt-8 rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
-          <p className="font-medium text-[#1F2937]">No listings yet</p>
+          <p className="font-medium text-[#1F2937]">{tProfile('noListingsYet')}</p>
           <p className="mt-1 text-sm text-[#6B7280]">
-            The sellers you follow haven&apos;t posted anything recently.
+            {t('sellersHaventPosted')}
           </p>
           <Link
             href="/feed"
             className="mt-4 inline-block text-sm font-medium text-[#F36D21] hover:underline"
           >
-            Browse all listings
+            {t('browseAllListings')}
           </Link>
         </div>
       ) : (
@@ -202,7 +205,7 @@ export async function FollowingContent({ userId }: { userId: string }) {
                 title={product.title}
                 price={product.price}
                 images={product.images}
-                conditionLabel={CONDITION_LABEL[product.condition] ?? product.condition}
+                conditionLabel={getConditionLabel(tProduct, product.condition)}
                 conditionKey={product.condition}
                 categoryName={cat?.name}
                 sellerUsername={seller?.username}
@@ -219,10 +222,10 @@ export async function FollowingContent({ userId }: { userId: string }) {
 
       {suggestedSellers.length > 0 && (
         <div className="mt-10 border-t border-[#E5E7EB] pt-8">
-          <h2 className="text-base font-semibold text-[#1F2937]">Discover more sellers</h2>
+          <h2 className="text-base font-semibold text-[#1F2937]">{t('discoverMoreSellers')}</h2>
           <ul className="mt-3 divide-y divide-[#F3F4F6] overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">
             {suggestedSellers.map((seller: any) => (
-              <SuggestedSellerRow key={seller.id} seller={seller} viewerId={userId} />
+              <SuggestedSellerRow key={seller.id} seller={seller} viewerId={userId} t={tFeed} />
             ))}
           </ul>
         </div>

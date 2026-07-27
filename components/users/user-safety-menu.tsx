@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import { MoreHorizontal } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { ReportUserModal } from '@/components/users/report-user-modal'
 import { useToast } from '@/components/ui/toast'
@@ -19,6 +20,9 @@ export function UserSafetyMenu({
   viewerId,
   initialBlocked,
 }: Props) {
+  const t = useTranslations('chat')
+  const tSafety = useTranslations('safety')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [mode, setMode] = useState<'menu' | 'block-confirm'>('menu')
   const [isBlocked, setIsBlocked] = useState(initialBlocked)
@@ -52,16 +56,16 @@ export function UserSafetyMenu({
           .delete()
           .eq('blocker_id', viewerId)
           .eq('blocked_id', targetUserId)
-        if (dbErr) { setError('Failed. Please try again.'); return }
+        if (dbErr) { setError(tSafety('failed')); return }
         setIsBlocked(false)
-        showToast(`@${targetUsername} has been unblocked.`, 'success')
+        showToast(tSafety('userUnblockedToast', { username: targetUsername }), 'success')
       } else {
         const { error: dbErr } = await supabase
           .from('blocks')
           .upsert({ blocker_id: viewerId, blocked_id: targetUserId }, { onConflict: 'blocker_id,blocked_id' })
-        if (dbErr) { setError('Failed. Please try again.'); return }
+        if (dbErr) { setError(tSafety('failed')); return }
         setIsBlocked(true)
-        showToast(`@${targetUsername} has been blocked.`, 'success')
+        showToast(tSafety('userBlockedToast', { username: targetUsername }), 'success')
       }
       setOpen(false)
       setMode('menu')
@@ -74,7 +78,7 @@ export function UserSafetyMenu({
         <button
           type="button"
           onClick={() => { setOpen((v) => !v); setMode('menu'); setError(null) }}
-          aria-label="More options"
+          aria-label={t('moreOptions')}
           className="flex size-9 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#9CA3AF] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]"
         >
           <MoreHorizontal className="size-4" />
@@ -91,7 +95,9 @@ export function UserSafetyMenu({
                     isBlocked ? 'text-[#C0392B]' : 'text-[#374151]'
                   }`}
                 >
-                  {isBlocked ? `Unblock @${targetUsername}` : `Block @${targetUsername}`}
+                  {isBlocked
+                    ? t('unblockUser', { username: targetUsername })
+                    : t('blockUser', { username: targetUsername })}
                 </button>
                 <div className="h-px bg-[#F3F4F6]" />
                 <button
@@ -99,17 +105,19 @@ export function UserSafetyMenu({
                   onClick={() => { setOpen(false); setReportOpen(true) }}
                   className="flex w-full items-center px-4 py-2.5 text-sm text-[#374151] transition-colors hover:bg-[#F9FAFB]"
                 >
-                  Report user
+                  {tSafety('reportUserMenuItem')}
                 </button>
               </>
             ) : (
               <div className="p-3">
                 <p className="text-sm font-medium text-[#1F2937]">
-                  {isBlocked ? `Unblock @${targetUsername}?` : `Block @${targetUsername}?`}
+                  {isBlocked
+                    ? t('unblockConfirmTitle', { username: targetUsername })
+                    : t('blockConfirmTitle', { username: targetUsername })}
                 </p>
                 {!isBlocked && (
                   <p className="mt-1 text-xs text-[#6B7280]">
-                    They won&apos;t be able to message you. Unblock anytime from Settings.
+                    {t('blockWarning')}
                   </p>
                 )}
                 {error && <p className="mt-1 text-xs text-[#C0392B]">{error}</p>}
@@ -120,7 +128,7 @@ export function UserSafetyMenu({
                     disabled={isPending}
                     className="flex-1 rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-60"
                   >
-                    Cancel
+                    {tCommon('cancel')}
                   </button>
                   <button
                     type="button"
@@ -128,7 +136,7 @@ export function UserSafetyMenu({
                     disabled={isPending}
                     className="flex-1 rounded-lg bg-[#C0392B] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
                   >
-                    {isPending ? '…' : isBlocked ? 'Unblock' : 'Block'}
+                    {isPending ? '…' : isBlocked ? t('unblockAction') : t('blockAction')}
                   </button>
                 </div>
               </div>

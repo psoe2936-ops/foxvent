@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 export function MakeOfferButton({
@@ -11,6 +12,7 @@ export function MakeOfferButton({
   productId: string
   sellerId: string
 }) {
+  const t = useTranslations('product')
   const router = useRouter()
   const supabase = createClient()
   const [loading, setLoading] = useState(false)
@@ -68,7 +70,7 @@ export function MakeOfferButton({
       disabled={loading}
       className="w-full rounded-lg border border-[#F36D21] px-4 py-2.5 text-sm font-semibold text-[#F36D21] hover:bg-[#FEF3E2] disabled:opacity-60"
     >
-      {loading ? 'Opening chat…' : 'Make an offer'}
+      {loading ? t('openingChat') : t('makeOffer')}
     </button>
   )
 }

@@ -9,7 +9,7 @@ export function FoxIcon({ className }: FoxIconProps) {
   return (
     <Image
       src="/fox-curious.png"
-      alt="FoxVend"
+      alt="FoxVent"
       width={80}
       height={80}
       className={cn('size-17 shrink-0 rounded-full object-cover', className)}

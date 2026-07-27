@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { StarRatingInput } from '@/components/reviews/star-rating-input'
 
@@ -20,6 +21,10 @@ export function ReviewModal({
   onClose: () => void
   onSuccess: () => void
 }) {
+  const t = useTranslations('review')
+  const tCommon = useTranslations('common')
+  const tProfile = useTranslations('profile')
+  const tProduct = useTranslations('product')
   const supabase = createClient()
   const [rating, setRating] = useState(0)
   const [comment, setComment] = useState('')
@@ -37,7 +42,7 @@ export function ReviewModal({
     } = await supabase.auth.getUser()
 
     if (!user) {
-      setError('You must be logged in to leave a review.')
+      setError(t('mustBeLoggedIn'))
       setSubmitting(false)
       return
     }
@@ -54,9 +59,9 @@ export function ReviewModal({
 
     if (dbErr) {
       if (dbErr.code === '23505') {
-        setError("You've already reviewed this transaction.")
+        setError(t('alreadyReviewed'))
       } else {
-        setError('Failed to submit review. Please try again.')
+        setError(t('failedToSubmit'))
       }
       return
     }
@@ -80,17 +85,17 @@ export function ReviewModal({
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="font-semibold text-[#1F2937]">
-              Rate your experience with {sellerName}
+              {t('rateYourExperience', { name: sellerName })}
             </h2>
             {productTitle && (
-              <p className="mt-0.5 text-xs text-[#9CA3AF]">for {productTitle}</p>
+              <p className="mt-0.5 text-xs text-[#9CA3AF]">{tProfile('forProduct', { product: productTitle })}</p>
             )}
           </div>
           <button
             type="button"
             onClick={onClose}
             className="shrink-0 rounded-full p-1 text-[#9CA3AF] hover:bg-[#F3F4F6] hover:text-[#6B7280]"
-            aria-label="Close"
+            aria-label={tCommon('close')}
           >
             <X className="size-5" />
           </button>
@@ -99,7 +104,7 @@ export function ReviewModal({
         {done ? (
           <div className="mt-6 flex flex-col items-center gap-3 py-4 text-center">
             <span className="text-3xl">🙏</span>
-            <p className="font-medium text-[#1F2937]">Thank you for your feedback!</p>
+            <p className="font-medium text-[#1F2937]">{t('thankYouForFeedback')}</p>
           </div>
         ) : (
           <div className="mt-5 space-y-4">
@@ -109,14 +114,14 @@ export function ReviewModal({
 
             <div>
               <label className="mb-1 block text-xs font-medium text-[#374151]">
-                Comment{' '}
-                <span className="text-[#9CA3AF]">(optional)</span>
+                {t('commentLabel')}{' '}
+                <span className="text-[#9CA3AF]">{tProduct('optional')}</span>
               </label>
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value.slice(0, 500))}
                 rows={4}
-                placeholder="Share your experience..."
+                placeholder={t('shareYourExperience')}
                 className="w-full resize-none rounded-lg border border-[#E5E7EB] p-3 text-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
               />
               <p className="mt-0.5 text-right text-xs text-[#9CA3AF]">{comment.length}/500</p>
@@ -134,7 +139,7 @@ export function ReviewModal({
               disabled={rating === 0 || submitting}
               className="w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
             >
-              {submitting ? 'Submitting…' : 'Submit review'}
+              {submitting ? t('submitting') : t('submitReview')}
             </button>
           </div>
         )}

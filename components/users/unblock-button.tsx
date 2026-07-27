@@ -2,6 +2,7 @@
 
 import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 type Props = {
@@ -10,6 +11,8 @@ type Props = {
 }
 
 export function UnblockButton({ blockerId, blockedId }: Props) {
+  const t = useTranslations('chat')
+  const tCommon = useTranslations('common')
   const [confirming, setConfirming] = useState(false)
   const [isPending, startTransition] = useTransition()
   const router = useRouter()
@@ -34,7 +37,7 @@ export function UnblockButton({ blockerId, blockedId }: Props) {
           onClick={() => setConfirming(false)}
           className="rounded-lg border border-[#E5E7EB] px-2.5 py-1 text-xs text-[#6B7280] hover:bg-[#F3F4F6]"
         >
-          Cancel
+          {tCommon('cancel')}
         </button>
         <button
           type="button"
@@ -42,7 +45,7 @@ export function UnblockButton({ blockerId, blockedId }: Props) {
           disabled={isPending}
           className="rounded-lg bg-[#C0392B] px-2.5 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
         >
-          {isPending ? '…' : 'Unblock'}
+          {isPending ? '…' : t('unblockAction')}
         </button>
       </div>
     )
@@ -54,7 +57,7 @@ export function UnblockButton({ blockerId, blockedId }: Props) {
       onClick={() => setConfirming(true)}
       className="rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#6B7280] transition-colors hover:bg-[#F3F4F6]"
     >
-      Unblock
+      {t('unblockAction')}
     </button>
   )
 }

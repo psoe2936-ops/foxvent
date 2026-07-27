@@ -1,6 +1,7 @@
 'use client'
 
 import { useMemo, useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 type Props = {
@@ -18,6 +19,9 @@ export function BlockButton({
   initialBlocked,
   onBlockChange,
 }: Props) {
+  const t = useTranslations('chat')
+  const tSafety = useTranslations('safety')
+  const tCommon = useTranslations('common')
   const [isBlocked, setIsBlocked] = useState(initialBlocked)
   const [confirming, setConfirming] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -33,14 +37,14 @@ export function BlockButton({
           .delete()
           .eq('blocker_id', viewerId)
           .eq('blocked_id', targetUserId)
-        if (dbErr) { setError('Failed. Please try again.'); return }
+        if (dbErr) { setError(tSafety('failed')); return }
         setIsBlocked(false)
         onBlockChange?.(false)
       } else {
         const { error: dbErr } = await supabase
           .from('blocks')
           .upsert({ blocker_id: viewerId, blocked_id: targetUserId }, { onConflict: 'blocker_id,blocked_id' })
-        if (dbErr) { setError('Failed. Please try again.'); return }
+        if (dbErr) { setError(tSafety('failed')); return }
         setIsBlocked(true)
         onBlockChange?.(true)
       }
@@ -52,11 +56,13 @@ export function BlockButton({
     return (
       <div className="rounded-xl border border-[#E5E7EB] bg-white p-3 shadow-sm">
         <p className="text-sm font-medium text-[#1F2937]">
-          {isBlocked ? `Unblock @${targetUsername}?` : `Block @${targetUsername}?`}
+          {isBlocked
+            ? t('unblockConfirmTitle', { username: targetUsername })
+            : t('blockConfirmTitle', { username: targetUsername })}
         </p>
         {!isBlocked && (
           <p className="mt-1 text-xs text-[#6B7280]">
-            They won&apos;t be able to message you. You can unblock from Settings anytime.
+            {t('blockWarning')}
           </p>
         )}
         {error && <p className="mt-1 text-xs text-[#C0392B]">{error}</p>}
@@ -67,7 +73,7 @@ export function BlockButton({
             disabled={isPending}
             className="flex-1 rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-60"
           >
-            Cancel
+            {tCommon('cancel')}
           </button>
           <button
             type="button"
@@ -75,7 +81,7 @@ export function BlockButton({
             disabled={isPending}
             className="flex-1 rounded-lg bg-[#C0392B] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
           >
-            {isPending ? '…' : isBlocked ? 'Unblock' : 'Block'}
+            {isPending ? '…' : isBlocked ? t('unblockAction') : t('blockAction')}
           </button>
         </div>
       </div>
@@ -92,7 +98,7 @@ export function BlockButton({
           : 'rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#9CA3AF] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]'
       }
     >
-      {isBlocked ? 'Blocked' : 'Block'}
+      {isBlocked ? tSafety('blockedState') : t('blockAction')}
     </button>
   )
 }

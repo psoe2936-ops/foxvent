@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getMessages } from 'next-intl/server'
 import { notFound } from 'next/navigation'
@@ -8,6 +7,7 @@ import { routing } from '@/i18n/routing'
 import '../globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
 import { cn } from '@/lib/utils'
+import { geist, fontMono } from '@/lib/fonts'
 import { NavbarServer } from '@/components/navbar/navbar-server'
 import { createClient } from '@/lib/supabase/server'
 import { SupportChatBubble } from '@/components/support/support-chat-bubble'
@@ -25,23 +25,16 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'FoxVend — Buy & Sell Second-Hand',
+    default: 'FoxVent — Buy & Sell Second-Hand',
     template: '%s — FoxVent',
   },
   description:
-    'FoxVend is a verified second-hand marketplace. Buy and sell pre-loved items safely.',
+    'FoxVent is a verified second-hand marketplace. Buy and sell pre-loved items safely.',
   openGraph: {
-    siteName: 'FoxVend',
+    siteName: 'FoxVent',
     type: 'website',
   },
 }
-
-const geist = Geist({ subsets: ['latin'], variable: '--font-sans' })
-
-const fontMono = Geist_Mono({
-  subsets: ['latin'],
-  variable: '--font-mono',
-})
 
 export default async function LocaleLayout({
   children,

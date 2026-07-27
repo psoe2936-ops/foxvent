@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, MoreVertical, Pencil, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { deleteProduct, markAsSold, markAsUnsold } from '@/app/products/actions'
 import { EditListingModal } from '@/components/products/edit-listing-modal'
 import type { Category } from '@/components/profile/new-listing-modal'
@@ -26,6 +27,8 @@ type Props = {
 }
 
 export function ProductOwnerMenu({ product, categories, sellerUsername }: Props) {
+  const t = useTranslations('product')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
@@ -76,7 +79,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
           type="button"
           onClick={(e) => { e.preventDefault(); setOpen((v) => !v) }}
           className="flex size-7 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition-colors hover:bg-black/70"
-          aria-label="Listing options"
+          aria-label={t('listingOptions')}
         >
           <MoreVertical className="size-4" />
         </button>
@@ -89,7 +92,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
               className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
             >
               <Pencil className="size-3.5 text-[#9CA3AF]" />
-              Edit
+              {tCommon('edit')}
             </button>
             {isApproved && (
               <button
@@ -99,7 +102,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
                 className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB] disabled:opacity-60"
               >
                 <CheckCircle className="size-3.5 text-[#9CA3AF]" />
-                {product.is_sold ? 'Mark available' : 'Mark as sold'}
+                {product.is_sold ? t('markAsAvailable') : t('markAsSold')}
               </button>
             )}
             <div className="my-1 h-px bg-[#F3F4F6]" />
@@ -109,7 +112,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
               className="flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-[#C0392B] hover:bg-[#FDEDEC]"
             >
               <Trash2 className="size-3.5" />
-              Delete
+              {tCommon('delete')}
             </button>
           </div>
         )}
@@ -124,15 +127,15 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
             onClick={(e) => e.stopPropagation()}
             className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl"
           >
-            <p className="font-semibold text-[#1F2937]">Delete listing?</p>
-            <p className="mt-1 text-sm text-[#6B7280]">This cannot be undone.</p>
+            <p className="font-semibold text-[#1F2937]">{t('deleteListingConfirmTitle')}</p>
+            <p className="mt-1 text-sm text-[#6B7280]">{t('deleteListingConfirmBody')}</p>
             <div className="mt-5 flex gap-3">
               <button
                 type="button"
                 onClick={() => setConfirmDelete(false)}
                 className="flex-1 rounded-lg border border-[#E5E7EB] py-2 text-sm font-medium text-[#374151] hover:bg-[#F9FAFB]"
               >
-                Cancel
+                {tCommon('cancel')}
               </button>
               <button
                 type="button"
@@ -140,7 +143,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
                 disabled={isPending}
                 className="flex-1 rounded-lg bg-[#C0392B] py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-60"
               >
-                {isPending ? 'Deleting...' : 'Delete'}
+                {isPending ? t('deleting') : tCommon('delete')}
               </button>
             </div>
           </div>

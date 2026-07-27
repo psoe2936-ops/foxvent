@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 import { notFound } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { NavbarServer } from '@/components/navbar/navbar-server'
 import { FollowButton } from '@/components/profile/follow-button'
@@ -9,6 +10,7 @@ type Props = { params: Promise<{ username: string }> }
 
 export default async function FollowersPage({ params }: Props) {
   const { username } = await params
+  const t = await getTranslations('profile')
   const supabase = await createClient()
 
   const {
@@ -61,19 +63,19 @@ export default async function FollowersPage({ params }: Props) {
           className="mb-5 inline-flex items-center gap-1.5 text-sm text-[#6B7280] hover:text-[#1F2937]"
         >
           <ArrowLeft className="size-4" />
-          Back to profile
+          {t('backToProfile')}
         </Link>
 
         <h1 className="text-xl font-bold text-[#1F2937]">
-          Followers
+          {t('followers')}
           <span className="ml-2 text-base font-normal text-[#6B7280]">@{username}</span>
         </h1>
         <p className="mt-0.5 text-sm text-[#6B7280]">
-          {followers.length} follower{followers.length !== 1 ? 's' : ''}
+          {t('followerCount', { count: followers.length })}
         </p>
 
         {followers.length === 0 ? (
-          <p className="mt-8 text-sm text-[#9CA3AF]">No followers yet.</p>
+          <p className="mt-8 text-sm text-[#9CA3AF]">{t('noFollowersYet')}</p>
         ) : (
           <ul className="mt-5 divide-y divide-[#F3F4F6] rounded-2xl border border-[#E5E7EB] bg-white">
             {followers.map((user: any) => (

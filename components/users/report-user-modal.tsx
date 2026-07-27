@@ -2,16 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { submitUserReport } from '@/app/reports/actions'
-
-const REASONS = [
-  { value: 'scam_or_fraud', label: 'Scam or fraud' },
-  { value: 'harassment', label: 'Harassment' },
-  { value: 'fake_profile', label: 'Fake profile' },
-  { value: 'inappropriate_behavior', label: 'Inappropriate behavior' },
-  { value: 'payment_dispute', label: 'Payment dispute' },
-  { value: 'other', label: 'Other' },
-]
 
 type Props = {
   targetUserId: string
@@ -28,6 +20,19 @@ export function ReportUserModal({
   conversationId,
   onClose,
 }: Props) {
+  const t = useTranslations('safety')
+  const tCommon = useTranslations('common')
+  const tProduct = useTranslations('product')
+  const tListing = useTranslations('listing')
+  const tChat = useTranslations('chat')
+  const REASONS = [
+    { value: 'scam_or_fraud', label: t('reasonScamOrFraud') },
+    { value: 'harassment', label: t('reasonHarassment') },
+    { value: 'fake_profile', label: t('reasonFakeProfile') },
+    { value: 'inappropriate_behavior', label: t('reasonInappropriateBehavior') },
+    { value: 'payment_dispute', label: t('reasonPaymentDispute') },
+    { value: 'other', label: t('reasonOther') },
+  ]
   const [reason, setReason] = useState('')
   const [description, setDescription] = useState('')
   const [submitted, setSubmitted] = useState(false)
@@ -36,9 +41,9 @@ export function ReportUserModal({
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!reason) { setError('Please select a reason.'); return }
+    if (!reason) { setError(t('pleaseSelectReason')); return }
     if (description.trim().length < 20) {
-      setError('Description must be at least 20 characters.')
+      setError(t('descriptionTooShort20'))
       return
     }
     setError(null)
@@ -64,12 +69,12 @@ export function ReportUserModal({
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">
-          <h2 className="font-semibold text-[#1F2937]">Report @{targetUsername}</h2>
+          <h2 className="font-semibold text-[#1F2937]">{tChat('reportUser', { username: targetUsername })}</h2>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-1 text-[#9CA3AF] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
-            aria-label="Close"
+            aria-label={tCommon('close')}
           >
             <X className="size-5" />
           </button>
@@ -78,27 +83,26 @@ export function ReportUserModal({
         {submitted ? (
           <div className="mt-4">
             <p className="text-sm leading-relaxed text-[#374151]">
-              Report submitted. Our team will review this within 24 hours. If this involves an
-              ongoing safety concern, please also block this user.
+              {t('reportSubmittedExtended')}
             </p>
             <button
               type="button"
               onClick={onClose}
               className="mt-4 w-full rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
             >
-              Done
+              {tProduct('done')}
             </button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="mt-4 space-y-4">
             <div>
-              <label className="mb-1 block text-xs font-medium text-[#374151]">Reason</label>
+              <label className="mb-1 block text-xs font-medium text-[#374151]">{tProduct('reasonLabel')}</label>
               <select
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none focus:border-[#F36D21]"
               >
-                <option value="">Select a reason</option>
+                <option value="">{tProduct('selectAReason')}</option>
                 {REASONS.map((r) => (
                   <option key={r.value} value={r.value}>
                     {r.label}
@@ -108,13 +112,13 @@ export function ReportUserModal({
             </div>
 
             <div>
-              <label className="mb-1 block text-xs font-medium text-[#374151]">Description</label>
+              <label className="mb-1 block text-xs font-medium text-[#374151]">{tListing('descriptionLabel')}</label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={4}
                 maxLength={2000}
-                placeholder="Please describe what happened, including any details about payment or meetup arrangements if relevant"
+                placeholder={t('describeWhatHappened')}
                 className="w-full resize-none rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
               />
               <p className="mt-0.5 text-right text-xs text-[#9CA3AF]">{description.length}/2000</p>
@@ -127,7 +131,7 @@ export function ReportUserModal({
               disabled={isPending}
               className="w-full rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-70"
             >
-              {isPending ? 'Submitting…' : 'Submit report'}
+              {isPending ? tProduct('submitting') : tProduct('submitReport')}
             </button>
           </form>
         )}

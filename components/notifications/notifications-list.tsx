@@ -4,6 +4,7 @@ import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { AlertCircle, Bell, CheckCircle2, MessageCircle, UserPlus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { formatRelativeTime } from '@/lib/format-relative-time'
 
@@ -33,6 +34,7 @@ export function NotificationsList({
   userId: string
   initialNotifications: NotificationRow[]
 }) {
+  const t = useTranslations('notifications')
   const [notifications, setNotifications] = useState(initialNotifications)
   const [markingAll, setMarkingAll] = useState(false)
   const router = useRouter()
@@ -67,10 +69,10 @@ export function NotificationsList({
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-[#1F2937]">Notifications</h1>
+        <h1 className="text-xl font-bold text-[#1F2937]">{t('title')}</h1>
         <div className="flex items-center gap-3">
           <p className="text-sm text-[#6B7280]">
-            {unreadCount > 0 ? `${unreadCount} unread` : `${notifications.length} total`}
+            {unreadCount > 0 ? t('unreadCount', { count: unreadCount }) : t('totalCount', { count: notifications.length })}
           </p>
           {unreadCount > 0 && (
             <button
@@ -79,7 +81,7 @@ export function NotificationsList({
               disabled={markingAll}
               className="cursor-pointer text-sm text-[#F36D21] hover:underline disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {markingAll ? 'Marking…' : 'Mark all as read'}
+              {markingAll ? t('marking') : t('markAllAsRead')}
             </button>
           )}
         </div>
@@ -88,9 +90,9 @@ export function NotificationsList({
       {notifications.length === 0 ? (
         <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
           <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
-          <p className="text-base font-medium text-[#1F2937]">No notifications yet</p>
+          <p className="text-base font-medium text-[#1F2937]">{t('noNotificationsYet')}</p>
           <p className="mt-1 text-sm text-[#6B7280]">
-            We&apos;ll notify you when something happens.
+            {t('weWillNotify')}
           </p>
         </div>
       ) : (

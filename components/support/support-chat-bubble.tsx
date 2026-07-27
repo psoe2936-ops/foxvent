@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { ArrowUp, MessageCircle, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeText } from '@/lib/sanitize'
 import { checkRateLimit, formatRetryTime } from '@/lib/rate-limit'
@@ -17,6 +18,8 @@ type SupportMessage = {
 }
 
 export function SupportChatBubble({ userId }: { userId: string | null }) {
+  const t = useTranslations('support')
+  const tCommon = useTranslations('common')
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState<SupportMessage[]>([])
@@ -167,7 +170,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
     const rl = await checkRateLimit(supabase, userId!, 'support_message', 20, 10)
     if (!rl.allowed) {
       const wait = formatRetryTime(rl.retryAfterSeconds ?? 600)
-      setSendError(`You're messaging a bit fast — give it ${wait}!`)
+      setSendError(t('messagingTooFast', { wait }))
       setSending(false)
       return
     }
@@ -218,13 +221,13 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
           <div className="flex shrink-0 items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
             <FoxIcon className="size-8 shrink-0" />
             <div className="min-w-0 flex-1">
-              <p className="font-medium text-[#1F2937]">FoxVent Support</p>
-              <p className="text-xs text-[#6B7280]">We&apos;ll reply as soon as we can</p>
+              <p className="font-medium text-[#1F2937]">{t('supportName')}</p>
+              <p className="text-xs text-[#6B7280]">{t('willReplyAsap')}</p>
             </div>
             <button
               onClick={() => setOpen(false)}
               className="shrink-0 rounded-full p-1 text-[#9CA3AF] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
-              aria-label="Close"
+              aria-label={tCommon('close')}
             >
               <X className="size-4" />
             </button>
@@ -235,7 +238,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
             {messages.length === 0 && (
               <div className="flex flex-col items-start">
                 <div className="max-w-[80%] rounded-2xl rounded-bl-sm bg-[#F3F4F6] px-3 py-2 text-sm text-[#1F2937]">
-                  👋 Hi! How can we help you today?
+                  {t('greetingBubble')}
                 </div>
               </div>
             )}
@@ -276,14 +279,14 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) handleSend()
               }}
-              placeholder="Write your message..."
+              placeholder={t('writeYourMessage')}
               className="flex-1 rounded-full border border-[#E5E7EB] px-4 py-2 text-sm outline-none focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20"
             />
             <button
               onClick={handleSend}
               disabled={!input.trim() || sending}
               className="shrink-0 rounded-full bg-[#F36D21] p-2 text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-              aria-label="Send"
+              aria-label={t('send')}
             >
               <ArrowUp className="size-4" />
             </button>
@@ -297,7 +300,7 @@ export function SupportChatBubble({ userId }: { userId: string | null }) {
         <button
           onClick={() => { setOpen(true); setUnreadCount(0) }}
           className="fixed bottom-24 right-4 z-50 flex size-14 items-center justify-center rounded-full bg-[#F36D21] shadow-lg transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6"
-          aria-label="Open support chat"
+          aria-label={t('openSupportChat')}
         >
           <MessageCircle className="size-6 text-white" />
           {unreadCount > 0 && (

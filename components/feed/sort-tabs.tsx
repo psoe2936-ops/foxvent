@@ -1,19 +1,10 @@
 'use client'
 
+import { useTranslations } from 'next-intl'
 import { HoverEdgeScroll } from '@/components/feed/hover-edge-scroll'
 import { buildMarketplaceHref } from '@/lib/marketplace-url'
 
 type SortOption = 'newest' | 'popular' | 'price_asc' | 'price_desc'
-
-const SORT_TABS: {
-  id: SortOption
-  label: string
-}[] = [
-  { id: 'newest', label: 'Newest' },
-  { id: 'popular', label: 'Popular' },
-  { id: 'price_asc', label: 'Price: Low to High' },
-  { id: 'price_desc', label: 'Price: High to Low' },
-]
 
 type SortTabsProps = {
   sort: SortOption
@@ -22,6 +13,13 @@ type SortTabsProps = {
 }
 
 export function SortTabs({ sort, filterParams, basePath = '/' }: SortTabsProps) {
+  const t = useTranslations('feed')
+  const SORT_TABS: { id: SortOption; label: string }[] = [
+    { id: 'newest', label: t('newest') },
+    { id: 'popular', label: t('popular') },
+    { id: 'price_asc', label: t('priceLowHigh') },
+    { id: 'price_desc', label: t('priceHighLow') },
+  ]
   return (
     <HoverEdgeScroll className="min-w-0 flex-1 cursor-default">
       <div className="flex w-max gap-6">

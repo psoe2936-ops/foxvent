@@ -57,7 +57,7 @@ export async function ActivityPanel({
         <div className="mt-4 flex flex-col items-center gap-2 py-4 text-center">
           <Lock className="size-5 text-[#D1D5DB]" />
           <p className="text-[13px] text-[#9CA3AF]">
-            Sign in to see your activity
+            {t('signInToSeeActivity')}
           </p>
         </div>
       ) : notifications.length === 0 ? (
@@ -102,7 +102,7 @@ export async function ActivityPanel({
             href="/feed/notifications"
             className="mt-3 block text-center text-[12px] font-medium text-[#F36D21] hover:underline"
           >
-            View all activity
+            {t('viewAllActivity')}
           </Link>
         </>
       )}

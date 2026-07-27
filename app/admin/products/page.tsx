@@ -82,7 +82,7 @@ export default async function AdminProductsPage({
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-[#1F2937]">
+        <h1 className="text-2xl font-semibold tracking-tight text-[#1F2937]">
           {statusTitle[status] ?? 'Listings'}
         </h1>
         {(pendingCount ?? 0) > 0 && status !== 'pending' && (

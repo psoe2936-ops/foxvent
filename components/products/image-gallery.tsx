@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { ImageLightbox } from '@/components/products/image-lightbox'
 
 type Props = {
@@ -10,6 +11,7 @@ type Props = {
 }
 
 export function ImageGallery({ images, title, isSold }: Props) {
+  const t = useTranslations('product')
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
 
   return (
@@ -22,7 +24,7 @@ export function ImageGallery({ images, title, isSold }: Props) {
               type="button"
               onClick={() => setLightboxIndex(i)}
               className="group relative aspect-square w-full overflow-hidden rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]"
-              aria-label={`View photo ${i + 1}`}
+              aria-label={t('viewPhoto', { number: i + 1 })}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -35,14 +37,14 @@ export function ImageGallery({ images, title, isSold }: Props) {
           ))
         ) : (
           <div className="col-span-2 flex aspect-video items-center justify-center rounded-xl bg-[#F3F4F6] text-sm text-[#9CA3AF]">
-            No images
+            {t('noImages')}
           </div>
         )}
       </div>
 
       {isSold && (
         <div className="absolute left-3 top-3 rounded-lg bg-black/60 px-3 py-1 text-sm font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-          Sold
+          {t('sold')}
         </div>
       )}
 

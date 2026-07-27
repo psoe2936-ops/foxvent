@@ -1,9 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 export function PasswordResetButton({ email }: { email: string }) {
+  const t = useTranslations('settings')
+  const tCommon = useTranslations('common')
   const [status, setStatus] = useState<'idle' | 'loading' | 'sent' | 'error'>('idle')
   const supabase = createClient()
 
@@ -18,7 +21,7 @@ export function PasswordResetButton({ email }: { email: string }) {
   if (status === 'sent') {
     return (
       <p className="text-sm text-green-600">
-        Reset link sent — check your inbox.
+        {t('resetLinkSent')}
       </p>
     )
   }
@@ -31,10 +34,10 @@ export function PasswordResetButton({ email }: { email: string }) {
         disabled={status === 'loading'}
         className="self-start rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#2D2E32] transition-colors hover:bg-[#F9FAFB] disabled:opacity-50"
       >
-        {status === 'loading' ? 'Sending…' : 'Send reset email'}
+        {status === 'loading' ? t('sending') : t('sendResetEmail')}
       </button>
       {status === 'error' && (
-        <p className="text-xs text-[#C0392B]">Something went wrong. Try again.</p>
+        <p className="text-xs text-[#C0392B]">{tCommon('somethingWentWrong')}</p>
       )}
     </div>
   )

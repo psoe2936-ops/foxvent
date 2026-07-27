@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 
 type Props = {
@@ -8,6 +9,7 @@ type Props = {
 }
 
 export async function MoreFromSeller({ sellerId, sellerUsername, currentProductId }: Props) {
+  const t = await getTranslations('product')
   const supabase = await createClient()
 
   const { data: listings } = await supabase
@@ -25,12 +27,12 @@ export async function MoreFromSeller({ sellerId, sellerUsername, currentProductI
   return (
     <section className="rounded-xl border border-[#E8EAED] bg-white p-5 shadow-sm">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-sm font-semibold text-[#1F2937]">More from seller</h2>
+        <h2 className="text-sm font-semibold text-[#1F2937]">{t('moreFromSeller')}</h2>
         <Link
           href={`/profile/${sellerUsername}`}
           className="text-xs font-medium text-[#F36D21] hover:underline"
         >
-          View all →
+          {t('viewAll')} →
         </Link>
       </div>
 

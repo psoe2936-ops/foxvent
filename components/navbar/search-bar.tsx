@@ -3,6 +3,7 @@
 import { Search, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 
 const STORAGE_KEY = 'foxvent_recent_searches'
@@ -16,6 +17,8 @@ type SearchBarProps = {
 }
 
 export function SearchBar({ className, categories = [] }: SearchBarProps) {
+  const t = useTranslations('navbar')
+  const tFeed = useTranslations('feed')
   const [value, setValue] = useState('')
   const [showDropdown, setShowDropdown] = useState(false)
   const [recentSearches, setRecentSearches] = useState<string[]>([])
@@ -88,7 +91,7 @@ export function SearchBar({ className, categories = [] }: SearchBarProps) {
     <div className={cn('relative w-full max-w-2xl', className)}>
       <form onSubmit={handleSubmit}>
         <label htmlFor="navbar-search" className="sr-only">
-          Search products, categories or users
+          {t('searchPlaceholder')}
         </label>
         <Search
           className="pointer-events-none absolute top-1/2 left-3 z-10 size-4 -translate-y-1/2 text-[#9CA3AF]"
@@ -103,14 +106,14 @@ export function SearchBar({ className, categories = [] }: SearchBarProps) {
           onChange={(e) => setValue(e.target.value)}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          placeholder="Search products, categories or users..."
+          placeholder={`${t('searchPlaceholder')}...`}
           className={`h-10 w-full rounded-xl border border-transparent bg-[#F3F4F6] pl-10 text-sm text-[#2D2E32] placeholder:text-[#9CA3AF] outline-none transition-colors focus:border-[#E5E7EB] focus:bg-white focus:ring-2 focus:ring-[#F36D21]/20 ${value ? 'pr-9' : 'pr-16'}`}
         />
         {value ? (
           <button
             type="button"
             onClick={handleClear}
-            aria-label="Clear search"
+            aria-label={tFeed('clearSearchAriaLabel')}
             className="absolute top-1/2 right-3 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280]"
           >
             <X className="size-4" />
@@ -128,7 +131,7 @@ export function SearchBar({ className, categories = [] }: SearchBarProps) {
           {recentSearches.length > 0 && (
             <div className={categories.length > 0 ? 'mb-3' : ''}>
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                Recent
+                {t('recentLabel')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {recentSearches.map((s) => (
@@ -153,7 +156,7 @@ export function SearchBar({ className, categories = [] }: SearchBarProps) {
           {categories.length > 0 && (
             <div>
               <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[#9CA3AF]">
-                Categories
+                {t('categoriesLabel')}
               </p>
               <div className="flex flex-wrap gap-2">
                 {categories.slice(0, 8).map((cat) => (

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Heart } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { useToast } from '@/components/ui/toast'
 
@@ -13,6 +14,7 @@ export function WishlistHeart({
   productId: string
   initialSaved?: boolean
 }) {
+  const t = useTranslations('wishlist')
   const [saved, setSaved] = useState(initialSaved)
   const [pending, setPending] = useState(false)
   const router = useRouter()
@@ -48,7 +50,7 @@ export function WishlistHeart({
 
       if (error) {
         setSaved(true)
-        showToast('Could not remove from wishlist. Please try again.', 'error')
+        showToast(t('removeFailed'), 'error')
       }
     } else {
       const { error } = await supabase
@@ -57,7 +59,7 @@ export function WishlistHeart({
 
       if (error) {
         setSaved(false)
-        showToast('Could not save to wishlist. Please try again.', 'error')
+        showToast(t('saveFailed'), 'error')
       }
     }
 
@@ -72,7 +74,7 @@ export function WishlistHeart({
       className={`absolute right-2.5 top-2.5 flex size-8 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur-sm transition-colors ${
         saved ? 'text-[#F36D21]' : 'text-[#6B7280] hover:text-[#F36D21]'
       }`}
-      aria-label={saved ? 'Remove from wishlist' : 'Save to wishlist'}
+      aria-label={saved ? t('removeFromWishlist') : t('saveToWishlist')}
     >
       <Heart className="size-4" fill={saved ? '#F36D21' : 'none'} />
     </button>

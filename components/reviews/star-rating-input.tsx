@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Star } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 
 const SIZE_CLASS = { sm: 'size-4', lg: 'size-8' }
 
@@ -14,6 +15,7 @@ export function StarRatingInput({
   onChange: (rating: number) => void
   size?: 'sm' | 'lg'
 }) {
+  const t = useTranslations('review')
   const [hovered, setHovered] = useState(0)
   const display = hovered || value
   const starClass = SIZE_CLASS[size]
@@ -27,7 +29,7 @@ export function StarRatingInput({
           onClick={() => onChange(star)}
           onMouseEnter={() => setHovered(star)}
           className="transition-transform hover:scale-110 focus-visible:outline-none"
-          aria-label={`Rate ${star} star${star !== 1 ? 's' : ''}`}
+          aria-label={t('rateStars', { count: star })}
         >
           <Star
             className={`${starClass} transition-colors ${

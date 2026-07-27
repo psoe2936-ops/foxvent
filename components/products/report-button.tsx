@@ -2,16 +2,8 @@
 
 import { useState } from 'react'
 import { Flag, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { submitProductReport } from '@/app/reports/actions'
-
-const REASONS = [
-  'Spam',
-  'Fake listing',
-  'Inappropriate content',
-  'Wrong price',
-  'Already sold',
-  'Other',
-]
 
 export function ReportButton({
   productId,
@@ -20,6 +12,16 @@ export function ReportButton({
   productId: string
   viewerId: string
 }) {
+  const t = useTranslations('product')
+  const tCommon = useTranslations('common')
+  const REASONS = [
+    { value: 'Spam', label: t('reasonSpam') },
+    { value: 'Fake listing', label: t('reasonFakeListing') },
+    { value: 'Inappropriate content', label: t('reasonInappropriateContent') },
+    { value: 'Wrong price', label: t('reasonWrongPrice') },
+    { value: 'Already sold', label: t('reasonAlreadySold') },
+    { value: 'Other', label: t('reasonOther') },
+  ]
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState('')
   const [description, setDescription] = useState('')
@@ -70,7 +72,7 @@ export function ReportButton({
         className="inline-flex items-center gap-1.5 text-xs text-[#9CA3AF] transition-colors hover:text-[#6B7280]"
       >
         <Flag className="size-3.5" />
-        Report listing
+        {t('reportListing')}
       </button>
 
       {open && (
@@ -88,70 +90,70 @@ export function ReportButton({
             <button
               type="button"
               onClick={handleClose}
-              aria-label="Close"
+              aria-label={tCommon('close')}
               className="absolute right-4 top-4 text-[#9CA3AF] hover:text-[#2D2E32]"
             >
               <X className="size-5" />
             </button>
 
             <h2 id="report-modal-title" className="text-base font-bold text-[#1F2937]">
-              Report this listing
+              {t('reportThisListing')}
             </h2>
 
             {done ? (
               <div className="mt-4 text-center">
                 <p className="text-sm text-[#1F2937]">
-                  Report submitted. We&apos;ll review it shortly.
+                  {t('reportSubmitted')}
                 </p>
                 <button
                   type="button"
                   onClick={handleClose}
                   className="mt-4 rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
                 >
-                  Done
+                  {t('done')}
                 </button>
               </div>
             ) : alreadyReported ? (
               <div className="mt-4 text-center">
                 <p className="text-sm text-[#6B7280]">
-                  You&apos;ve already reported this listing.
+                  {t('alreadyReported')}
                 </p>
                 <button
                   type="button"
                   onClick={handleClose}
                   className="mt-4 rounded-lg border border-[#E5E7EB] px-4 py-2 text-sm font-medium text-[#6B7280] hover:bg-[#F9FAFB]"
                 >
-                  Close
+                  {tCommon('close')}
                 </button>
               </div>
             ) : (
               <div className="mt-4 space-y-4">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                    Reason
+                    {t('reasonLabel')}
                   </label>
                   <select
                     value={reason}
                     onChange={(e) => setReason(e.target.value)}
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none focus:border-[#F36D21]"
                   >
-                    <option value="">Select a reason</option>
+                    <option value="">{t('selectAReason')}</option>
                     {REASONS.map((r) => (
-                      <option key={r} value={r}>{r}</option>
+                      <option key={r.value} value={r.value}>{r.label}</option>
                     ))}
                   </select>
                 </div>
 
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                    Additional details{' '}
-                    <span className="text-[#9CA3AF]">(optional)</span>
+                    {t('additionalDetails')}{' '}
+                    <span className="text-[#9CA3AF]">{t('optional')}</span>
                   </label>
                   <textarea
                     value={description}
                     onChange={(e) => setDescription(e.target.value.slice(0, 500))}
                     rows={3}
-                    placeholder="Describe the issue..."
+                    placeholder={t('describeIssue')}
                     className="w-full resize-none rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
                   />
                   <p className="mt-0.5 text-right text-xs text-[#9CA3AF]">
@@ -171,7 +173,7 @@ export function ReportButton({
                   disabled={!reason || submitting}
                   className="w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-sm font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {submitting ? 'Submitting...' : 'Submit report'}
+                  {submitting ? t('submitting') : t('submitReport')}
                 </button>
               </div>
             )}

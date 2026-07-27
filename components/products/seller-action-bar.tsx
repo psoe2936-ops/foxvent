@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle, Pencil, Trash2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { deleteProduct, markAsSold, markAsUnsold } from '@/app/products/actions'
 import { EditListingModal } from '@/components/products/edit-listing-modal'
 import type { Category } from '@/components/profile/new-listing-modal'
@@ -27,6 +28,8 @@ type Props = {
 }
 
 export function SellerActionBar({ product, categories, sellerUsername }: Props) {
+  const t = useTranslations('product')
+  const tCommon = useTranslations('common')
   const [editOpen, setEditOpen] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -47,7 +50,7 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
         }
         router.refresh()
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+        const msg = err instanceof Error ? err.message : tCommon('somethingWentWrong')
         setError(msg)
         showToast(msg, 'error')
       }
@@ -60,7 +63,7 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
       try {
         await deleteProduct(product.id, sellerUsername)
       } catch (err) {
-        const msg = err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+        const msg = err instanceof Error ? err.message : tCommon('somethingWentWrong')
         setError(msg)
         showToast(msg, 'error')
       }
@@ -78,7 +81,7 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
             className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6]"
           >
             <Pencil className="size-3.5" />
-            Edit
+            {tCommon('edit')}
           </button>
 
           {/* Mark as sold — only for approved listings */}
@@ -90,7 +93,7 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
               className="inline-flex items-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-3 py-1.5 text-sm font-medium text-[#374151] transition-colors hover:bg-[#F3F4F6] disabled:opacity-60"
             >
               <CheckCircle className="size-3.5" />
-              {product.is_sold ? 'Mark available' : 'Mark as sold'}
+              {product.is_sold ? t('markAsAvailable') : t('markAsSold')}
             </button>
           )}
 
@@ -103,17 +106,17 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
                 className="inline-flex items-center gap-1.5 rounded-lg border border-[#FDEDEC] bg-white px-3 py-1.5 text-sm font-medium text-[#C0392B] transition-colors hover:bg-[#FDEDEC]"
               >
                 <Trash2 className="size-3.5" />
-                Delete
+                {tCommon('delete')}
               </button>
             ) : (
               <>
-                <span className="text-xs text-[#6B7280]">Are you sure?</span>
+                <span className="text-xs text-[#6B7280]">{t('areYouSure')}</span>
                 <button
                   type="button"
                   onClick={() => setConfirmDelete(false)}
                   className="rounded-lg border border-[#E5E7EB] px-2.5 py-1 text-xs text-[#6B7280] hover:bg-[#F3F4F6]"
                 >
-                  Cancel
+                  {tCommon('cancel')}
                 </button>
                 <button
                   type="button"
@@ -121,7 +124,7 @@ export function SellerActionBar({ product, categories, sellerUsername }: Props) 
                   disabled={isPending}
                   className="rounded-lg bg-[#C0392B] px-2.5 py-1 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
                 >
-                  {isPending ? 'Deleting…' : 'Delete'}
+                  {isPending ? t('deleting') : tCommon('delete')}
                 </button>
               </>
             )}

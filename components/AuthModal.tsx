@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react'
 import { Check, Eye, EyeOff, Mail } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeUsername } from '@/lib/sanitize'
 import { useRouter } from 'next/navigation'
@@ -15,27 +16,31 @@ import { useRouter } from 'next/navigation'
 type AuthMode = 'login' | 'register' | 'forgot'
 type Screen = 'form' | 'otp' | 'reset-sent'
 type FieldErrors = { email?: string; password?: string; username?: string }
+type AuthT = ReturnType<typeof useTranslations<'auth'>>
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
-function validateEmail(val: string): string | undefined {
-  if (!val) return 'Email is required.'
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return 'Enter a valid email address.'
+function validateEmail(t: AuthT, val: string): string | undefined {
+  if (!val) return t('emailRequired')
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return t('emailInvalid')
 }
 
-function validatePassword(val: string): string | undefined {
-  if (!val) return 'Password is required.'
-  if (val.length < 6) return 'Password must be at least 6 characters.'
+function validatePassword(t: AuthT, val: string): string | undefined {
+  if (!val) return t('passwordRequired')
+  if (val.length < 6) return t('passwordTooShort')
 }
 
-function getStrength(pwd: string): { level: number; label: string; color: string } {
-  if (pwd.length < 8) return { level: 1, label: 'Weak', color: '#C0392B' }
+function getStrength(
+  t: AuthT,
+  pwd: string
+): { level: number; label: string; color: string } {
+  if (pwd.length < 8) return { level: 1, label: t('strengthWeak'), color: '#C0392B' }
   const score = [/[A-Z]/.test(pwd), /\d/.test(pwd), /[^A-Za-z0-9]/.test(pwd)].filter(
     Boolean
   ).length
-  if (score >= 3) return { level: 4, label: 'Strong', color: '#1A7A4A' }
-  if (score >= 2) return { level: 3, label: 'Good', color: '#D97706' }
-  return { level: 2, label: 'Fair', color: '#F36D21' }
+  if (score >= 3) return { level: 4, label: t('strengthStrong'), color: '#1A7A4A' }
+  if (score >= 2) return { level: 3, label: t('strengthGood'), color: '#D97706' }
+  return { level: 2, label: t('strengthFair'), color: '#F36D21' }
 }
 
 // ── Shared sub-components ──────────────────────────────────────────────────────
@@ -57,8 +62,8 @@ function Spinner({ dark = false }: { dark?: boolean }) {
   )
 }
 
-function StrengthMeter({ password }: { password: string }) {
-  const { level, label, color } = getStrength(password)
+function StrengthMeter({ t, password }: { t: AuthT; password: string }) {
+  const { level, label, color } = getStrength(t, password)
   return (
     <div style={{ marginBottom: '10px', marginTop: '-2px' }}>
       <div style={{ display: 'flex', gap: '4px', marginBottom: '4px' }}>
@@ -107,10 +112,12 @@ function FormField({
 function EmailSentScreen({
   heading,
   body,
+  backLabel,
   onBack,
 }: {
   heading: string
   body: ReactNode
+  backLabel: string
   onBack: () => void
 }) {
   return (
@@ -146,7 +153,7 @@ function EmailSentScreen({
           cursor: 'pointer',
         }}
       >
-        ← Back to sign in
+        ← {backLabel}
       </button>
     </div>
   )
@@ -189,6 +196,9 @@ function AuthModalContent({
   onClose: () => void
   redirectTo?: string
 }) {
+  const t = useTranslations('auth')
+  const tCommon = useTranslations('common')
+
   // ── Form state ────────────────────────────────────────────────────────────
   const [mode, setMode] = useState<AuthMode>(initialMode)
   const [screen, setScreen] = useState<Screen>('form')
@@ -271,8 +281,8 @@ function AuthModalContent({
     const trimmedPassword = password.trim()
     const errs: FieldErrors = {}
 
-    const emailErr = validateEmail(trimmedEmail)
-    const pwdErr = validatePassword(trimmedPassword)
+    const emailErr = validateEmail(t, trimmedEmail)
+    const pwdErr = validatePassword(t, trimmedPassword)
     if (emailErr) errs.email = emailErr
     if (pwdErr) errs.password = pwdErr
     if (Object.keys(errs).length) {
@@ -282,11 +292,11 @@ function AuthModalContent({
 
     if (mode === 'register') {
       if (!fullName.trim()) {
-        setError('Please enter your full name.')
+        setError(t('fullNameRequired'))
         return
       }
       if (!username) {
-        setFieldErrors({ username: 'Please choose a username.' })
+        setFieldErrors({ username: t('usernameRequired') })
         return
       }
     }
@@ -339,7 +349,7 @@ function AuthModalContent({
     setFieldErrors({})
 
     const trimmedEmail = email.trim().toLowerCase()
-    const emailErr = validateEmail(trimmedEmail)
+    const emailErr = validateEmail(t, trimmedEmail)
     if (emailErr) {
       setFieldErrors({ email: emailErr })
       return
@@ -372,7 +382,7 @@ function AuthModalContent({
     })
 
     if (oauthError || !data.url) {
-      setError(oauthError?.message ?? 'Could not start Google sign in.')
+      setError(oauthError?.message ?? t('couldNotStartGoogle'))
       setGoogleLoading(false)
       return
     }
@@ -403,7 +413,7 @@ function AuthModalContent({
     setOtpLoading(false)
 
     if (verifyError) {
-      setError('Invalid or expired code. Please try again.')
+      setError(t('invalidOtpCode'))
       setDigits(['', '', '', '', '', '', '', ''])
       setTimeout(() => inputRefs.current[0]?.focus(), 0)
       return
@@ -460,24 +470,24 @@ function AuthModalContent({
   const otpComplete = digits.join('').length === 8
 
   const headings: Record<AuthMode, string> = {
-    login: 'Welcome back',
-    register: 'Create your account',
-    forgot: 'Reset password',
+    login: t('headingLogin'),
+    register: t('headingRegister'),
+    forgot: t('headingForgot'),
   }
   const subtitles: Record<AuthMode, string> = {
-    login: 'Sign in to continue to FoxVent',
-    register: 'Join the FoxVent community',
-    forgot: 'Enter your email to get a reset link',
+    login: t('subtitleLogin'),
+    register: t('subtitleRegister'),
+    forgot: t('subtitleForgot'),
   }
   const submitLabels: Record<AuthMode, string> = {
-    login: 'Sign in',
-    register: 'Create account',
-    forgot: 'Send reset link',
+    login: tCommon('signIn'),
+    register: t('createAccount'),
+    forgot: t('sendResetLink'),
   }
   const loadingLabels: Record<AuthMode, string> = {
-    login: 'Signing in...',
-    register: 'Creating account...',
-    forgot: 'Sending link...',
+    login: t('signingIn'),
+    register: t('creatingAccount'),
+    forgot: t('sendingLink'),
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
@@ -491,7 +501,7 @@ function AuthModalContent({
         onClick={(e) => e.stopPropagation()}
         className="relative h-full w-full overflow-y-auto rounded-t-3xl border border-white/60 bg-white/90 p-8 backdrop-blur-2xl backdrop-saturate-150 sm:h-auto sm:max-h-[90vh] sm:w-95 sm:max-w-[90vw] sm:rounded-[14px] sm:shadow-[0_16px_48px_rgba(0,0,0,0.12)]"
       >
-        <button type="button" onClick={onClose} style={closeButtonStyle} aria-label="Close">
+        <button type="button" onClick={onClose} style={closeButtonStyle} aria-label={tCommon('close')}>
           ×
         </button>
 
@@ -518,11 +528,10 @@ function AuthModalContent({
                 id="auth-modal-title"
                 style={{ fontSize: '20px', fontWeight: 700, color: '#1A1814', margin: '0 0 8px' }}
               >
-                Check your email
+                {t('checkYourEmail')}
               </h2>
               <p style={{ fontSize: '13px', color: '#6B6860', lineHeight: 1.6 }}>
-                We sent an 8-digit code to <strong>{email}</strong>. Enter it below to verify
-                your account.
+                {t.rich('otpSentMessage', { email, b: (chunks) => <strong>{chunks}</strong> })}
               </p>
             </div>
 
@@ -600,15 +609,15 @@ function AuthModalContent({
               {otpVerified ? (
                 <>
                   <Check size={16} />
-                  Verified!
+                  {t('verified')}
                 </>
               ) : otpLoading ? (
                 <>
                   <Spinner />
-                  Verifying...
+                  {t('verifyingCode')}
                 </>
               ) : (
-                'Verify'
+                t('verify')
               )}
             </button>
 
@@ -634,7 +643,7 @@ function AuthModalContent({
                   cursor: resendCooldown > 0 ? 'not-allowed' : 'pointer',
                 }}
               >
-                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+                {resendCooldown > 0 ? t('resendIn', { seconds: resendCooldown }) : t('resendCode')}
               </button>
               <button
                 type="button"
@@ -651,7 +660,7 @@ function AuthModalContent({
                   cursor: 'pointer',
                 }}
               >
-                Wrong email? Go back
+                {t('wrongEmailGoBack')}
               </button>
             </div>
           </div>
@@ -660,8 +669,9 @@ function AuthModalContent({
         {/* ── Reset link sent screen ── */}
         {screen === 'reset-sent' && (
           <EmailSentScreen
-            heading="Check your inbox"
-            body="We sent a password reset link to your email. Click it to choose a new password."
+            heading={t('checkYourInbox')}
+            body={t('resetLinkSentBody')}
+            backLabel={t('backToSignIn')}
             onBack={() => switchMode('login')}
           />
         )}
@@ -701,7 +711,7 @@ function AuthModalContent({
                   {googleLoading ? (
                     <>
                       <Spinner dark />
-                      Redirecting...
+                      {t('redirecting')}
                     </>
                   ) : (
                     <>
@@ -711,14 +721,14 @@ function AuthModalContent({
                         <path fill="#4CAF50" d="M24 45c5.4 0 10.3-1.8 14-5l-6.5-5.4C29.7 36.3 27 37 24 37c-5.4 0-10-3.6-11.6-8.5l-6.6 5.1C9.4 40.5 16.1 45 24 45z" />
                         <path fill="#1976D2" d="M43.6 20.5H24v7h11.3c-1 2.7-2.8 4.9-5.2 6.4l6.5 5.4C40.6 35.8 44 30.4 44 24c0-1.2-.1-2.3-.4-3.5z" />
                       </svg>
-                      Continue with Google
+                      {t('continueWithGoogle')}
                     </>
                   )}
                 </button>
 
                 <div style={dividerStyle}>
                   <div style={dividerLineStyle} />
-                  <span style={{ fontSize: '12px', color: '#6B6860' }}>or</span>
+                  <span style={{ fontSize: '12px', color: '#6B6860' }}>{t('or')}</span>
                   <div style={dividerLineStyle} />
                 </div>
               </>
@@ -728,7 +738,7 @@ function AuthModalContent({
             <form onSubmit={mode === 'forgot' ? handleForgotPassword : handleEmailAuth}>
               {mode === 'register' && (
                 <>
-                  <FormField label="Full name">
+                  <FormField label={t('fullName')}>
                     <input
                       type="text"
                       required
@@ -743,7 +753,7 @@ function AuthModalContent({
                   </FormField>
 
                   <FormField
-                    label={`Username${username.length > 0 ? ` (${username.length}/30)` : ''}`}
+                    label={`${t('username')}${username.length > 0 ? ` (${username.length}/30)` : ''}`}
                     error={fieldErrors.username}
                   >
                     <input
@@ -768,7 +778,7 @@ function AuthModalContent({
                 </>
               )}
 
-              <FormField label="Email address" error={fieldErrors.email}>
+              <FormField label={t('emailAddress')} error={fieldErrors.email}>
                 <input
                   type="email"
                   required
@@ -787,7 +797,7 @@ function AuthModalContent({
 
               {mode !== 'forgot' && (
                 <>
-                  <FormField label="Password" error={fieldErrors.password}>
+                  <FormField label={t('password')} error={fieldErrors.password}>
                     <div style={{ position: 'relative' }}>
                       <input
                         type={showPassword ? 'text' : 'password'}
@@ -812,7 +822,7 @@ function AuthModalContent({
                         type="button"
                         tabIndex={-1}
                         onClick={() => setShowPassword((v) => !v)}
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-label={showPassword ? t('hidePassword') : t('showPassword')}
                         style={{
                           position: 'absolute',
                           right: '10px',
@@ -833,7 +843,7 @@ function AuthModalContent({
                   </FormField>
 
                   {mode === 'register' && password.length > 0 && (
-                    <StrengthMeter password={password} />
+                    <StrengthMeter t={t} password={password} />
                   )}
                 </>
               )}
@@ -872,7 +882,7 @@ function AuthModalContent({
                   style={{ ...switchButtonStyle, fontSize: '12px' }}
                   onClick={() => switchMode('forgot')}
                 >
-                  Forgot password?
+                  {t('forgotPassword')}
                 </button>
               </div>
             )}
@@ -881,35 +891,35 @@ function AuthModalContent({
             <div style={switchTextStyle}>
               {mode === 'login' ? (
                 <>
-                  Don&apos;t have an account?{' '}
+                  {t('noAccount')}{' '}
                   <button
                     type="button"
                     style={switchButtonStyle}
                     onClick={() => switchMode('register')}
                   >
-                    Sign up
+                    {tCommon('signUp')}
                   </button>
                 </>
               ) : mode === 'register' ? (
                 <>
-                  Already have an account?{' '}
+                  {t('haveAccount')}{' '}
                   <button
                     type="button"
                     style={switchButtonStyle}
                     onClick={() => switchMode('login')}
                   >
-                    Sign in
+                    {tCommon('signIn')}
                   </button>
                 </>
               ) : (
                 <>
-                  Remember your password?{' '}
+                  {t('rememberPassword')}{' '}
                   <button
                     type="button"
                     style={switchButtonStyle}
                     onClick={() => switchMode('login')}
                   >
-                    Sign in
+                    {tCommon('signIn')}
                   </button>
                 </>
               )}

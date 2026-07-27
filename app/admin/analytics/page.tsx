@@ -96,10 +96,10 @@ export default async function AdminAnalyticsPage() {
   }) {
     return (
       <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
+        <p className="text-xs font-medium uppercase tracking-wide text-[#6B7280]">
           {label}
         </p>
-        <p className="mt-1.5 text-3xl font-bold text-[#1F2937]">{value}</p>
+        <p className="mt-1.5 text-2xl font-semibold text-[#1F2937]">{value}</p>
         {sub && <p className="mt-0.5 text-xs text-[#6B7280]">{sub}</p>}
       </div>
     )
@@ -108,7 +108,7 @@ export default async function AdminAnalyticsPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-xl font-bold text-[#1F2937]">Analytics</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-[#1F2937]">Analytics</h1>
         <p className="mt-1 text-sm text-[#6B7280]">Real-time platform overview.</p>
       </div>
 
@@ -127,7 +127,7 @@ export default async function AdminAnalyticsPage() {
 
       {/* Overview stats */}
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-[#6B7280]">Overview</h2>
+        <h2 className="mb-3 text-sm font-semibold text-[#1F2937]">Overview</h2>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             label="Total users"
@@ -152,7 +152,7 @@ export default async function AdminAnalyticsPage() {
 
       {/* Listings breakdown */}
       <div>
-        <h2 className="mb-3 text-sm font-semibold text-[#6B7280]">Listings by status</h2>
+        <h2 className="mb-3 text-sm font-semibold text-[#1F2937]">Listings by status</h2>
         <div className="grid grid-cols-3 gap-4">
           {[
             { label: 'Approved', count: approvedCount ?? 0, color: 'bg-[#E8F5E9]', text: 'text-[#1A7A4A]' },
@@ -160,10 +160,10 @@ export default async function AdminAnalyticsPage() {
             { label: 'Rejected', count: rejectedCount ?? 0, color: 'bg-[#FDEDEC]', text: 'text-[#C0392B]' },
           ].map((item) => (
             <div key={item.label} className={`rounded-2xl border border-[#E5E7EB] ${item.color} p-5`}>
-              <p className={`text-xs font-semibold uppercase tracking-wide ${item.text}`}>
+              <p className={`text-xs font-medium uppercase tracking-wide ${item.text}`}>
                 {item.label}
               </p>
-              <p className={`mt-1.5 text-3xl font-bold ${item.text}`}>
+              <p className={`mt-1.5 text-2xl font-semibold ${item.text}`}>
                 {item.count.toLocaleString()}
               </p>
               <p className={`mt-0.5 text-xs ${item.text} opacity-70`}>

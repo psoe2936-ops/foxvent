@@ -1,4 +1,7 @@
+'use client'
+
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export type Product = {
   id: string
@@ -18,12 +21,6 @@ type ProductCardProps = {
   product: Product
 }
 
-const STATUS_BADGES: Record<string, { label: string; className: string }> = {
-  pending: { label: 'Pending', className: 'bg-[#FEF3E2] text-[#C26A08]' },
-  approved: { label: 'Approved', className: 'bg-[#E7F6EC] text-[#1F9254]' },
-  rejected: { label: 'Rejected', className: 'bg-[#FDEDEC] text-[#C0392B]' },
-}
-
 function formatPrice(amount: number): string {
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
@@ -33,9 +30,15 @@ function formatPrice(amount: number): string {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const t = useTranslations('product')
+  const STATUS_BADGES: Record<string, { label: string; className: string }> = {
+    pending: { label: t('statusPendingLabel'), className: 'bg-[#FEF3E2] text-[#C26A08]' },
+    approved: { label: t('statusApprovedLabel'), className: 'bg-[#E7F6EC] text-[#1F9254]' },
+    rejected: { label: t('statusRejectedLabel'), className: 'bg-[#FDEDEC] text-[#C0392B]' },
+  }
   const image = product.images?.[0]
   const badge = product.is_sold
-    ? { label: 'Sold', className: 'bg-[#F3F4F6] text-[#6B7280]' }
+    ? { label: t('sold'), className: 'bg-[#F3F4F6] text-[#6B7280]' }
     : STATUS_BADGES[product.status] ?? STATUS_BADGES.pending
 
   return (
@@ -50,7 +53,7 @@ export function ProductCard({ product }: ProductCardProps) {
           />
         ) : (
           <div className="flex size-full items-center justify-center text-xs text-[#9CA3AF]">
-            No image
+            {t('noImage')}
           </div>
         )}
         <span

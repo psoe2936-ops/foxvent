@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 
 type RawRow = {
@@ -10,6 +11,7 @@ type RawRow = {
 }
 
 export async function RecentlyViewedRow({ userId }: { userId: string }) {
+  const t = await getTranslations('feed')
   const supabase = await createClient()
 
   const { data } = await supabase
@@ -29,7 +31,7 @@ export async function RecentlyViewedRow({ userId }: { userId: string }) {
 
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-[#6B7280]">Recently Viewed</p>
+      <p className="mb-2 text-sm font-medium text-[#6B7280]">{t('recentlyViewed')}</p>
       <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-1">
         {items.map((item) => (
           <Link

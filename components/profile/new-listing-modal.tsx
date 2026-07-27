@@ -9,6 +9,7 @@ import {
   type DragEvent,
 } from 'react'
 import { ImagePlus, Loader2, MapPin, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeText, sanitizePrice } from '@/lib/sanitize'
@@ -38,13 +39,6 @@ type FormErrors = {
   photos?: string
 }
 
-const CONDITION_OPTIONS = [
-  { value: 'new', label: 'New with tags' },
-  { value: 'like_new', label: 'Like new' },
-  { value: 'good', label: 'Good' },
-  { value: 'fair', label: 'Fair' },
-]
-
 const MAX_PHOTOS = 5
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024
 const VALID_PHOTO_TYPES = ['image/jpeg', 'image/png']
@@ -56,6 +50,15 @@ export function NewListingModal({
   onClose,
   onSuccess,
 }: NewListingModalProps) {
+  const t = useTranslations('listing')
+  const tProduct = useTranslations('product')
+  const tCommon = useTranslations('common')
+  const CONDITION_OPTIONS = [
+    { value: 'new', label: t('conditionNewWithTags') },
+    { value: 'like_new', label: tProduct('conditionLikeNew') },
+    { value: 'good', label: tProduct('conditionGood') },
+    { value: 'fair', label: tProduct('conditionFair') },
+  ]
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
   const [categoryId, setCategoryId] = useState('')
@@ -114,11 +117,11 @@ export function NewListingModal({
 
     for (const file of incoming) {
       if (!VALID_PHOTO_TYPES.includes(file.type)) {
-        rejection = 'Only JPG or PNG images are allowed.'
+        rejection = t('onlyJpgPng')
         continue
       }
       if (file.size > MAX_PHOTO_SIZE) {
-        rejection = 'Each photo must be 5MB or smaller.'
+        rejection = t('photoTooLarge')
         continue
       }
       validFiles.push(file)
@@ -126,7 +129,7 @@ export function NewListingModal({
 
     const available = MAX_PHOTOS - photos.length
     if (validFiles.length > available) {
-      rejection = 'You can upload up to 5 photos.'
+      rejection = t('maxPhotos')
     }
 
     if (available > 0 && validFiles.length > 0) {
@@ -177,35 +180,35 @@ export function NewListingModal({
 
     const trimmedTitle = title.trim()
     if (!trimmedTitle || trimmedTitle.length < 3) {
-      nextErrors.title = 'Title must be at least 3 characters.'
+      nextErrors.title = t('titleTooShort')
     } else if (trimmedTitle.length > 100) {
-      nextErrors.title = 'Title must be 100 characters or fewer.'
+      nextErrors.title = t('titleTooLong')
     }
 
     const trimmedDesc = description.trim()
     if (!trimmedDesc || trimmedDesc.length < 10) {
-      nextErrors.description = 'Description must be at least 10 characters.'
+      nextErrors.description = t('descriptionTooShort')
     } else if (trimmedDesc.length > 2000) {
-      nextErrors.description = 'Description must be 2000 characters or fewer.'
+      nextErrors.description = t('descriptionTooLong')
     }
 
     if (!categoryId) {
-      nextErrors.category = 'Please select a category.'
+      nextErrors.category = t('selectCategory')
     }
 
     if (!condition) {
-      nextErrors.condition = 'Please select a condition.'
+      nextErrors.condition = t('selectCondition')
     }
 
     const numericPrice = Number(price)
     if (!price || Number.isNaN(numericPrice) || numericPrice <= 0) {
-      nextErrors.price = 'Enter a price greater than 0.'
+      nextErrors.price = t('priceMustBePositive')
     } else if (numericPrice > 999_999_999) {
-      nextErrors.price = 'Price exceeds the maximum allowed value.'
+      nextErrors.price = t('priceExceedsMax')
     }
 
     if (photos.length === 0) {
-      nextErrors.photos = 'Add at least one photo.'
+      nextErrors.photos = t('addAtLeastOnePhoto')
     }
 
     setErrors(nextErrors)
@@ -264,7 +267,7 @@ export function NewListingModal({
       showSuccessToast()
     } catch (err) {
       setSubmitError(
-        err instanceof Error ? err.message : 'Something went wrong. Please try again.'
+        err instanceof Error ? err.message : tCommon('somethingWentWrong')
       )
     } finally {
       setSubmitting(false)
@@ -287,13 +290,13 @@ export function NewListingModal({
           >
             <div className="flex items-center justify-between border-b border-[#E5E7EB] px-6 py-4">
               <h2 id="new-listing-title" className="text-lg font-bold text-[#2D2E32]">
-                New listing
+                {t('newListingTitle')}
               </h2>
               <button
                 type="button"
                 onClick={handleClose}
                 disabled={submitting}
-                aria-label="Close"
+                aria-label={tCommon('close')}
                 className="text-[#9CA3AF] transition-colors hover:text-[#2D2E32] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <X className="size-5" aria-hidden="true" />
@@ -307,7 +310,7 @@ export function NewListingModal({
             >
               <div>
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                  Title
+                  {t('titleLabel')}
                 </label>
                 <input
                   type="text"
@@ -327,14 +330,14 @@ export function NewListingModal({
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                  Description
+                  {t('descriptionLabel')}
                 </label>
                 <textarea
                   value={description}
                   maxLength={2000}
                   rows={4}
                   disabled={submitting}
-                  placeholder="Describe the item's condition, size, material..."
+                  placeholder={t('descriptionPlaceholder')}
                   onChange={(event: ChangeEvent<HTMLTextAreaElement>) =>
                     setDescription(event.target.value)
                   }
@@ -349,7 +352,7 @@ export function NewListingModal({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                    Category
+                    {t('categoryLabel')}
                   </label>
                   <select
                     value={categoryId}
@@ -359,7 +362,7 @@ export function NewListingModal({
                     }
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none focus:border-[#F36D21] disabled:opacity-60"
                   >
-                    <option value="">Select</option>
+                    <option value="">{t('selectPlaceholder')}</option>
                     {categories.map((category) => (
                       <option key={category.id} value={category.id}>
                         {category.icon ? `${category.icon} ` : ''}
@@ -374,7 +377,7 @@ export function NewListingModal({
 
                 <div>
                   <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                    Condition
+                    {tProduct('condition')}
                   </label>
                   <select
                     value={condition}
@@ -384,7 +387,7 @@ export function NewListingModal({
                     }
                     className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none focus:border-[#F36D21] disabled:opacity-60"
                   >
-                    <option value="">Select</option>
+                    <option value="">{t('selectPlaceholder')}</option>
                     {CONDITION_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
                         {option.label}
@@ -399,7 +402,7 @@ export function NewListingModal({
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                  Price
+                  {t('priceLabel')}
                 </label>
                 <div className="relative">
                   <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-sm font-medium text-[#6B7280]">
@@ -436,7 +439,7 @@ export function NewListingModal({
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
                   <span className="inline-flex items-center gap-1">
                     <MapPin className="size-3.5" aria-hidden="true" />
-                    Location
+                    {t('locationLabel')}
                   </span>
                 </label>
                 <input
@@ -444,7 +447,7 @@ export function NewListingModal({
                   value={location}
                   maxLength={100}
                   disabled={submitting}
-                  placeholder="e.g. Yangon, Mandalay, Mawlamyine"
+                  placeholder={t('locationPlaceholder')}
                   onChange={(event: ChangeEvent<HTMLInputElement>) =>
                     setLocation(event.target.value)
                   }
@@ -454,7 +457,7 @@ export function NewListingModal({
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-[#2D2E32]">
-                  Photos
+                  {t('photosLabel')}
                 </label>
                 <div
                   role="button"
@@ -483,11 +486,11 @@ export function NewListingModal({
                 >
                   <ImagePlus className="size-6 text-[#9CA3AF]" aria-hidden="true" />
                   <p className="text-sm text-[#6B7280]">
-                    <span className="font-medium text-[#F36D21]">Click to upload</span>{' '}
-                    or drag and drop
+                    <span className="font-medium text-[#F36D21]">{t('clickToUpload')}</span>{' '}
+                    {t('orDragAndDrop')}
                   </p>
                   <p className="text-xs text-[#9CA3AF]">
-                    JPG or PNG, up to 5 photos, 5MB each
+                    {t('photoRequirements')}
                   </p>
                 </div>
                 <input
@@ -515,14 +518,14 @@ export function NewListingModal({
                         </div>
                         {index === 0 && (
                           <span className="absolute bottom-1 left-1 rounded-full bg-black/60 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                            Cover
+                            {t('cover')}
                           </span>
                         )}
                         <button
                           type="button"
                           onClick={() => removePhoto(index)}
                           disabled={submitting}
-                          aria-label="Remove photo"
+                          aria-label={t('removePhoto')}
                           className="absolute -right-1.5 -top-1.5 flex size-5 items-center justify-center rounded-full bg-white text-[#6B7280] shadow-sm ring-1 ring-[#E5E7EB] hover:text-[#C0392B] disabled:opacity-60"
                         >
                           <X className="size-3" aria-hidden="true" />
@@ -554,10 +557,10 @@ export function NewListingModal({
                 {submitting ? (
                   <span className="inline-flex items-center justify-center gap-2">
                     <Loader2 className="size-4 animate-spin" aria-hidden="true" />
-                    Posting...
+                    {t('posting')}
                   </span>
                 ) : (
-                  'Post listing'
+                  t('postListing')
                 )}
               </button>
             </div>
@@ -573,7 +576,7 @@ export function NewListingModal({
             toast.fading ? 'opacity-0' : 'opacity-100'
           )}
         >
-          Listing submitted — pending review
+          {t('listingSubmitted')}
         </div>
       )}
     </>

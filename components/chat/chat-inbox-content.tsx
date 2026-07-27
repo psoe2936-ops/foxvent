@@ -1,8 +1,11 @@
 import Image from 'next/image'
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 
 export async function ChatInboxContent({ userId }: { userId: string }) {
+  const t = await getTranslations('chat')
+  const tSidebar = await getTranslations('sidebar')
   const supabase = await createClient()
 
   const { data: conversations } = await supabase
@@ -18,21 +21,21 @@ export async function ChatInboxContent({ userId }: { userId: string }) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-[#1F2937]">Messages</h1>
+      <h1 className="text-2xl font-bold text-[#1F2937]">{tSidebar('messages')}</h1>
 
       <div className="mt-6 space-y-2">
         {!conversations || conversations.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
             <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
-            <p className="text-base font-medium text-[#1F2937]">No conversations yet</p>
+            <p className="text-base font-medium text-[#1F2937]">{t('noConversations')}</p>
             <p className="mt-1 text-sm text-[#6B7280]">
-              Message a seller from any listing to start chatting.
+              {t('browseToStartChat')}
             </p>
             <Link
               href="/feed"
               className="mt-5 inline-block rounded-lg bg-[#F36D21] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
             >
-              Browse listings
+              {t('browseListings')}
             </Link>
           </div>
         ) : (

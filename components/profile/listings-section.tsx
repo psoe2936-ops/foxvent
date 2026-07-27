@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { ProductGrid } from '@/components/profile/product-grid'
 import { NewListingModal, type Category } from '@/components/profile/new-listing-modal'
 import type { Product } from '@/components/profile/product-card'
@@ -24,6 +25,7 @@ export function ListingsSection({
   sellerUsername = '',
   initialModalOpen = false,
 }: ListingsSectionProps) {
+  const t = useTranslations('listing')
   const [products, setProducts] = useState(initialProducts)
   const [modalOpen, setModalOpen] = useState(initialModalOpen)
   const pathname = usePathname()
@@ -47,7 +49,7 @@ export function ListingsSection({
             className="inline-flex items-center gap-2 rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-[#E0631D] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
           >
             <Plus className="size-4" aria-hidden="true" />
-            New listing
+            {t('newListingTitle')}
           </button>
         </div>
       )}

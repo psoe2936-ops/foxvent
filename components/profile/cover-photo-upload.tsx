@@ -3,6 +3,7 @@
 import { useRef, useState, type ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import { Camera, Loader2 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 type CoverPhotoUploadProps = {
@@ -18,6 +19,7 @@ export function CoverPhotoUpload({
   initialCoverUrl,
   isOwner,
 }: CoverPhotoUploadProps) {
+  const t = useTranslations('profile')
   const [coverUrl, setCoverUrl] = useState(initialCoverUrl)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -31,11 +33,11 @@ export function CoverPhotoUpload({
     if (!file) return
 
     if (!file.type.startsWith('image/')) {
-      setError('Please choose an image file.')
+      setError(t('pleaseChooseImage'))
       return
     }
     if (file.size > MAX_FILE_SIZE) {
-      setError('Image must be smaller than 5MB.')
+      setError(t('imageMustBeUnder5MB'))
       return
     }
 
@@ -88,7 +90,7 @@ export function CoverPhotoUpload({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            aria-label="Change cover photo"
+            aria-label={t('changeCoverPhoto')}
             className="group/cover absolute inset-0 flex items-center justify-center transition-colors hover:bg-black/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/50"
           >
             <span className="flex items-center gap-2 rounded-lg bg-black/60 px-3 py-2 text-sm font-medium text-white opacity-0 transition-opacity group-hover/cover:opacity-100">
@@ -97,7 +99,7 @@ export function CoverPhotoUpload({
               ) : (
                 <Camera className="size-4" aria-hidden="true" />
               )}
-              {uploading ? 'Uploading...' : 'Change cover photo'}
+              {uploading ? t('uploading') : t('changeCoverPhoto')}
             </span>
           </button>
           <input

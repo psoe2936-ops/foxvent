@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { Check, CheckCheck, ImagePlus, Loader2, MoreVertical, Send, Shield, Video, X } from 'lucide-react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { sendMessage } from '@/app/chat/actions'
 import { makeOffer, type Offer } from '@/app/offers/actions'
@@ -137,6 +138,9 @@ export function ChatThread({
   const supabase = useMemo(() => createClient(), [])
   const pathname = usePathname()
   const router = useRouter()
+  const t = useTranslations('chat')
+  const tCommon = useTranslations('common')
+  const tProduct = useTranslations('product')
 
   const isInputDisabled = iBlockedThem || theyBlockedMe || sending
 
@@ -476,17 +480,17 @@ export function ChatThread({
               href={`/products/${product.id}`}
               className="shrink-0 text-xs font-medium text-[#F36D21] hover:underline"
             >
-              View listing
+              {t('viewListing')}
             </Link>
           )}
 
           <button
             onClick={handleStartCall}
             className="ml-2 flex items-center gap-1.5 rounded-lg bg-[#F36D21] px-3 py-1.5 text-xs font-semibold text-white hover:opacity-90"
-            aria-label="Start video call"
+            aria-label={t('startVideoCall')}
           >
             <Video className="size-4" />
-            Video call
+            {t('videoCall')}
           </button>
 
           {/* Kebab menu */}
@@ -496,7 +500,7 @@ export function ChatThread({
                 type="button"
                 onClick={() => { setKebabOpen((v) => !v); setKebabMode('menu'); setBlockError(null) }}
                 className="flex size-8 items-center justify-center rounded-lg text-[#9CA3AF] transition-colors hover:bg-[#F3F4F6] hover:text-[#6B7280]"
-                aria-label="More options"
+                aria-label={t('moreOptions')}
               >
                 <MoreVertical className="size-4" />
               </button>
@@ -510,7 +514,7 @@ export function ChatThread({
                         onClick={() => setKebabOpen(false)}
                         className="flex w-full items-center px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
                       >
-                        View profile
+                        {t('viewProfile')}
                       </Link>
                       <div className="h-px bg-[#F3F4F6]" />
                       <button
@@ -518,21 +522,23 @@ export function ChatThread({
                         onClick={() => setKebabMode('block-confirm')}
                         className={`flex w-full items-center px-4 py-2.5 text-sm hover:bg-[#F9FAFB] ${iBlockedThem ? 'text-[#C0392B]' : 'text-[#374151]'}`}
                       >
-                        {iBlockedThem ? `Unblock @${otherPerson.username}` : `Block @${otherPerson.username}`}
+                        {iBlockedThem
+                          ? t('unblockUser', { username: otherPerson.username })
+                          : t('blockUser', { username: otherPerson.username })}
                       </button>
                       <button
                         type="button"
                         onClick={() => { setKebabOpen(false); setReportOpen(true) }}
                         className="flex w-full items-center px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
                       >
-                        Report @{otherPerson.username}
+                        {t('reportUser', { username: otherPerson.username })}
                       </button>
                       {isBuyer && (
                         <>
                           <div className="h-px bg-[#F3F4F6]" />
                           {hasReviewed || justReviewed ? (
                             <span className="flex w-full items-center px-4 py-2.5 text-sm text-[#9CA3AF]">
-                              ✓ Reviewed
+                              ✓ {t('reviewed')}
                             </span>
                           ) : (
                             <button
@@ -540,7 +546,7 @@ export function ChatThread({
                               onClick={() => { setKebabOpen(false); setReviewOpen(true) }}
                               className="flex w-full items-center px-4 py-2.5 text-sm text-[#374151] hover:bg-[#F9FAFB]"
                             >
-                              Rate seller
+                              {t('rateSeller')}
                             </button>
                           )}
                         </>
@@ -549,11 +555,13 @@ export function ChatThread({
                   ) : (
                     <div className="p-3">
                       <p className="text-sm font-medium text-[#1F2937]">
-                        {iBlockedThem ? `Unblock @${otherPerson.username}?` : `Block @${otherPerson.username}?`}
+                        {iBlockedThem
+                          ? t('unblockConfirmTitle', { username: otherPerson.username })
+                          : t('blockConfirmTitle', { username: otherPerson.username })}
                       </p>
                       {!iBlockedThem && (
                         <p className="mt-1 text-xs text-[#6B7280]">
-                          They won&apos;t be able to message you. Unblock anytime from Settings.
+                          {t('blockWarning')}
                         </p>
                       )}
                       {blockError && <p className="mt-1 text-xs text-[#C0392B]">{blockError}</p>}
@@ -564,7 +572,7 @@ export function ChatThread({
                           disabled={blockPending}
                           className="flex-1 rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs font-medium text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-60"
                         >
-                          Cancel
+                          {tCommon('cancel')}
                         </button>
                         <button
                           type="button"
@@ -572,7 +580,7 @@ export function ChatThread({
                           disabled={blockPending}
                           className="flex-1 rounded-lg bg-[#C0392B] px-3 py-1.5 text-xs font-medium text-white hover:opacity-90 disabled:opacity-60"
                         >
-                          {blockPending ? '…' : iBlockedThem ? 'Unblock' : 'Block'}
+                          {blockPending ? '…' : iBlockedThem ? t('unblockAction') : t('blockAction')}
                         </button>
                       </div>
                     </div>
@@ -587,7 +595,7 @@ export function ChatThread({
         <div className="flex shrink-0 items-start gap-2 border-b border-[#E5E7EB] bg-[#FEF3E2] px-4 py-2">
           <Shield className="mt-0.5 size-3.5 shrink-0 text-[#C26A08]" aria-hidden="true" />
           <p className="text-[11px] leading-relaxed text-[#C26A08]">
-            For your safety: meet in person and inspect items before paying when possible. If arranging remote payment, only deal with sellers you trust.
+            {t('safetyNotice')}
           </p>
         </div>
 
@@ -595,7 +603,7 @@ export function ChatThread({
         <div className="flex-1 space-y-2 overflow-y-auto p-4">
           {timeline.length === 0 ? (
             <p className="py-8 text-center text-sm text-[#6B7280]">
-              Say hello and ask about {product?.title ?? 'this item'}.
+              {t('sayHello', { product: product?.title ?? t('thisItem') })}
             </p>
           ) : (
             timeline.map((item) => {
@@ -618,13 +626,17 @@ export function ChatThread({
                     <div className="flex items-center gap-2 rounded-full bg-[#F3F4F6] px-4 py-2 text-xs text-[#6B7280]">
                       <Video className="size-3.5" />
                       {msg.call_status === 'completed' && (
-                        <span>Video call · {formatCallDuration(msg.call_duration_seconds ?? 0)}</span>
+                        <span>
+                          {t('videoCallDuration', {
+                            duration: formatCallDuration(msg.call_duration_seconds ?? 0),
+                          })}
+                        </span>
                       )}
                       {msg.call_status === 'missed' && (
-                        <span className="text-[#C0392B]">Missed video call</span>
+                        <span className="text-[#C0392B]">{t('missedVideoCall')}</span>
                       )}
                       {msg.call_status === 'declined' && (
-                        <span className="text-[#C0392B]">Video call declined</span>
+                        <span className="text-[#C0392B]">{t('videoCallDeclined')}</span>
                       )}
                     </div>
                   </div>
@@ -703,19 +715,19 @@ export function ChatThread({
         {iBlockedThem ? (
           <div className="flex shrink-0 items-center justify-between border-t border-[#E5E7EB] bg-[#FEF3E2] px-4 py-3">
             <p className="text-xs text-[#C26A08]">
-              You&apos;ve blocked @{otherPerson?.username}. They cannot send you messages.
+              {t('blockedBannerText', { username: otherPerson?.username ?? '' })}
             </p>
             <button
               type="button"
               onClick={() => { setKebabMode('block-confirm'); setKebabOpen(true) }}
               className="ml-3 shrink-0 text-xs font-medium text-[#C0392B] underline hover:no-underline"
             >
-              Unblock
+              {t('unblockAction')}
             </button>
           </div>
         ) : theyBlockedMe ? (
           <div className="flex shrink-0 items-center border-t border-[#E5E7EB] bg-[#F9FAFB] px-4 py-3">
-            <p className="text-xs text-[#9CA3AF]">You cannot send messages to this user.</p>
+            <p className="text-xs text-[#9CA3AF]">{t('theyBlockedMeText')}</p>
           </div>
         ) : (
           /* Normal input */
@@ -724,12 +736,12 @@ export function ChatThread({
             {isBuyer && showOfferPanel && (
               <div className="border-b border-white/60 bg-white/90 px-4 py-3 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-[#2D2E32]">Make an offer</p>
+                  <p className="text-sm font-semibold text-[#1F2937]">{tProduct('makeOffer')}</p>
                   <button
                     type="button"
                     onClick={() => { setShowOfferPanel(false); setOfferAmount(''); setOfferError(null) }}
                     className="text-[#9CA3AF] hover:text-[#6B7280]"
-                    aria-label="Close offer panel"
+                    aria-label={t('closeOfferPanel')}
                   >
                     <X className="size-4" />
                   </button>
@@ -744,7 +756,7 @@ export function ChatThread({
                     value={offerAmount}
                     onChange={(e) => { setOfferAmount(e.target.value); setOfferError(null) }}
                     onKeyDown={(e) => { if (e.key === 'Enter') handleSubmitOffer() }}
-                    placeholder="Your offer amount"
+                    placeholder={t('offerAmountPlaceholder')}
                     disabled={sendingOffer}
                     className="w-full rounded-lg border border-[#E5E7EB] py-2 pl-14 pr-3 text-sm outline-none focus:border-[#F36D21] disabled:opacity-50"
                   />
@@ -756,7 +768,7 @@ export function ChatThread({
                   disabled={!offerAmount || sendingOffer}
                   className="mt-2 w-full rounded-lg bg-[#F36D21] py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50"
                 >
-                  {sendingOffer ? 'Submitting…' : 'Submit offer'}
+                  {sendingOffer ? t('submittingOffer') : t('submitOffer')}
                 </button>
               </div>
             )}
@@ -783,7 +795,7 @@ export function ChatThread({
                   onClick={() => setShowOfferPanel(true)}
                   className="shrink-0 rounded-lg border border-[#F36D21] px-2.5 py-2 text-xs font-semibold text-[#F36D21] hover:bg-[#FEF3E2]"
                 >
-                  💰 Offer
+                  💰 {t('offer')}
                 </button>
               )}
               <button
@@ -791,7 +803,7 @@ export function ChatThread({
                 onClick={() => { setImageError(null); fileInputRef.current?.click() }}
                 disabled={isInputDisabled || imageUploading}
                 className="shrink-0 rounded-lg border border-[#E5E7EB] p-2 text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-50"
-                aria-label="Send image"
+                aria-label={t('sendImage')}
               >
                 {imageUploading
                   ? <Loader2 className="size-4 animate-spin" />
@@ -802,7 +814,7 @@ export function ChatThread({
                 value={input}
                 onChange={handleInputChange}
                 onKeyDown={(e) => { if (e.key === 'Enter') handleSend() }}
-                placeholder="Type a message..."
+                placeholder={`${t('typeMessage')}...`}
                 disabled={isInputDisabled}
                 className="flex-1 rounded-full border border-[#E5E7EB] px-4 py-2 text-sm outline-none focus:border-[#F36D21] disabled:opacity-50"
               />
@@ -810,7 +822,7 @@ export function ChatThread({
                 onClick={handleSend}
                 disabled={!input.trim() || sending}
                 className="rounded-full bg-[#F36D21] p-2.5 text-white disabled:opacity-50"
-                aria-label="Send message"
+                aria-label={t('sendMessage')}
               >
                 <Send className="size-4" />
               </button>

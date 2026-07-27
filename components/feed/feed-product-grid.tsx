@@ -1,7 +1,9 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { X } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { getConditionLabel } from '@/lib/condition-label'
 import { CategoryPills } from '@/components/feed/category-pills'
 import { ProductCard } from '@/components/feed/product-card'
 import { FilterPanel } from '@/components/feed/filter-panel'
@@ -16,13 +18,6 @@ type SearchParams = {
   maxPrice?: string
   condition?: string
   hideSold?: string
-}
-
-const CONDITION_LABEL: Record<string, string> = {
-  new: 'New',
-  like_new: 'Like New',
-  good: 'Good',
-  fair: 'Fair',
 }
 
 type SortOption = 'newest' | 'price_asc' | 'price_desc'
@@ -47,6 +42,9 @@ export async function FeedProductGrid({
   searchParams: SearchParams
   basePath?: string
 }) {
+  const t = await getTranslations('feed')
+  const tProduct = await getTranslations('product')
+  const tNavbar = await getTranslations('navbar')
   const { category, q, sort: sortParam, minPrice, maxPrice, condition, hideSold } = searchParams
    type SortOption = 'newest' | 'popular' | 'price_asc' | 'price_desc'
 const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'||  sortParam === 'popular' ? sortParam : 'newest'
@@ -153,12 +151,10 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
         <div className="flex items-center justify-between">
           <div>
             <p className="text-sm text-[#6B7280]">
-              Results for{' '}
-              <span className="font-semibold text-[#1F2937]">&ldquo;{q}&rdquo;</span>
+              {t('resultsFor', { query: q })}
             </p>
             <p className="mt-0.5 text-xs text-[#9CA3AF]">
-              {people.length} {people.length === 1 ? 'person' : 'people'} &middot; {listings.length}{' '}
-              {listings.length === 1 ? 'listing' : 'listings'}
+              {t('personCount', { count: people.length })} &middot; {t('listingsCount', { count: listings.length })}
             </p>
           </div>
           <Link
@@ -166,7 +162,7 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
             className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-[#9CA3AF] hover:bg-[#F3F4F6] hover:text-[#6B7280]"
           >
             <X className="size-3" />
-            Clear
+            {t('clear')}
           </Link>
         </div>
 
@@ -174,7 +170,7 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
         {people.length > 0 && (
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-[#1F2937]">
-              People{' '}
+              {t('peopleSectionTitle')}{' '}
               <span className="font-normal text-[#9CA3AF]">({people.length})</span>
             </h2>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
@@ -197,15 +193,15 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
         {/* Listings section */}
         <div className="space-y-3">
           <h2 className="text-sm font-semibold text-[#1F2937]">
-            Listings{' '}
+            {t('listingsSectionTitle')}{' '}
             <span className="font-normal text-[#9CA3AF]">({listings.length})</span>
           </h2>
 
           {listings.length === 0 ? (
             <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E8EAED] bg-white py-16 text-center">
               <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
-              <p className="mt-3 text-sm font-medium text-[#374151]">No listings found</p>
-              <p className="mt-1 text-sm text-[#9CA3AF]">Try a different search term.</p>
+              <p className="mt-3 text-sm font-medium text-[#374151]">{t('noListingsFound')}</p>
+              <p className="mt-1 text-sm text-[#9CA3AF]">{t('tryDifferentSearchTerm')}</p>
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
@@ -223,7 +219,7 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
                     title={product.title}
                     price={product.price}
                     images={product.images}
-                    conditionLabel={CONDITION_LABEL[product.condition] ?? product.condition}
+                    conditionLabel={getConditionLabel(tProduct, product.condition)}
                     conditionKey={product.condition}
                     categoryName={cat?.name}
                     sellerUsername={seller?.username}
@@ -324,7 +320,7 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
 
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <h1 className="text-lg font-bold text-[#1F2937] sm:text-xl">All Listings</h1>
+          <h1 className="text-lg font-bold text-[#1F2937] sm:text-xl">{t('allListings')}</h1>
           <div className="relative w-full sm:w-56 md:hidden">
             <form action={basePath} method="get">
               {category && <input type="hidden" name="category" value={category} />}
@@ -337,14 +333,14 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
                 type="text"
                 name="q"
                 defaultValue={q ?? ''}
-                placeholder="Search products, categories or users"
+                placeholder={tNavbar('searchPlaceholder')}
                 className={`w-full rounded-lg border border-[#E8EAED] bg-white py-2 text-sm text-[#374151] shadow-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20 ${q ? 'pl-3.5 pr-8' : 'px-3.5'}`}
               />
             </form>
             {q && (
               <Link
                 href={clearSearchUrl}
-                aria-label="Clear search"
+                aria-label={t('clearSearchAriaLabel')}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280]"
               >
                 <X className="size-3.5" />
@@ -356,23 +352,23 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
         <FilterPanel sort={sort} filterParams={filterParams} basePath={basePath} />
 
         <p className="text-xs text-[#9CA3AF]">
-          {products?.length ?? 0} listing{products?.length === 1 ? '' : 's'}
+          {t('listingsCount', { count: products?.length ?? 0 })}
         </p>
 
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 xl:grid-cols-4">
           {!products || products.length === 0 ? (
             <div className="col-span-full flex flex-col items-center justify-center rounded-xl border border-dashed border-[#E8EAED] bg-white py-20 text-center">
               <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
-              <p className="mt-3 text-sm font-medium text-[#374151]">No listings found</p>
+              <p className="mt-3 text-sm font-medium text-[#374151]">{t('noListingsFound')}</p>
               <p className="mt-1 text-sm text-[#9CA3AF]">
-                Try a different search or category.
+                {t('tryDifferentSearch')}
               </p>
               {(q || category) && (
                 <Link
                   href={basePath}
                   className="mt-4 rounded-lg bg-[#F36D21] px-4 py-2 text-sm font-semibold text-white hover:opacity-90"
                 >
-                  Clear filters
+                  {t('clearFilters')}
                 </Link>
               )}
             </div>
@@ -394,7 +390,7 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
                     title={product.title}
                     price={product.price}
                     images={product.images}
-                    conditionLabel={CONDITION_LABEL[product.condition] ?? product.condition}
+                    conditionLabel={getConditionLabel(tProduct, product.condition)}
                     conditionKey={product.condition}
                     categoryName={cat?.name}
                     sellerUsername={seller?.username}

@@ -1,15 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { respondToOffer, type Offer } from '@/app/offers/actions'
-
-const STATUS_LABEL: Record<Offer['status'], string> = {
-  pending: 'Pending',
-  accepted: 'Accepted',
-  rejected: 'Rejected',
-  countered: 'Countered',
-  expired: 'Expired',
-}
 
 const STATUS_COLOR: Record<Offer['status'], string> = {
   pending: 'text-[#C26A08] bg-[#FEF3E2]',
@@ -28,6 +21,17 @@ export function OfferCard({
   currentUserId: string
   onUpdate: (updated: Offer) => void
 }) {
+  const t = useTranslations('offer')
+  const tCommon = useTranslations('common')
+
+  const STATUS_LABEL: Record<Offer['status'], string> = {
+    pending: t('statusPending'),
+    accepted: t('statusAccepted'),
+    rejected: t('statusRejected'),
+    countered: t('statusCountered'),
+    expired: t('statusExpired'),
+  }
+
   const isCounterOffer = offer.parent_offer_id !== null
 
   // Who sent this offer? Use sender_id if available, 
@@ -72,7 +76,7 @@ export function OfferCard({
       <div className="w-64 rounded-2xl border-2 border-[#F36D21] bg-white p-4 shadow-sm">
         <div className="flex items-center justify-between">
           <span className="text-xs font-semibold uppercase tracking-wide text-[#9CA3AF]">
-            {isCounterOffer ? 'Counter offer' : 'Offer'}
+            {isCounterOffer ? t('counterOfferLabel') : t('offerLabel')}
           </span>
           <span
             className={`rounded-full px-2 py-0.5 text-[10px] font-medium ${STATUS_COLOR[offer.status]}`}
@@ -87,7 +91,7 @@ export function OfferCard({
 
         {/* Show who is waiting */}
         {offer.status === 'pending' && iMadethisOffer && (
-          <p className="mt-2 text-xs text-[#9CA3AF]">Waiting for response...</p>
+          <p className="mt-2 text-xs text-[#9CA3AF]">{t('waitingForResponse')}</p>
         )}
 
         {/* Accept / Counter / Reject buttons for the responder */}
@@ -99,7 +103,7 @@ export function OfferCard({
               disabled={isPending}
               className="flex-1 rounded-lg bg-[#1A7A4A] px-2 py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
             >
-              Accept
+              {t('accept')}
             </button>
             <button
               type="button"
@@ -107,7 +111,7 @@ export function OfferCard({
               disabled={isPending}
               className="flex-1 rounded-lg border border-[#F36D21] px-2 py-1.5 text-xs font-semibold text-[#F36D21] hover:bg-[#FEF3E2] disabled:opacity-50"
             >
-              Counter
+              {t('counter')}
             </button>
             <button
               type="button"
@@ -115,7 +119,7 @@ export function OfferCard({
               disabled={isPending}
               className="flex-1 rounded-lg border border-[#E5E7EB] px-2 py-1.5 text-xs font-semibold text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-50"
             >
-              Reject
+              {t('reject')}
             </button>
           </div>
         )}
@@ -135,7 +139,7 @@ export function OfferCard({
                   setCounterAmount(e.target.value.replace(/[^0-9]/g, ''))
                   setError(null)
                 }}
-                placeholder="Counter amount"
+                placeholder={t('counterAmountPlaceholder')}
                 className="w-full rounded-lg border border-[#E5E7EB] py-2 pl-12 pr-3 text-sm outline-none focus:border-[#F36D21]"
               />
             </div>
@@ -147,7 +151,7 @@ export function OfferCard({
                 disabled={isPending}
                 className="flex-1 rounded-lg border border-[#E5E7EB] py-1.5 text-xs font-medium text-[#6B7280] hover:bg-[#F3F4F6] disabled:opacity-50"
               >
-                Cancel
+                {tCommon('cancel')}
               </button>
               <button
                 type="button"
@@ -155,7 +159,7 @@ export function OfferCard({
                 disabled={isPending || !counterAmount}
                 className="flex-1 rounded-lg bg-[#F36D21] py-1.5 text-xs font-semibold text-white hover:opacity-90 disabled:opacity-50"
               >
-                {isPending ? '…' : 'Send'}
+                {isPending ? '…' : t('send')}
               </button>
             </div>
           </div>
@@ -168,13 +172,13 @@ export function OfferCard({
         {/* Accepted state */}
         {offer.status === 'accepted' && (
           <p className="mt-2 text-xs font-medium text-[#1A7A4A]">
-            ✓ Offer accepted! Coordinate your meetup in chat.
+            ✓ {t('acceptedMessage')}
           </p>
         )}
 
         {/* Rejected state */}
         {offer.status === 'rejected' && (
-          <p className="mt-2 text-xs text-[#9CA3AF]">Offer declined.</p>
+          <p className="mt-2 text-xs text-[#9CA3AF]">{t('declinedMessage')}</p>
         )}
       </div>
     </div>

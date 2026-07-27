@@ -56,7 +56,7 @@ export default async function AdminProductDetailPage({
     <div>
       <Link
         href="/admin/products"
-        className="text-sm text-[#6B7280] hover:text-[#2D2E32]"
+        className="text-sm text-[#6B7280] hover:text-[#1F2937]"
       >
         ← Back to products
       </Link>
@@ -83,7 +83,7 @@ export default async function AdminProductDetailPage({
           </div>
 
           <div className="mt-6 rounded-2xl border border-[#E5E7EB] bg-white p-5">
-            <h2 className="font-semibold text-[#2D2E32]">Description</h2>
+            <h2 className="text-sm font-semibold text-[#1F2937]">Description</h2>
             <p className="mt-2 whitespace-pre-wrap text-sm text-[#4B5563]">
               {product.description || 'No description provided.'}
             </p>
@@ -105,7 +105,7 @@ export default async function AdminProductDetailPage({
               {product.status}
             </span>
 
-            <h1 className="mt-3 text-xl font-bold text-[#2D2E32]">
+            <h1 className="mt-3 text-xl font-semibold tracking-tight text-[#1F2937]">
               {product.title}
             </h1>
             <p className="mt-1 text-2xl font-bold text-[#F36D21]">
@@ -115,24 +115,24 @@ export default async function AdminProductDetailPage({
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-[#6B7280]">Category</dt>
-                <dd className="text-[#2D2E32]">{category?.name ?? '—'}</dd>
+                <dd className="text-[#1F2937]">{category?.name ?? '—'}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-[#6B7280]">Condition</dt>
-                <dd className="text-[#2D2E32]">
+                <dd className="text-[#1F2937]">
                   {conditionLabel[product.condition] ?? product.condition}
                 </dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-[#6B7280]">Submitted</dt>
-                <dd className="text-[#2D2E32]">
+                <dd className="text-[#1F2937]">
                   {new Date(product.created_at).toLocaleDateString()}
                 </dd>
               </div>
               {product.approved_at && (
                 <div className="flex justify-between">
                   <dt className="text-[#6B7280]">Approved</dt>
-                  <dd className="text-[#2D2E32]">
+                  <dd className="text-[#1F2937]">
                     {new Date(product.approved_at).toLocaleDateString()}
                   </dd>
                 </div>
@@ -148,7 +148,7 @@ export default async function AdminProductDetailPage({
 
           {/* Seller card */}
           <div className="rounded-2xl border border-[#E5E7EB] bg-white p-5">
-            <h2 className="text-sm font-semibold text-[#2D2E32]">Seller</h2>
+            <h2 className="text-sm font-semibold text-[#1F2937]">Seller</h2>
             <Link
               href={`/profile/${seller?.username}`}
               className="mt-3 flex items-center gap-3 hover:opacity-80"
@@ -160,7 +160,7 @@ export default async function AdminProductDetailPage({
                 className="size-10 rounded-full bg-[#F3F4F6] object-cover"
               />
               <div>
-                <p className="text-sm font-medium text-[#2D2E32]">
+                <p className="text-sm font-medium text-[#1F2937]">
                   {seller?.full_name}
                 </p>
                 <p className="text-xs text-[#6B7280]">@{seller?.username}</p>
@@ -170,7 +170,7 @@ export default async function AdminProductDetailPage({
             <dl className="mt-4 space-y-2 text-sm">
               <div className="flex justify-between">
                 <dt className="text-[#6B7280]">Member since</dt>
-                <dd className="text-[#2D2E32]">
+                <dd className="text-[#1F2937]">
                   {seller?.created_at
                     ? new Date(seller.created_at).toLocaleDateString()
                     : '—'}
@@ -178,7 +178,7 @@ export default async function AdminProductDetailPage({
               </div>
               <div className="flex justify-between">
                 <dt className="text-[#6B7280]">Total listings</dt>
-                <dd className="text-[#2D2E32]">{sellerListingCount ?? 0}</dd>
+                <dd className="text-[#1F2937]">{sellerListingCount ?? 0}</dd>
               </div>
               <div className="flex justify-between">
                 <dt className="text-[#6B7280]">Past rejections</dt>
@@ -186,7 +186,7 @@ export default async function AdminProductDetailPage({
                   className={
                     (sellerRejectedCount ?? 0) > 0
                       ? 'font-medium text-[#C0392B]'
-                      : 'text-[#2D2E32]'
+                      : 'text-[#1F2937]'
                   }
                 >
                   {sellerRejectedCount ?? 0}

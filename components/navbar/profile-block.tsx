@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import { ChevronDown } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 
@@ -25,6 +26,10 @@ export function ProfileBlock({
   avatarUrl,
   className,
 }: ProfileBlockProps) {
+  const t = useTranslations('navbar')
+  const tChat = useTranslations('chat')
+  const tSidebar = useTranslations('sidebar')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
@@ -62,7 +67,7 @@ export function ProfileBlock({
         type="button"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`${displayName} profile menu`}
+        aria-label={t('profileMenu', { name: displayName })}
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 rounded-xl p-1 pr-2 transition-colors hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
       >
@@ -76,7 +81,7 @@ export function ProfileBlock({
           <span className="truncate text-sm font-semibold text-[#2D2E32]">
             {displayName}
           </span>
-          <span className="text-xs text-[#9CA3AF]">View profile</span>
+          <span className="text-xs text-[#9CA3AF]">{tChat('viewProfile')}</span>
         </span>
         <ChevronDown
           className={cn(
@@ -103,7 +108,7 @@ export function ProfileBlock({
             className="block px-4 py-2 text-sm text-[#2D2E32] hover:bg-[#F3F4F6]"
             role="menuitem"
           >
-            My profile
+            {t('myProfile')}
           </Link>
           <Link
             href={`/profile/${profile?.username}`}
@@ -111,7 +116,7 @@ export function ProfileBlock({
             className="block px-4 py-2 text-sm text-[#2D2E32] hover:bg-[#F3F4F6]"
             role="menuitem"
           >
-            My listings
+            {tSidebar('myListings')}
           </Link>
 
           {isAdmin && (
@@ -121,7 +126,7 @@ export function ProfileBlock({
               className="block px-4 py-2 text-sm font-medium text-[#F36D21] hover:bg-[#F3F4F6]"
               role="menuitem"
             >
-              Admin panel
+              {t('adminPanel')}
             </Link>
           )}
 
@@ -133,7 +138,7 @@ export function ProfileBlock({
             className="block w-full text-left px-4 py-2 text-sm text-[#C0392B] hover:bg-[#FDEDEC]"
             role="menuitem"
           >
-            Log out
+            {tCommon('logout')}
           </button>
         </div>
       )}

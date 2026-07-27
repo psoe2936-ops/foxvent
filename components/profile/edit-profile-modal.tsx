@@ -3,6 +3,7 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { Pencil, X } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { updateProfile } from '@/app/profile/actions'
 
 type EditProfileModalProps = {
@@ -17,6 +18,10 @@ type EditProfileModalProps = {
 }
 
 export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
+  const t = useTranslations('profile')
+  const tAuth = useTranslations('auth')
+  const tListing = useTranslations('listing')
+  const tCommon = useTranslations('common')
   const [open, setOpen] = useState(false)
   const [fullName, setFullName] = useState(profile.full_name)
   const [username, setUsername] = useState(profile.username)
@@ -74,7 +79,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
           className="inline-flex items-center gap-2 rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-sm font-medium text-[#2D2E32] transition-colors hover:bg-[#F9FAFB] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
         >
           <Pencil className="size-4" aria-hidden="true" />
-          Edit profile
+          {t('editProfile')}
         </button>
       )}
 
@@ -93,7 +98,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
             <button
               type="button"
               onClick={closeModal}
-              aria-label="Close"
+              aria-label={tCommon('close')}
               className="absolute right-4 top-4 text-[#9CA3AF] transition-colors hover:text-[#2D2E32]"
             >
               <X className="size-5" aria-hidden="true" />
@@ -103,11 +108,11 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
               id="edit-profile-title"
               className="text-lg font-bold text-[#2D2E32]"
             >
-              Edit profile
+              {t('editProfile')}
             </h2>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-3">
-              <Field label="Full name">
+              <Field label={tAuth('fullName')}>
                 <input
                   type="text"
                   required
@@ -117,7 +122,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
                 />
               </Field>
 
-              <Field label="Username">
+              <Field label={tAuth('username')}>
                 <input
                   type="text"
                   required
@@ -129,23 +134,23 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
                 />
               </Field>
 
-              <Field label="Location">
+              <Field label={tListing('locationLabel')}>
                 <input
                   type="text"
                   value={location}
                   onChange={(event) => setLocation(event.target.value)}
-                  placeholder="City, Country"
+                  placeholder={t('cityCountryPlaceholder')}
                   className="w-full rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
                 />
               </Field>
 
-              <Field label="Bio">
+              <Field label={t('bioLabel')}>
                 <textarea
                   value={bio}
                   onChange={(event) => setBio(event.target.value)}
                   rows={3}
                   maxLength={300}
-                  placeholder="Tell people a bit about yourself"
+                  placeholder={t('bioPlaceholder')}
                   className="w-full resize-none rounded-lg border border-[#E5E7EB] px-3 py-2 text-sm text-[#2D2E32] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
                 />
               </Field>
@@ -161,7 +166,7 @@ export function EditProfileModal({ profile, trigger }: EditProfileModalProps) {
                 disabled={loading}
                 className="w-full rounded-lg bg-[#F36D21] px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-[#E0631D] disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {loading ? 'Saving...' : 'Save changes'}
+                {loading ? tListing('saving') : tListing('saveChanges')}
               </button>
             </form>
           </div>

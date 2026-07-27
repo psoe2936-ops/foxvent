@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 
 type Preferences = {
@@ -11,24 +12,6 @@ type Preferences = {
 
 type PreferenceField = keyof Preferences
 
-const TOGGLE_ITEMS: { field: PreferenceField; label: string; description: string }[] = [
-  {
-    field: 'new_messages',
-    label: 'New messages',
-    description: 'Get notified when someone messages you',
-  },
-  {
-    field: 'listing_updates',
-    label: 'Listing updates',
-    description: 'Know when your listing is approved or rejected',
-  },
-  {
-    field: 'new_followers',
-    label: 'New followers',
-    description: 'Find out when someone follows you',
-  },
-]
-
 export function NotificationToggles({
   initialPreferences,
   userId,
@@ -36,7 +19,26 @@ export function NotificationToggles({
   initialPreferences: Preferences
   userId: string
 }) {
+  const t = useTranslations('settings')
   const [preferences, setPreferences] = useState<Preferences>(initialPreferences)
+
+  const TOGGLE_ITEMS: { field: PreferenceField; label: string; description: string }[] = [
+    {
+      field: 'new_messages',
+      label: t('newMessagesLabel'),
+      description: t('newMessagesDesc'),
+    },
+    {
+      field: 'listing_updates',
+      label: t('listingUpdatesLabel'),
+      description: t('listingUpdatesDesc'),
+    },
+    {
+      field: 'new_followers',
+      label: t('newFollowersLabel'),
+      description: t('newFollowersDesc'),
+    },
+  ]
 
   return (
     <>
@@ -76,6 +78,7 @@ function ToggleRow({
   userId: string
   onChange: (value: boolean) => void
 }) {
+  const t = useTranslations('settings')
   const [status, setStatus] = useState<'idle' | 'saved' | 'error'>('idle')
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
@@ -125,7 +128,7 @@ function ToggleRow({
         } ${status === 'error' ? 'text-[#DC2626]' : 'text-[#16A34A]'}`}
         aria-live="polite"
       >
-        {status === 'saved' ? 'Saved ✓' : status === 'error' ? "Couldn't save" : ''}
+        {status === 'saved' ? t('savedCheckmark') : status === 'error' ? t('couldntSave') : ''}
       </span>
       <ToggleSwitch on={on} onClick={handleToggle} />
     </div>

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { MessageCircle } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { formatShortTime } from '@/lib/format-relative-time'
 
@@ -17,6 +18,9 @@ type ConversationItem = {
 }
 
 export function MessagesPanel({ userId }: { userId: string }) {
+  const t = useTranslations('chat')
+  const tSidebar = useTranslations('sidebar')
+  const tNotif = useTranslations('notifications')
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<ConversationItem[]>([])
   const [loading, setLoading] = useState(false)
@@ -148,7 +152,7 @@ export function MessagesPanel({ userId }: { userId: string }) {
 
         return {
           id: convo.id,
-          otherPerson: other ?? { id: '', full_name: 'Unknown', avatar_url: null },
+          otherPerson: other ?? { id: '', full_name: t('unknownUser'), avatar_url: null },
           productTitle: product?.title ?? '',
           lastMessage: latestMsg.get(convo.id) ?? '',
           lastMessageAt: convo.last_message_at,
@@ -179,7 +183,7 @@ export function MessagesPanel({ userId }: { userId: string }) {
     <div className="relative" ref={panelRef}>
       <button
         type="button"
-        aria-label={`Messages${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+        aria-label={`${tSidebar('messages')}${unreadCount > 0 ? `, ${tNotif('unreadCount', { count: unreadCount })}` : ''}`}
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
         className="relative inline-flex size-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#2D2E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
@@ -196,12 +200,12 @@ export function MessagesPanel({ userId }: { userId: string }) {
         <div className="absolute right-0 top-full z-50 mt-2 w-85 overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
           {/* Header */}
           <div className="flex items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
-            <h2 className="shrink-0 text-[15px] font-bold text-[#1F2937]">Messages</h2>
+            <h2 className="shrink-0 text-[15px] font-bold text-[#1F2937]">{tSidebar('messages')}</h2>
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search messages..."
+              placeholder={t('searchMessagesPlaceholder')}
               className="min-w-0 flex-1 rounded-lg border border-[#E5E7EB] px-3 py-1.5 text-xs text-[#374151] outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21]"
             />
           </div>
@@ -216,11 +220,11 @@ export function MessagesPanel({ userId }: { userId: string }) {
               <div className="py-12 text-center">
                 <MessageCircle className="mx-auto size-8 text-[#D1D5DB]" />
                 <p className="mt-3 text-sm font-medium text-[#374151]">
-                  {search ? 'No results found' : 'No messages yet'}
+                  {search ? t('noResultsFound') : t('noMessagesYetPanel')}
                 </p>
                 {!search && (
                   <p className="mt-1 text-xs text-[#9CA3AF]">
-                    Start a conversation by contacting a seller.
+                    {t('startConversationByContacting')}
                   </p>
                 )}
               </div>
@@ -295,7 +299,7 @@ export function MessagesPanel({ userId }: { userId: string }) {
               onClick={() => setOpen(false)}
               className="text-xs font-semibold text-[#F36D21] hover:underline"
             >
-              View all conversations →
+              {t('viewAllConversations')} →
             </Link>
           </div>
         </div>

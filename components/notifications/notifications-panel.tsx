@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { AlertCircle, Bell, CheckCircle2, MessageCircle, UserPlus } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { formatShortTime } from '@/lib/format-relative-time'
 
@@ -50,6 +51,7 @@ function isToday(dateString: string): boolean {
 }
 
 export function NotificationsPanel({ userId }: { userId: string }) {
+  const t = useTranslations('notifications')
   const [open, setOpen] = useState(false)
   const [notifications, setNotifications] = useState<NotificationRow[]>([])
   const [loading, setLoading] = useState(false)
@@ -201,7 +203,7 @@ export function NotificationsPanel({ userId }: { userId: string }) {
     <div className="relative" ref={panelRef}>
       <button
         type="button"
-        aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ''}`}
+        aria-label={`${t('title')}${unreadCount > 0 ? `, ${t('unreadCount', { count: unreadCount })}` : ''}`}
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
         className="relative inline-flex size-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#2D2E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
@@ -218,14 +220,14 @@ export function NotificationsPanel({ userId }: { userId: string }) {
         <div className="absolute right-0 top-full z-50 mt-2 w-85 overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-[#E5E7EB] px-4 py-3">
-            <h2 className="text-[15px] font-bold text-[#1F2937]">Notifications</h2>
+            <h2 className="text-[15px] font-bold text-[#1F2937]">{t('title')}</h2>
             {notifications.some((n) => !n.is_read) && (
               <button
                 type="button"
                 onClick={markAllRead}
                 className="text-xs font-medium text-[#F36D21] hover:underline"
               >
-                Mark all as read
+                {t('markAllAsRead')}
               </button>
             )}
           </div>
@@ -239,15 +241,15 @@ export function NotificationsPanel({ userId }: { userId: string }) {
             ) : notifications.length === 0 ? (
               <div className="py-12 text-center">
                 <Bell className="mx-auto size-8 text-[#D1D5DB]" />
-                <p className="mt-3 text-sm font-medium text-[#374151]">You&apos;re all caught up</p>
-                <p className="mt-1 text-xs text-[#9CA3AF]">No notifications yet.</p>
+                <p className="mt-3 text-sm font-medium text-[#374151]">{t('allCaughtUp')}</p>
+                <p className="mt-1 text-xs text-[#9CA3AF]">{t('noNotificationsYet')}</p>
               </div>
             ) : (
               <ul>
                 {todayItems.length > 0 && (
                   <>
                     <li className="border-b border-[#F3F4F6] px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#9CA3AF]">
-                      Today
+                      {t('today')}
                     </li>
                     {todayItems.map(renderRow)}
                   </>
@@ -255,7 +257,7 @@ export function NotificationsPanel({ userId }: { userId: string }) {
                 {earlierItems.length > 0 && (
                   <>
                     <li className="border-b border-[#F3F4F6] px-4 py-2 text-[11px] font-semibold uppercase tracking-wider text-[#9CA3AF]">
-                      Earlier
+                      {t('earlier')}
                     </li>
                     {earlierItems.map(renderRow)}
                   </>
@@ -271,7 +273,7 @@ export function NotificationsPanel({ userId }: { userId: string }) {
               onClick={() => setOpen(false)}
               className="text-xs font-semibold text-[#F36D21] hover:underline"
             >
-              View all notifications →
+              {t('viewAllNotifications')} →
             </Link>
           </div>
         </div>

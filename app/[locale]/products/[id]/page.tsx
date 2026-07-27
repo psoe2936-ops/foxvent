@@ -2,7 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { Eye } from 'lucide-react'
 import type { Metadata } from 'next'
+import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { getConditionLabel } from '@/lib/condition-label'
 import { MessageSellerButton } from '@/components/products/message-seller-button'
 import { MakeOfferButton } from '@/components/products/make-offer-button'
 import { SellerActionBar } from '@/components/products/seller-action-bar'
@@ -28,7 +30,10 @@ export async function generateMetadata({ params }: ProductDetailProps): Promise<
     .eq('id', id)
     .single()
 
-  if (!product) return { title: 'Listing not found — FoxVent' }
+  if (!product) {
+    const t = await getTranslations('product')
+    return { title: `${t('listingNotFound')} — FoxVent` }
+  }
 
   const title = `${product.title} — FoxVent`
   const description = product.description
@@ -48,15 +53,11 @@ export async function generateMetadata({ params }: ProductDetailProps): Promise<
   }
 }
 
-const CONDITION_LABEL: Record<string, string> = {
-  new: 'New with tags',
-  like_new: 'Like new',
-  good: 'Good',
-  fair: 'Fair',
-}
-
 export default async function PublicProductPage({ params }: ProductDetailProps) {
   const { id } = await params
+  const t = await getTranslations('product')
+  const tListing = await getTranslations('listing')
+  const tFeed = await getTranslations('feed')
   const supabase = await createClient()
 
   const { data: product } = await supabase
@@ -155,7 +156,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
         {/* Center content */}
         <div className="min-w-0 flex-1 px-4 sm:px-6 lg:px-10">
           <Link href="/feed" className="text-sm text-[#6B7280] hover:text-[#2D2E32]">
-            ← Back to browse
+            ← {t('backToBrowse')}
           </Link>
 
           {/* Status banner for seller viewing non-approved listings */}
@@ -168,8 +169,10 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               }`}
             >
               {product.status === 'pending'
-                ? 'This listing is pending review and is not yet visible to buyers.'
-                : `This listing was rejected${product.rejection_reason ? `: ${product.rejection_reason}` : '. You can edit and resubmit it.'}`}
+                ? t('pendingReviewNotice')
+                : product.rejection_reason
+                ? t('rejectedWithReason', { reason: product.rejection_reason })
+                : t('rejectedNoReason')}
             </div>
           )}
 
@@ -195,19 +198,21 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               </p>
 
               <span className="mt-3 inline-block rounded-full bg-[#EBF2FA] px-3 py-1 text-xs font-medium text-[#1B4F8C]">
-                {CONDITION_LABEL[product.condition] ?? product.condition}
+                {product.condition === 'new'
+                  ? tListing('conditionNewWithTags')
+                  : getConditionLabel(t, product.condition)}
               </span>
 
               <p className="mt-5 whitespace-pre-wrap text-sm leading-relaxed text-[#4B5563]">
-                {product.description || 'No description provided.'}
+                {product.description || t('noDescriptionProvided')}
               </p>
 
               <div className="mt-4 flex items-center gap-4 text-xs text-[#9CA3AF]">
-                <span>Listed {new Date(product.created_at).toLocaleDateString()}</span>
+                <span>{t('listedOn', { date: new Date(product.created_at).toLocaleDateString() })}</span>
                 {(product.views_count ?? 0) > 0 && (
                   <span className="inline-flex items-center gap-1">
                     <Eye className="size-3.5" />
-                    {product.views_count} view{product.views_count === 1 ? '' : 's'}
+                    {t('viewsCount', { count: product.views_count ?? 0 })}
                   </span>
                 )}
               </div>
@@ -293,7 +298,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
               currentProductId={product.id}
             />
           ) : (
-            <TrendingPanel items={trendingItems} label="Most popular" />
+            <TrendingPanel items={trendingItems} label={tFeed('mostPopular')} />
           )}
         </aside>
       </div>

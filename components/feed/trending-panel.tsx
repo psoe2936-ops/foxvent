@@ -60,7 +60,7 @@ export async function TrendingPanel({
       </div>
 
       {items.length === 0 ? (
-        <p className="mt-4 text-[13px] text-[#9CA3AF]">Nothing here yet.</p>
+        <p className="mt-4 text-[13px] text-[#9CA3AF]">{t('nothingHereYet')}</p>
       ) : (
         <ul className="mt-3 divide-y divide-[#F3F4F6]">
           {items.map((item) => {

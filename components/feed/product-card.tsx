@@ -69,7 +69,7 @@ export function ProductCard({
           />
         ) : (
           <div className="flex size-full items-center justify-center text-xs text-[#9CA3AF]">
-            No image
+            {t('noImage')}
           </div>
         )}
         <span
@@ -123,7 +123,7 @@ export function ProductCard({
               </span>
             ) : isFollowingSeller ? (
               <span className="ml-auto shrink-0 rounded-full bg-[#FEF3E2] px-1.5 py-0.5 text-[10px] font-medium text-[#F36D21]">
-                {t('following') ?? 'Following'}
+                {t('following')}
               </span>
             ) : null}
           </div>
