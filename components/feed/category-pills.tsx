@@ -33,7 +33,7 @@ export async function CategoryPills({
       <div className="flex w-max gap-2">
         <Link
           href={buildMarketplaceHref(filterParams, { category: undefined }, basePath)}
-          className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+          className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
             !activeCategory
               ? 'border-[#1F2937] bg-[#1F2937] text-white'
               : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:border-[#D1D5DB] hover:bg-white'
@@ -54,7 +54,7 @@ export async function CategoryPills({
             <Link
               key={cat.id}
               href={buildMarketplaceHref(filterParams, { category: cat.id }, basePath)}
-              className={`shrink-0 rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
+              className={`shrink-0 whitespace-nowrap rounded-full border px-4 py-1.5 text-sm font-medium transition-colors ${
                 isActive
                   ? 'border-[#1F2937] bg-[#1F2937] text-white'
                   : 'border-[#E5E7EB] bg-[#F9FAFB] text-[#374151] hover:border-[#D1D5DB] hover:bg-white'

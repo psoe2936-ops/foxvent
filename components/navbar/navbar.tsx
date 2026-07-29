@@ -89,6 +89,12 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
 
+  useEffect(() => {
+    function onOpenSearch() { setMobileSearchOpen(true) }
+    window.addEventListener('foxvent-open-search', onOpenSearch)
+    return () => window.removeEventListener('foxvent-open-search', onOpenSearch)
+  }, [])
+
   const isLoggedIn = !!user
 
   const openModal = (mode: 'login' | 'register') => {
@@ -128,7 +134,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
           </div>
 
           {/* Right actions */}
-          <div className="ml-auto flex shrink-0 items-center gap-1 sm:gap-3">
+          <div className="ml-auto flex min-w-0 items-center gap-1 sm:gap-3">
             <button
               type="button"
               aria-label={tNav('searchPlaceholder')}
@@ -142,6 +148,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
               isLoggedIn={isLoggedIn}
               onRequireAuth={() => openModal('login')}
               username={profile?.username}
+              className="hidden md:flex"
             />
 
             {isLoggedIn && user && <UtilityIcons userId={user.id} />}
@@ -151,7 +158,7 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             {isLoggedIn ? (
               <ProfileBlock profile={profile} className="hidden md:flex" />
             ) : (
-              <SignUpButton onClick={() => openModal('register')} />
+              <SignUpButton onClick={() => openModal('register')} className="min-w-0 truncate" />
             )}
           </div>
         </nav>
@@ -209,22 +216,34 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
             {/* Nav links */}
             <nav className="flex-1 overflow-y-auto px-2 py-3">{isLoggedIn ? (
-                DRAWER_LINKS.map(({ href, label, Icon, badge }) => (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setDrawerOpen(false)}
-                    className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
-                  >
-                    <span className="relative shrink-0">
-                      <Icon className="size-5" strokeWidth={1.75} />
-                      {badge && user?.id && (
-                        <SidebarUnreadBadge userId={user.id} type={badge} />
-                      )}
-                    </span>
-                    {label}
-                  </Link>
-                ))
+                <>
+                  {DRAWER_LINKS.map(({ href, label, Icon, badge }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#4B5563] transition-colors hover:bg-[#F3F4F6] hover:text-[#1F2937]"
+                    >
+                      <span className="relative shrink-0">
+                        <Icon className="size-5" strokeWidth={1.75} />
+                        {badge && user?.id && (
+                          <SidebarUnreadBadge userId={user.id} type={badge} />
+                        )}
+                      </span>
+                      {label}
+                    </Link>
+                  ))}
+                  {profile?.role === 'admin' && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setDrawerOpen(false)}
+                      className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-[#F36D21] transition-colors hover:bg-[#FEF3E2]"
+                    >
+                      <Settings className="size-5" strokeWidth={1.75} />
+                      {tNav('adminPanel')}
+                    </Link>
+                  )}
+                </>
               ) : (
                 <>
                   <Link
@@ -258,6 +277,25 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
                 </Link>
               </div>
             )}
+
+            {/* Footer links */}
+            <div className="border-t border-[#E5E7EB] px-4 py-3 flex flex-wrap gap-x-4 gap-y-1">
+              {[
+                { href: '/about', label: 'About' },
+                { href: '/settings', label: 'Help' },
+                { href: '/terms', label: 'Terms' },
+                { href: '/privacy', label: 'Privacy' },
+              ].map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => setDrawerOpen(false)}
+                  className="text-xs text-[#9CA3AF] hover:text-[#6B7280]"
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
           </aside>
         </>
       )}

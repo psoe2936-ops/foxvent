@@ -40,7 +40,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
   const activeProfile = isActive('/profile')
 
   const itemCls = (active: boolean) =>
-    `flex flex-col items-center gap-0.5 px-2 py-1.5 text-[10px] font-medium transition-transform active:scale-90 ${
+    `flex min-w-0 flex-col items-center gap-0.5 px-2 py-1.5 text-center text-[10px] font-medium leading-tight break-words transition-transform active:scale-90 ${
       active ? 'text-[#F36D21]' : 'text-[#9CA3AF]'
     }`
 
@@ -67,7 +67,10 @@ export function BottomNav({ username, userId }: BottomNavProps) {
         {/* Search */}
         <button
           type="button"
-          onClick={() => router.push('/feed')}
+          onClick={() => {
+            router.push('/feed')
+            window.dispatchEvent(new Event('foxvent-open-search'))
+          }}
           className={itemCls(false)}
           aria-label={t('search')}
         >
