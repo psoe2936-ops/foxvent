@@ -43,7 +43,6 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
   const t = useTranslations('sidebar')
   const tNav = useTranslations('navbar')
 
-  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [drawerOpen, setDrawerOpen] = useState(false)
   const [modalOpen, setModalOpen] = useState(false)
   const [modalMode, setModalMode] = useState<'login' | 'register'>('register')
@@ -88,12 +87,6 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
     document.body.style.overflow = drawerOpen ? 'hidden' : ''
     return () => { document.body.style.overflow = '' }
   }, [drawerOpen])
-
-  useEffect(() => {
-    function onOpenSearch() { setMobileSearchOpen(true) }
-    window.addEventListener('foxvent-open-search', onOpenSearch)
-    return () => window.removeEventListener('foxvent-open-search', onOpenSearch)
-  }, [])
 
   const isLoggedIn = !!user
 
@@ -153,13 +146,6 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             )}
           </div>
         </nav>
-
-        {/* Mobile search bar */}
-        {mobileSearchOpen && (
-          <div className="border-t border-[#E5E7EB] px-4 py-3 md:hidden">
-            <SearchBar categories={categories} />
-          </div>
-        )}
       </header>
 
       {/* Mobile drawer */}

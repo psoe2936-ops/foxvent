@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { formatPrice } from '@/lib/format-price'
 
 type RawRow = {
   viewed_at: string
@@ -47,7 +48,7 @@ export async function RecentlyViewedRow({ userId }: { userId: string }) {
             />
             <p className="mt-1 line-clamp-1 text-xs text-[#374151]">{item.title}</p>
             <p className="text-xs font-semibold text-[#F36D21]">
-              MMK {item.price.toLocaleString()}
+              {formatPrice(item.price)}
             </p>
           </Link>
         ))}

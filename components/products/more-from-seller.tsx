@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { formatPrice } from '@/lib/format-price'
 
 type Props = {
   sellerId: string
@@ -52,7 +53,7 @@ export async function MoreFromSeller({ sellerId, sellerUsername, currentProductI
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-medium text-[#374151]">{item.title}</p>
               <p className="text-xs font-semibold text-[#F36D21]">
-                MMK {item.price.toLocaleString()}
+                {formatPrice(item.price)}
               </p>
             </div>
           </Link>

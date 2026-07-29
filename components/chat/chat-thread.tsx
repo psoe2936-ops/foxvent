@@ -7,6 +7,7 @@ import { Check, CheckCheck, ImagePlus, Loader2, MoreVertical, Send, Shield, Vide
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
+import { formatPrice } from '@/lib/format-price'
 import { sendMessage } from '@/app/chat/actions'
 import { makeOffer, type Offer } from '@/app/offers/actions'
 import dynamic from 'next/dynamic'
@@ -470,7 +471,7 @@ export function ChatThread({
             <p className="truncate font-medium text-[#2D2E32]">{otherPerson?.full_name}</p>
             {product && (
               <p className="truncate text-xs text-[#6B7280]">
-                {product.title} · MMK {mounted ? product.price.toLocaleString() : product.price}
+                {product.title} · {mounted ? formatPrice(product.price) : `MMK ${product.price}`}
               </p>
             )}
           </div>

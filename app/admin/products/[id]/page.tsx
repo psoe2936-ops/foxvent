@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { RejectButton } from '@/components/admin/reject-button'
+import { formatPrice } from '@/lib/format-price'
 import { approveProduct } from '../actions'
 
 type ProductDetailProps = {
@@ -109,7 +110,7 @@ export default async function AdminProductDetailPage({
               {product.title}
             </h1>
             <p className="mt-1 text-2xl font-bold text-[#F36D21]">
-              MMK {product.price.toLocaleString()}
+              {formatPrice(product.price)}
             </p>
 
             <dl className="mt-4 space-y-2 text-sm">

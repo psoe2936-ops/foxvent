@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import { WishlistHeart } from '@/components/feed/wishlist-heart'
 import { formatRelativeTime } from '@/lib/format-relative-time'
+import { formatPrice } from '@/lib/format-price'
 import { StarRatingDisplay } from '@/components/reviews/star-rating-display'
 
 type ProductCardProps = {
@@ -90,7 +91,7 @@ export function ProductCard({
           {title}
         </p>
         <p className="mt-1.5 text-xl font-bold text-[#F36D21]">
-          MMK {price.toLocaleString()}
+          {formatPrice(price)}
         </p>
 
         {(categoryName || conditionLabel) && (

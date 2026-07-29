@@ -2,6 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
+import { formatPrice } from '@/lib/format-price'
 
 export async function ChatInboxContent({ userId }: { userId: string }) {
   const t = await getTranslations('chat')
@@ -60,7 +61,7 @@ export async function ChatInboxContent({ userId }: { userId: string }) {
                 <div className="min-w-0 flex-1">
                   <p className="font-medium text-[#1F2937]">{otherPerson?.full_name}</p>
                   <p className="truncate text-sm text-[#6B7280]">
-                    {product?.title} · MMK {product?.price?.toLocaleString()}
+                    {product?.title} · {product?.price != null && formatPrice(product.price)}
                   </p>
                 </div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}

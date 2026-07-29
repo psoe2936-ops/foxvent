@@ -8,6 +8,7 @@ import { CategoryPills } from '@/components/feed/category-pills'
 import { ProductCard } from '@/components/feed/product-card'
 import { FilterPanel } from '@/components/feed/filter-panel'
 import { RecentlyViewedRow } from '@/components/feed/recently-viewed-row'
+import { MobileSearchBox } from '@/components/feed/mobile-search-box'
 import { UserCard } from '@/components/search/user-card'
 
 type SearchParams = {
@@ -44,7 +45,6 @@ export async function FeedProductGrid({
 }) {
   const t = await getTranslations('feed')
   const tProduct = await getTranslations('product')
-  const tNavbar = await getTranslations('navbar')
   const { category, q, sort: sortParam, minPrice, maxPrice, condition, hideSold } = searchParams
    type SortOption = 'newest' | 'popular' | 'price_asc' | 'price_desc'
 const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'||  sortParam === 'popular' ? sortParam : 'newest'
@@ -321,32 +321,17 @@ const sort: SortOption = sortParam === 'price_asc'||  sortParam === 'price_desc'
       <div className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h1 className="text-lg font-bold text-[#1F2937] sm:text-xl">{t('allListings')}</h1>
-          <div className="relative w-full sm:w-56 md:hidden">
-            <form action={basePath} method="get">
-              {category && <input type="hidden" name="category" value={category} />}
-              {sort !== 'newest' && <input type="hidden" name="sort" value={sort} />}
-              {minPrice && <input type="hidden" name="minPrice" value={minPrice} />}
-              {maxPrice && <input type="hidden" name="maxPrice" value={maxPrice} />}
-              {condition && <input type="hidden" name="condition" value={condition} />}
-              {hideSold && <input type="hidden" name="hideSold" value={hideSold} />}
-              <input
-                type="text"
-                name="q"
-                defaultValue={q ?? ''}
-                placeholder={tNavbar('searchPlaceholder')}
-                className={`w-full rounded-lg border border-[#E8EAED] bg-white py-2 text-sm text-[#374151] shadow-sm outline-none placeholder:text-[#9CA3AF] focus:border-[#F36D21] focus:ring-1 focus:ring-[#F36D21]/20 ${q ? 'pl-3.5 pr-8' : 'px-3.5'}`}
-              />
-            </form>
-            {q && (
-              <Link
-                href={clearSearchUrl}
-                aria-label={t('clearSearchAriaLabel')}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#9CA3AF] hover:text-[#6B7280]"
-              >
-                <X className="size-3.5" />
-              </Link>
-            )}
-          </div>
+          <MobileSearchBox
+            basePath={basePath}
+            category={category}
+            sort={sort}
+            minPrice={minPrice}
+            maxPrice={maxPrice}
+            condition={condition}
+            hideSold={hideSold}
+            q={q}
+            clearSearchUrl={clearSearchUrl}
+          />
         </div>
 
         <FilterPanel sort={sort} filterParams={filterParams} basePath={basePath} />

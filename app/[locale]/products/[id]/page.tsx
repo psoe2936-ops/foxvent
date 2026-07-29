@@ -5,6 +5,7 @@ import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { getConditionLabel } from '@/lib/condition-label'
+import { formatPrice } from '@/lib/format-price'
 import { MessageSellerButton } from '@/components/products/message-seller-button'
 import { MakeOfferButton } from '@/components/products/make-offer-button'
 import { SellerActionBar } from '@/components/products/seller-action-bar'
@@ -194,7 +195,7 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
 
               <h1 className="mt-3 text-2xl font-bold text-[#2D2E32]">{product.title}</h1>
               <p className="mt-1 text-3xl font-bold text-[#F36D21]">
-                MMK {product.price.toLocaleString()}
+                {formatPrice(product.price)}
               </p>
 
               <span className="mt-3 inline-block rounded-full bg-[#EBF2FA] px-3 py-1 text-xs font-medium text-[#1B4F8C]">

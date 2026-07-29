@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { respondToOffer, type Offer } from '@/app/offers/actions'
+import { formatPrice } from '@/lib/format-price'
 
 const STATUS_COLOR: Record<Offer['status'], string> = {
   pending: 'text-[#C26A08] bg-[#FEF3E2]',
@@ -86,7 +87,7 @@ export function OfferCard({
         </div>
 
         <p className="mt-2 text-2xl font-bold text-[#2D2E32]">
-          MMK {offer.amount.toLocaleString()}
+          {formatPrice(offer.amount)}
         </p>
 
         {/* Show who is waiting */}

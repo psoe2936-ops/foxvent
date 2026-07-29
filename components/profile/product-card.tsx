@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { formatPrice } from '@/lib/format-price'
 
 export type Product = {
   id: string
@@ -19,14 +20,6 @@ export type Product = {
 
 type ProductCardProps = {
   product: Product
-}
-
-function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(amount)
 }
 
 export function ProductCard({ product }: ProductCardProps) {

@@ -4,6 +4,7 @@ import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { ChatThread } from '@/components/chat/chat-thread'
 import { FeedSidebar } from '@/components/feed/sidebar'
+import { formatPrice } from '@/lib/format-price'
 
 type ChatPageProps = {
   params: Promise<{ id: string }>
@@ -129,7 +130,7 @@ export default async function ChatPage({ params, searchParams }: ChatPageProps) 
                 {product.title}
               </p>
               <p className="mt-1 text-lg font-bold text-[#F36D21]">
-                MMK {product.price.toLocaleString()}
+                {formatPrice(product.price)}
               </p>
               <Link
                 href={`/products/${product.id}`}

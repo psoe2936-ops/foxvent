@@ -1,3 +1,5 @@
+import { formatPrice as formatPriceShared } from '@/lib/format-price'
+
 export type ProfileListing = {
   id: string
   title: string
@@ -97,9 +99,5 @@ export const mockProfile: MockProfile = {
 }
 
 export function formatPrice(amount: number): string {
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0,
-  }).format(amount)
+  return formatPriceShared(amount)
 }

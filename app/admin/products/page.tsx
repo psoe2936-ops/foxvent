@@ -5,6 +5,7 @@ import { RejectButton } from '@/components/admin/reject-button'
 import { AdminDeleteButton } from '@/components/admin/admin-delete-button'
 import { AdminProductFilters } from '@/components/admin/admin-product-filters'
 import { formatRelativeTime } from '@/lib/format-relative-time'
+import { formatPrice } from '@/lib/format-price'
 import { approveProduct } from './actions'
 
 type SearchParams = Promise<{
@@ -165,7 +166,7 @@ export default async function AdminProductsPage({
                           {product.title}
                         </p>
                         <p className="text-xs text-[#9CA3AF]">
-                          MMK {product.price.toLocaleString()}
+                          {formatPrice(product.price)}
                         </p>
                       </div>
                     </div>

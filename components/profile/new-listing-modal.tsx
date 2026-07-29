@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeText, sanitizePrice } from '@/lib/sanitize'
 import { createListing } from '@/app/products/actions'
+import { formatPrice } from '@/lib/format-price'
 import type { Product } from '@/components/profile/product-card'
 
 export type Category = {
@@ -429,7 +430,7 @@ export function NewListingModal({
   <span className="text-xs text-[#C0392B]">{errors.price}</span>
   {price && !errors.price && (
     <span className="text-xs text-[#6B7280]">
-      = MMK {Number(price).toLocaleString()}
+      = {formatPrice(Number(price))}
     </span>
   )}
 </div>
