@@ -68,8 +68,10 @@ export function BottomNav({ username, userId }: BottomNavProps) {
         <button
           type="button"
           onClick={() => {
-            router.push('/feed')
             window.dispatchEvent(new Event('foxvent-open-search'))
+            if (!pathname.startsWith('/feed')) {
+              router.push('/feed')
+            }
           }}
           className={itemCls(false)}
           aria-label={t('search')}

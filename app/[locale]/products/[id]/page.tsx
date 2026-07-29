@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { Eye, MessageCircle } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import type { Metadata } from 'next'
 import { getTranslations } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
@@ -302,21 +302,6 @@ export default async function PublicProductPage({ params }: ProductDetailProps) 
           )}
         </aside>
       </div>
-
-      {!isOwnListing && seller && !product.is_sold && (
-        <div
-          className="fixed bottom-16 left-0 right-0 z-30 border-t border-[#E5E7EB] bg-white/90 backdrop-blur-md px-4 py-3 md:hidden"
-          style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 12px)' }}
-        >
-          <Link
-            href={`/chat?product=${product.id}`}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#F36D21] py-3 text-sm font-semibold text-white"
-          >
-            <MessageCircle className="size-4" />
-            {t('messageSeller')}
-          </Link>
-        </div>
-      )}
     </div>
   )
 }

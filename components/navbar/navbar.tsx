@@ -1,6 +1,6 @@
 'use client'
 
-import { Menu, Search, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
@@ -135,15 +135,6 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
 
           {/* Right actions */}
           <div className="ml-auto flex min-w-0 items-center gap-1 sm:gap-3">
-            <button
-              type="button"
-              aria-label={tNav('searchPlaceholder')}
-              onClick={() => setMobileSearchOpen((prev) => !prev)}
-              className="inline-flex size-9 items-center justify-center rounded-lg text-[#6B7280] transition-colors hover:bg-[#F3F4F6] hover:text-[#2D2E32] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30 md:hidden"
-            >
-              <Search className="size-5" aria-hidden="true" />
-            </button>
-
             <SellButton
               isLoggedIn={isLoggedIn}
               onRequireAuth={() => openModal('login')}
