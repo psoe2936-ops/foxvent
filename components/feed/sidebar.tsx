@@ -152,7 +152,7 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
         <div className="flex justify-center">
           {/*<Image
             src="/welcome.png(1).png"
-            alt="FoxVent mascot"
+            alt="FoxVend mascot"
             width={80}
             height={80}
             className="size-12 object-contain"
@@ -179,7 +179,7 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
           <Link href="/terms" className="hover:text-[#6B7280]">Terms</Link>
           <Link href="/privacy" className="hover:text-[#6B7280]">Privacy</Link>
         </div>
-        <p className="text-[10px] text-[#D1D5DB]">© 2026 FoxVent</p>
+        <p className="text-[10px] text-[#D1D5DB]">© 2026 FoxVend</p>
       </footer>
     </aside>
   )

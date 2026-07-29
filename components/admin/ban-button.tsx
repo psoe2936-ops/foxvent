@@ -102,7 +102,7 @@ export function BanButton({
           >
             <h3 className="font-semibold text-[#1F2937]">Ban @{username}</h3>
             <p className="mt-1 text-sm text-[#6B7280]">
-              The user will be notified and cannot access FoxVent until the ban expires.
+              The user will be notified and cannot access FoxVend until the ban expires.
             </p>
 
             <div className="mt-4">

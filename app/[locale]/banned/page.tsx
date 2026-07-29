@@ -30,7 +30,7 @@ export default async function BannedPage() {
           Account Restricted
         </h1>
         <p className="mt-2 text-sm text-[#6B7280]">
-          Your account has been restricted from accessing FoxVent.
+          Your account has been restricted from accessing FoxVend.
         </p>
 
         {profile.ban_reason && (
@@ -62,7 +62,7 @@ export default async function BannedPage() {
         <p className="mt-6 text-sm text-[#9CA3AF]">
           If you believe this is a mistake, please{' '}
           <a
-            href="mailto:support@foxvent.com"
+            href="mailto:support@foxvend.com"
             className="font-medium text-[#F36D21] hover:underline"
           >
             contact support

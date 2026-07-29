@@ -32,13 +32,13 @@ export async function generateMetadata({ params }: ProductDetailProps): Promise<
 
   if (!product) {
     const t = await getTranslations('product')
-    return { title: `${t('listingNotFound')} — FoxVent` }
+    return { title: `${t('listingNotFound')} — FoxVend` }
   }
 
-  const title = `${product.title} — FoxVent`
+  const title = `${product.title} — FoxVend`
   const description = product.description
     ? product.description.slice(0, 160)
-    : `Buy ${product.title} on FoxVent — verified second-hand marketplace.`
+    : `Buy ${product.title} on FoxVend — verified second-hand marketplace.`
   const image = product.images?.[0]
 
   return {

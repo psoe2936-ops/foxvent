@@ -89,7 +89,7 @@ export default function ResetPasswordPage() {
     <main className="flex min-h-screen items-center justify-center bg-[#F9FAFB] px-4">
       <div className="w-full max-w-sm rounded-2xl border border-[#E5E7EB] bg-white p-8 shadow-sm">
         <div className="mb-6 text-center">
-          <div className="text-xl font-extrabold text-[#1A1814]">FoxVent</div>
+          <div className="text-xl font-extrabold text-[#1A1814]">FoxVend</div>
           <h1 className="mt-2 text-xl font-bold text-[#1F2937]">
             Set new password
           </h1>

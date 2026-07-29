@@ -42,10 +42,10 @@ export function DeleteAccountModal() {
             <p className="mt-3 text-sm text-[#6B7280]">
               {t('pleaseEmail')}{' '}
               <a
-                href="mailto:support@foxvent.com"
+                href="mailto:support@foxvend.com"
                 className="font-medium text-[#F36D21] hover:underline"
               >
-                support@foxvent.com
+                support@foxvend.com
               </a>{' '}
               {t('fromRegisteredAddress')}
             </p>

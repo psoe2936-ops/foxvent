@@ -93,7 +93,7 @@ export const mockProfile: MockProfile = {
     },
   ],
   about:
-    'Hi! I\'m Neha, a trusted seller on FoxVent with over 2 years of experience. I specialize in electronics and gadgets, and I always ensure every item is accurately described and well-packaged for shipping.',
+    'Hi! I\'m Neha, a trusted seller on FoxVend with over 2 years of experience. I specialize in electronics and gadgets, and I always ensure every item is accurately described and well-packaged for shipping.',
 }
 
 export function formatPrice(amount: number): string {

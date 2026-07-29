@@ -682,7 +682,7 @@ function AuthModalContent({
             {/* Header */}
             <div style={{ textAlign: 'center', marginBottom: '20px' }}>
               <div style={{ fontSize: '20px', fontWeight: 800, marginBottom: '6px' }}>
-                FoxVent
+                FoxVend
               </div>
               <h2
                 id="auth-modal-title"

@@ -45,7 +45,7 @@ export default async function AdminUsersPage() {
     <div>
       <h1 className="text-2xl font-semibold tracking-tight text-[#1F2937]">Users</h1>
       <p className="mt-1 text-sm text-[#6B7280]">
-        All registered accounts on FoxVent.
+        All registered accounts on FoxVend.
       </p>
 
       <div className="mt-6 overflow-hidden rounded-2xl border border-[#E5E7EB] bg-white">

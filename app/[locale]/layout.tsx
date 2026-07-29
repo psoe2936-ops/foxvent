@@ -25,13 +25,13 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: 'FoxVent — Buy & Sell Second-Hand',
-    template: '%s — FoxVent',
+    default: 'FoxVend — Buy & Sell Second-Hand',
+    template: '%s — FoxVend',
   },
   description:
-    'FoxVent is a verified second-hand marketplace. Buy and sell pre-loved items safely.',
+    'FoxVend is a verified second-hand marketplace. Buy and sell pre-loved items safely.',
   openGraph: {
-    siteName: 'FoxVent',
+    siteName: 'FoxVend',
     type: 'website',
   },
 }

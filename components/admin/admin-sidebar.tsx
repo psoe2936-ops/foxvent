@@ -49,7 +49,7 @@ function SidebarInner({ pendingCount, pendingReportsCount, pendingUserReportsCou
       {/* Brand */}
       <div className="flex shrink-0 items-center gap-2.5 border-b border-[#E5E7EB] px-4 py-4">
         <FoxIcon className="size-7" />
-        <span className="text-sm font-bold text-[#1F2937]">FoxVent</span>
+        <span className="text-sm font-bold text-[#1F2937]">FoxVend</span>
         <span className="rounded-md bg-[#FEF3E2] px-1.5 py-0.5 text-[10px] font-semibold text-[#C26A08]">
           Admin
         </span>

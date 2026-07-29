@@ -59,7 +59,7 @@ export function AdminMobileNav({ pendingCount, pendingReportsCount, pendingUserR
       <header className="flex items-center justify-between border-b border-[#E5E7EB] bg-white px-4 py-3 lg:hidden">
         <div className="flex items-center gap-2">
           <FoxIcon className="size-6" />
-          <span className="text-sm font-bold text-[#1F2937]">FoxVent</span>
+          <span className="text-sm font-bold text-[#1F2937]">FoxVend</span>
           <span className="rounded-md bg-[#FEF3E2] px-1.5 py-0.5 text-[10px] font-semibold text-[#C26A08]">
             Admin
           </span>
@@ -85,7 +85,7 @@ export function AdminMobileNav({ pendingCount, pendingReportsCount, pendingUserR
             <div className="flex items-center justify-between border-b border-[#E5E7EB] px-4 py-4">
               <div className="flex items-center gap-2">
                 <FoxIcon className="size-7" />
-                <span className="text-sm font-bold text-[#1F2937]">FoxVent Admin</span>
+                <span className="text-sm font-bold text-[#1F2937]">FoxVend Admin</span>
               </div>
               <button
                 type="button"

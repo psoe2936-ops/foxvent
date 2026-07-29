@@ -40,7 +40,7 @@
     "notifications": "Notifications",
     "settings": "Settings",
     "shopSmartTitle": "Shop smart. Sell easy.",
-    "shopSmartBody": "Join the FoxVent community today.",
+    "shopSmartBody": "Join the FoxVend community today.",
     "startSelling": "Start Selling",
     "getStarted": "Get Started"
   },
@@ -161,7 +161,7 @@
     "openingChat": "Opening chat…",
     "viewPhoto": "View photo {number}",
     "noImages": "No images",
-    "shareText": "Check out {title} for MMK {price} on FoxVent!",
+    "shareText": "Check out {title} for MMK {price} on FoxVend!",
     "linkCopied": "Link copied!",
     "couldNotCopyLink": "Could not copy link",
     "moreFromSeller": "More from seller",
@@ -177,7 +177,7 @@
     "photoNumber": "Photo {number}"
   },
   "auth": {
-    "welcomeTitle": "Welcome to FoxVent",
+    "welcomeTitle": "Welcome to FoxVend",
     "welcomeSubtitle": "Buy and sell verified items in your community",
     "email": "Email",
     "password": "Password",
@@ -198,8 +198,8 @@
     "headingLogin": "Welcome back",
     "headingRegister": "Create your account",
     "headingForgot": "Reset password",
-    "subtitleLogin": "Sign in to continue to FoxVent",
-    "subtitleRegister": "Join the FoxVent community",
+    "subtitleLogin": "Sign in to continue to FoxVend",
+    "subtitleRegister": "Join the FoxVend community",
     "subtitleForgot": "Enter your email to get a reset link",
     "emailAddress": "Email address",
     "emailRequired": "Email is required.",
@@ -335,7 +335,7 @@
     "noReviewsYet": "No reviews yet.",
     "noListingsYet": "No listings yet",
     "profileNotFound": "Profile not found",
-    "viewListingsMetaDescription": "View {name}'s listings on FoxVent.",
+    "viewListingsMetaDescription": "View {name}'s listings on FoxVend.",
     "verifiedSeller": "Verified seller",
     "bioLabel": "Bio",
     "approvedListingsLabel": "Approved listings",
@@ -446,10 +446,10 @@
     "unexpectedErrorBody": "We hit an unexpected error. This has been logged and we'll look into it. Please try again."
   },
   "static": {
-    "aboutTitle": "About FoxVent",
-    "aboutBody": "FoxVent is a trusted C2C marketplace where buyers and sellers connect directly. Every listing is reviewed by our team before going live.",
-    "privacyBody": "FoxVent collects only the information needed to provide our service. We do not sell your personal data to third parties.",
-    "termsBody": "By using FoxVent, you agree to list items honestly, not post prohibited or fake listings, and treat other users with respect."
+    "aboutTitle": "About FoxVend",
+    "aboutBody": "FoxVend is a trusted C2C marketplace where buyers and sellers connect directly. Every listing is reviewed by our team before going live.",
+    "privacyBody": "FoxVend collects only the information needed to provide our service. We do not sell your personal data to third parties.",
+    "termsBody": "By using FoxVend, you agree to list items honestly, not post prohibited or fake listings, and treat other users with respect."
   },
   "safety": {
     "pleaseSelectReason": "Please select a reason.",
@@ -469,7 +469,7 @@
     "reasonOther": "Other"
   },
   "support": {
-    "supportName": "FoxVent Support",
+    "supportName": "FoxVend Support",
     "willReplyAsap": "We'll reply as soon as we can",
     "greetingBubble": "👋 Hi! How can we help you today?",
     "writeYourMessage": "Write your message...",
