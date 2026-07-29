@@ -197,9 +197,9 @@ export function MessagesPanel({ userId }: { userId: string }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-85 overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150">
+        <div className="fixed inset-x-4 top-16 z-50 flex max-h-[70vh] flex-col overflow-hidden rounded-2xl border border-white/60 bg-white/90 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur-2xl backdrop-saturate-150 sm:absolute sm:inset-x-auto sm:right-0 sm:top-full sm:mt-2 sm:max-h-none sm:w-85">
           {/* Header */}
-          <div className="flex items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
+          <div className="flex shrink-0 items-center gap-3 border-b border-[#E5E7EB] px-4 py-3">
             <h2 className="shrink-0 text-[15px] font-bold text-[#1F2937]">{tSidebar('messages')}</h2>
             <input
               type="text"
@@ -211,7 +211,7 @@ export function MessagesPanel({ userId }: { userId: string }) {
           </div>
 
           {/* List */}
-          <div className="max-h-105 overflow-y-auto">
+          <div className="max-h-105 min-h-0 flex-1 overflow-y-auto">
             {loading ? (
               <div className="flex items-center justify-center py-10">
                 <div className="size-5 animate-spin rounded-full border-2 border-[#F36D21] border-t-transparent" />
@@ -293,7 +293,7 @@ export function MessagesPanel({ userId }: { userId: string }) {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-[#E5E7EB] px-4 py-2.5">
+          <div className="shrink-0 border-t border-[#E5E7EB] px-4 py-2.5">
             <Link
               href="/chat"
               onClick={() => setOpen(false)}
