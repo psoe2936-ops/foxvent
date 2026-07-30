@@ -138,7 +138,7 @@ export default async function SettingsPage() {
 
       {/* Group 5 — Support */}
       <SettingsGroup label={t('supportGroup')}>
-        <SettingsLinkRow icon={<HelpCircle className="size-4" />} label={t('helpFaq')} href="/about" />
+        <SettingsLinkRow icon={<HelpCircle className="size-4" />} label={t('helpFaq')} href="/help" />
         <SettingsDivider />
         <SettingsLinkRow icon={<MessageCircle className="size-4" />} label={t('reportProblem')} href="/about" />
         <SettingsDivider />

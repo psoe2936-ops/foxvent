@@ -2,8 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { RejectButton } from '@/components/admin/reject-button'
+import { ApproveButton } from '@/components/admin/approve-button'
 import { formatPrice } from '@/lib/format-price'
-import { approveProduct } from '../actions'
 
 type ProductDetailProps = {
   params: Promise<{ id: string }>
@@ -199,15 +199,9 @@ export default async function AdminProductDetailPage({
           {/* Actions */}
           {product.status === 'pending' && (
             <div className="flex gap-2">
-              <form action={approveProduct} className="flex-1">
-                <input type="hidden" name="productId" value={product.id} />
-                <button
-                  type="submit"
-                  className="w-full rounded-lg bg-[#1A7A4A] px-4 py-2.5 text-sm font-medium text-white hover:opacity-90"
-                >
-                  Approve listing
-                </button>
-              </form>
+              <div className="flex-1">
+                <ApproveButton productId={product.id} variant="full" />
+              </div>
               <div className="flex-1">
                 <RejectButton productId={product.id} />
               </div>

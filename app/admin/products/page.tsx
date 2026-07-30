@@ -1,12 +1,12 @@
 import Link from 'next/link'
-import { Check, Eye } from 'lucide-react'
+import { Eye } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { RejectButton } from '@/components/admin/reject-button'
 import { AdminDeleteButton } from '@/components/admin/admin-delete-button'
+import { ApproveButton } from '@/components/admin/approve-button'
 import { AdminProductFilters } from '@/components/admin/admin-product-filters'
 import { formatRelativeTime } from '@/lib/format-relative-time'
 import { formatPrice } from '@/lib/format-price'
-import { approveProduct } from './actions'
 
 type SearchParams = Promise<{
   status?: string
@@ -194,16 +194,7 @@ export default async function AdminProductsPage({
                       </Link>
                       {product.status === 'pending' && (
                         <>
-                          <form action={approveProduct}>
-                            <input type="hidden" name="productId" value={product.id} />
-                            <button
-                              type="submit"
-                              title="Approve"
-                              className="flex size-8 items-center justify-center rounded-lg border border-[#E5E7EB] text-[#1A7A4A] transition-colors hover:bg-[#E8F5E9]"
-                            >
-                              <Check className="size-3.5" />
-                            </button>
-                          </form>
+                          <ApproveButton productId={product.id} variant="icon" />
                           <RejectButton productId={product.id} />
                         </>
                       )}

@@ -3,9 +3,11 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { rejectProduct } from '@/app/admin/products/actions'
+import { useToast } from '@/components/ui/toast'
 
 export function RejectButton({ productId }: { productId: string }) {
   const router = useRouter()
+  const { showToast } = useToast()
   const [open, setOpen] = useState(false)
   const [reason, setReason] = useState('')
   const [loading, setLoading] = useState(false)
@@ -13,10 +15,15 @@ export function RejectButton({ productId }: { productId: string }) {
   const handleReject = async () => {
     if (!reason.trim()) return
     setLoading(true)
-    await rejectProduct(productId, reason)
+    const result = await rejectProduct(productId, reason)
     setLoading(false)
+    if ('error' in result) {
+      showToast(result.error, 'error')
+      return
+    }
     setOpen(false)
     setReason('')
+    showToast('Listing rejected.', 'success')
     router.refresh()
   }
 

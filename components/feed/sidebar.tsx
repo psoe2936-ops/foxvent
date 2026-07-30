@@ -174,10 +174,10 @@ export function FeedSidebar({ userId }: FeedSidebarProps) {
 
       <footer className="mt-auto space-y-3 px-1 pt-10">
         <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-[#9CA3AF]">
-          <Link href="/about" className="hover:text-[#6B7280]">About</Link>
-          <Link href="/settings" className="hover:text-[#6B7280]">Help</Link>
-          <Link href="/terms" className="hover:text-[#6B7280]">Terms</Link>
-          <Link href="/privacy" className="hover:text-[#6B7280]">Privacy</Link>
+          <Link href="/about" className="hover:text-[#6B7280]">{t('about')}</Link>
+          <Link href="/help" className="hover:text-[#6B7280]">{t('help')}</Link>
+          <Link href="/terms" className="hover:text-[#6B7280]">{t('terms')}</Link>
+          <Link href="/privacy" className="hover:text-[#6B7280]">{t('privacy')}</Link>
         </div>
         <p className="text-[10px] text-[#D1D5DB]">© 2026 FoxVend</p>
       </footer>

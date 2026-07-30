@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { banUser, unbanUser } from '@/app/admin/users/actions'
+import { useToast } from '@/components/ui/toast'
 
 type BanDuration = '24h' | '7d' | '30d' | 'permanent'
 
@@ -27,6 +29,8 @@ export function BanButton({
   const [reason, setReason] = useState('')
   const [banError, setBanError] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const { showToast } = useToast()
 
   function handleBan() {
     const trimmed = reason.trim()
@@ -36,17 +40,26 @@ export function BanButton({
       const result = await banUser(userId, duration, trimmed)
       if ('error' in result) {
         setBanError(result.error)
+        showToast(result.error, 'error')
         return
       }
       setBanOpen(false)
       setReason('')
+      showToast(`@${username} has been banned.`, 'success')
+      router.refresh()
     })
   }
 
   function handleUnban() {
     startTransition(async () => {
-      await unbanUser(userId)
+      const result = await unbanUser(userId)
+      if ('error' in result) {
+        showToast(result.error, 'error')
+        return
+      }
       setUnbanConfirm(false)
+      showToast(`@${username} has been unbanned.`, 'success')
+      router.refresh()
     })
   }
 

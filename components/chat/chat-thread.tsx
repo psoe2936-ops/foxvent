@@ -652,7 +652,7 @@ export function ChatThread({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={msg.image_url}
-                      alt="Sent image"
+                      alt={t('sentImageAlt')}
                       loading="lazy"
                       onClick={() => setLightboxUrl(msg.image_url!)}
                       className={`max-w-[240px] cursor-pointer rounded-2xl object-cover ${
@@ -871,7 +871,7 @@ export function ChatThread({
       {lightboxUrl && (
         <ImageLightbox
           images={[lightboxUrl]}
-          alt="Chat image"
+          alt={t('chatImageAlt')}
           onClose={() => setLightboxUrl(null)}
         />
       )}

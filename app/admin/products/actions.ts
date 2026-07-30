@@ -17,8 +17,6 @@ async function verifyAdmin() {
     .eq('id', user.id)
     .single()
 
-  console.log('verifyAdmin check — user id:', user.id, 'profile:', profile)
-
   if (!profile || profile.role !== 'admin') {
     throw new Error('Not authorized')
   }
@@ -26,22 +24,31 @@ async function verifyAdmin() {
   return supabase
 }
 
-export async function approveProduct(formData: FormData) {
+export async function approveProduct(
+  productId: string
+): Promise<{ error: string } | { success: true }> {
   const supabase = await verifyAdmin()
-  const productId = formData.get('productId') as string
 
-  const { data, error } = await supabase
+  const { error, count } = await supabase
     .from('products')
-    .update({ status: 'approved', approved_at: new Date().toISOString() })
+    .update(
+      { status: 'approved', approved_at: new Date().toISOString() },
+      { count: 'exact' }
+    )
     .eq('id', productId)
-    .select()
 
-  console.log('Approve result — error:', error, 'updated rows:', data)
+  if (error) return { error: error.message }
+  if (!count) return { error: 'Approve failed — no rows affected. Check permissions.' }
 
   revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${productId}`)
+  return { success: true }
 }
 
-export async function rejectProduct(productId: string, reason: string) {
+export async function rejectProduct(
+  productId: string,
+  reason: string
+): Promise<{ error: string } | { success: true }> {
   const supabase = await verifyAdmin()
 
   // Fetch product + seller for the notification
@@ -51,13 +58,13 @@ export async function rejectProduct(productId: string, reason: string) {
     .eq('id', productId)
     .single()
 
-  const { data, error } = await supabase
+  const { error, count } = await supabase
     .from('products')
-    .update({ status: 'rejected', rejection_reason: reason })
+    .update({ status: 'rejected', rejection_reason: reason }, { count: 'exact' })
     .eq('id', productId)
-    .select()
 
-  console.log('Reject result — error:', error, 'updated rows:', data)
+  if (error) return { error: error.message }
+  if (!count) return { error: 'Reject failed — no rows affected. Check permissions.' }
 
   // Insert notification with rejection reason included in body
   if (product) {
@@ -72,10 +79,23 @@ export async function rejectProduct(productId: string, reason: string) {
   }
 
   revalidatePath('/admin/products')
+  revalidatePath(`/admin/products/${productId}`)
+  return { success: true }
 }
 
-export async function deleteProductAsAdmin(productId: string) {
+export async function deleteProductAsAdmin(
+  productId: string
+): Promise<{ error: string } | { success: true }> {
   const supabase = await verifyAdmin()
-  await supabase.from('products').delete().eq('id', productId)
+
+  const { error, count } = await supabase
+    .from('products')
+    .delete({ count: 'exact' })
+    .eq('id', productId)
+
+  if (error) return { error: error.message }
+  if (!count) return { error: 'Delete failed — no rows affected. Check permissions.' }
+
   revalidatePath('/admin/products')
+  return { success: true }
 }

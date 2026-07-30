@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import { FollowButton } from '@/components/profile/follow-button'
 
 type UserCardProps = {
@@ -11,7 +12,7 @@ type UserCardProps = {
   viewerId: string | null
 }
 
-export function UserCard({
+export async function UserCard({
   id,
   username,
   fullName,
@@ -20,6 +21,7 @@ export function UserCard({
   isFollowing,
   viewerId,
 }: UserCardProps) {
+  const t = await getTranslations('feed')
   const displayName = fullName ?? username
   const initial = (displayName[0] ?? '?').toUpperCase()
 
@@ -47,7 +49,7 @@ export function UserCard({
           </p>
           <p className="text-xs text-[#6B7280]">@{username}</p>
           <p className="mt-0.5 text-xs text-[#9CA3AF]">
-            {listingCount} listing{listingCount !== 1 ? 's' : ''}
+            {t('listingsCount', { count: listingCount })}
           </p>
         </div>
       </Link>

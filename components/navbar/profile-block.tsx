@@ -36,10 +36,8 @@ export function ProfileBlock({
   const supabase = createClient()
 
   const displayName = name ?? profile?.full_name ?? profile?.username ?? 'User'
-  const displayAvatarUrl =
-    avatarUrl ??
-    profile?.avatar_url ??
-    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=80&h=80&fit=crop&crop=face'
+  const displayAvatarUrl = avatarUrl ?? profile?.avatar_url ?? null
+  const initial = displayName[0]?.toUpperCase() ?? '?'
 
   const isAdmin = profile?.role === 'admin'
 
@@ -71,12 +69,18 @@ export function ProfileBlock({
         onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 rounded-xl p-1 pr-2 transition-colors hover:bg-[#F3F4F6] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#F36D21]/30"
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={displayAvatarUrl}
-          alt=""
-          className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white"
-        />
+        {displayAvatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={displayAvatarUrl}
+            alt=""
+            className="size-9 shrink-0 rounded-full object-cover ring-2 ring-white"
+          />
+        ) : (
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-[#FEF3E2] text-sm font-bold text-[#C26A08] ring-2 ring-white">
+            {initial}
+          </span>
+        )}
         <span className="hidden min-w-0 flex-col items-start text-left md:flex">
           <span className="truncate text-sm font-semibold text-[#2D2E32]">
             {displayName}

@@ -17,6 +17,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
   const router = useRouter()
   const t = useTranslations('bottomNav')
   const [callActive, setCallActive] = useState(false)
+  const [searchActive, setSearchActive] = useState(false)
 
   useEffect(() => {
     const onStart = () => setCallActive(true)
@@ -57,7 +58,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
       <div className="flex items-center justify-around pt-1 pb-2">
 
         {/* Home */}
-        <Link href="/feed" className={itemCls(activeHome)}>
+        <Link href="/feed" className={itemCls(activeHome)} onClick={() => setSearchActive(false)}>
           <span className={pillCls(activeHome)}>
             <House className="size-5" strokeWidth={activeHome ? 2.5 : 1.75} />
           </span>
@@ -72,12 +73,13 @@ export function BottomNav({ username, userId }: BottomNavProps) {
               router.push('/feed')
             }
             window.dispatchEvent(new Event('foxvent-open-search'))
+            setSearchActive(true)
           }}
-          className={itemCls(false)}
+          className={itemCls(searchActive)}
           aria-label={t('search')}
         >
-          <span className={pillCls(false)}>
-            <Search className="size-5" strokeWidth={1.75} />
+          <span className={pillCls(searchActive)}>
+            <Search className="size-5" strokeWidth={searchActive ? 2.5 : 1.75} />
           </span>
           <span>{t('search')}</span>
         </button>
@@ -88,6 +90,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
             href={username ? `/profile/${username}?new=1` : '/?login=1'}
             className="flex size-14 items-center justify-center rounded-full bg-[#F36D21] text-white shadow-[0_4px_20px_rgba(243,109,33,0.4)] transition-transform active:scale-90"
             aria-label={t('sell')}
+            onClick={() => setSearchActive(false)}
           >
             <Plus className="size-6" strokeWidth={2.5} />
           </Link>
@@ -95,7 +98,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
         </div>
 
         {/* Messages */}
-        <Link href="/chat" className={itemCls(activeChat)}>
+        <Link href="/chat" className={itemCls(activeChat)} onClick={() => setSearchActive(false)}>
           <span className={`${pillCls(activeChat)} relative`}>
             <MessageCircle className="size-5" strokeWidth={activeChat ? 2.5 : 1.75} />
             {userId && <SidebarUnreadBadge userId={userId} type="messages" />}
@@ -107,6 +110,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
         <Link
           href={username ? `/profile/${username}` : '/feed'}
           className={itemCls(activeProfile)}
+          onClick={() => setSearchActive(false)}
         >
           <span className={pillCls(activeProfile)}>
             <User className="size-5" strokeWidth={activeProfile ? 2.5 : 1.75} />

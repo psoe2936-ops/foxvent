@@ -42,7 +42,11 @@
     "shopSmartTitle": "Shop smart. Sell easy.",
     "shopSmartBody": "Join the FoxVend community today.",
     "startSelling": "Start Selling",
-    "getStarted": "Get Started"
+    "getStarted": "Get Started",
+    "about": "About",
+    "help": "Help",
+    "terms": "Terms",
+    "privacy": "Privacy"
   },
   "bottomNav": {
     "home": "Home",
@@ -277,7 +281,9 @@
     "noMessagesYetPanel": "No messages yet",
     "startConversationByContacting": "Start a conversation by contacting a seller.",
     "viewAllConversations": "View all conversations",
-    "unknownUser": "Unknown"
+    "unknownUser": "Unknown",
+    "sentImageAlt": "Sent image",
+    "chatImageAlt": "Chat image"
   },
   "call": {
     "connecting": "Connecting...",
@@ -446,10 +452,165 @@
     "unexpectedErrorBody": "We hit an unexpected error. This has been logged and we'll look into it. Please try again."
   },
   "static": {
-    "aboutTitle": "About FoxVend",
-    "aboutBody": "FoxVend is a trusted C2C marketplace where buyers and sellers connect directly. Every listing is reviewed by our team before going live.",
-    "privacyBody": "FoxVend collects only the information needed to provide our service. We do not sell your personal data to third parties.",
-    "termsBody": "By using FoxVend, you agree to list items honestly, not post prohibited or fake listings, and treat other users with respect."
+    "about": {
+      "title": "About FoxVend",
+      "paragraphs": [
+        "FoxVend is a community marketplace platform built as a final-year Computer Science project at the University of Computer Studies (Thaton). It allows people to buy and sell second-hand and new items directly with each other through listings, real-time chat, and video calls to inspect items before meeting up.",
+        "FoxVend is an academic project and is not currently operating as a registered commercial e-commerce business under Myanmar's Ministry of Commerce e-commerce guidelines. It does not process payments, hold funds, or guarantee transactions — all payment and meetup arrangements are made directly between buyers and sellers.",
+        "Our goal is to make local buying and selling safer and more convenient by adding moderation, direct communication, and trust features like reviews and ratings — inspired by the real needs of Myanmar's growing digital marketplace."
+      ]
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "lastUpdated": "Last updated: July 2026",
+      "sections": [
+        {
+          "heading": "1. Acceptance of Terms",
+          "body": "By creating an account or using FoxVend in any way, you agree to be bound by these Terms of Service. If you do not agree, please do not use the platform."
+        },
+        {
+          "heading": "2. Nature of the Platform",
+          "body": "FoxVend is a community marketplace that helps buyers and sellers in Myanmar find and communicate with each other. FoxVend facilitates listings, messaging, and video calls between users, but it does not process payments, hold funds in escrow, verify the authenticity or condition of any item, or guarantee that a transaction will be completed successfully. All negotiations, payments, and meetups happen directly between the buyer and the seller."
+        },
+        {
+          "heading": "3. User Responsibilities",
+          "body": "You agree to list items accurately and honestly, including a truthful description, condition, and price. You agree to communicate in good faith with other users. You are responsible for ensuring that anything you list or sell is legal to sell in Myanmar, including compliance with Myanmar's Trademark Law and Copyright Law — counterfeit goods, pirated media, and items that infringe another party's intellectual property rights are strictly prohibited."
+        },
+        {
+          "heading": "4. Account Requirements",
+          "body": "You must be at least 18 years old to create a FoxVend account. You agree to provide accurate registration information (including a valid email address) and to keep your account credentials secure. You are responsible for all activity that occurs under your account."
+        },
+        {
+          "heading": "5. Prohibited Conduct",
+          "body": "You may not use FoxVend to: commit fraud or attempt to scam another user; harass, threaten, or abuse another person; post spam or repetitive fake listings; misrepresent an item's condition, ownership, or authenticity; or attempt to circumvent safety features such as blocking, reporting, or content moderation."
+        },
+        {
+          "heading": "6. Content Moderation",
+          "body": "Listings are reviewed by our admin team before they become publicly visible. We reserve the right to reject, remove, or edit any listing or content that violates these Terms, and to suspend or permanently ban any account that repeatedly or seriously violates these Terms, at our discretion."
+        },
+        {
+          "heading": "7. Payments and Transactions",
+          "body": "FoxVend does not process payments or act as an escrow service. Users are encouraged to meet in person, inspect items carefully, and use secure, trusted payment methods when a remote transaction is necessary. In the spirit of Myanmar's Consumer Protection Law, we encourage transparency and fair dealing between users — but FoxVend is not a party to any transaction and is not liable for disputes, fraud, financial loss, or damages arising from interactions or transactions between users."
+        },
+        {
+          "heading": "8. Intellectual Property",
+          "body": "You retain ownership of the photos, descriptions, and other content you post on FoxVend. By posting content, you grant FoxVend a limited, non-exclusive license to display, store, and distribute that content for the purpose of operating the platform. You may not upload content that infringes the intellectual property rights of others under Myanmar's Copyright Law or Trademark Law."
+        },
+        {
+          "heading": "9. Limitation of Liability",
+          "body": "FoxVend is an academic, final-year student project provided on an \"as is\" and \"as available\" basis, with no warranty of any kind — express or implied — including warranties of uptime, availability, merchantability, or fitness for a particular (including commercial) purpose. To the fullest extent permitted by law, FoxVend and its student developers are not liable for any indirect, incidental, or consequential damages arising from your use of the platform."
+        },
+        {
+          "heading": "10. Termination",
+          "body": "We may suspend or terminate your access to FoxVend at any time, with or without notice, if we believe you have violated these Terms or engaged in conduct that is harmful to other users or to the platform."
+        },
+        {
+          "heading": "11. Changes to These Terms",
+          "body": "We may update these Terms from time to time as the project evolves. Continued use of FoxVend after changes are posted constitutes acceptance of the updated Terms."
+        },
+        {
+          "heading": "12. Governing Law",
+          "body": "FoxVend is developed and operated in Myanmar as a student project. These Terms are intended to operate in good-faith alignment with the general principles of Myanmar's Consumer Protection Law (2019) and Electronic Transactions Law (2004, as amended). FoxVend is not a registered commercial entity, and these Terms should not be read as a formal legal or regulatory compliance certification."
+        },
+        {
+          "heading": "13. Contact",
+          "body": "If you have questions about these Terms, please reach out through the in-app support chat or contact us at the email address listed in Settings."
+        }
+      ]
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "lastUpdated": "Last updated: July 2026",
+      "intro": "We aim to handle your data responsibly in line with Myanmar's Electronic Transactions Law and general data protection principles, while acknowledging Myanmar does not yet have a comprehensive standalone personal data protection law equivalent to GDPR.",
+      "sections": [
+        {
+          "heading": "1. What Data We Collect",
+          "body": "We collect the information you provide directly, such as your name, email address, phone number (if provided), profile photo, bio, and location (if you choose to add one). We also collect the content you create — listings, messages, reviews — and basic usage data such as pages visited and actions taken, to help us operate and improve the platform."
+        },
+        {
+          "heading": "2. How We Use Your Data",
+          "body": "We use your data to operate your account, connect buyers with sellers, show relevant listings, send notifications (such as new messages or listing approvals), and to keep the platform safe through moderation and abuse prevention."
+        },
+        {
+          "heading": "3. Data Storage",
+          "body": "Your data is stored using Supabase, a managed database and backend platform. Data is encrypted in transit (via HTTPS/TLS) and at rest. While we take reasonable steps to protect your data, no system can guarantee absolute security."
+        },
+        {
+          "heading": "4. Data Sharing",
+          "body": "We do not sell your personal data to third parties. Information is shared only as necessary for the platform to function — for example, a seller can see a buyer's username and profile when they message about a listing. We do not share your data with advertisers or data brokers."
+        },
+        {
+          "heading": "5. Your Rights",
+          "body": "You can access and update most of your profile information directly from your account settings. To request a copy of your data, a correction, or full deletion of your account and associated data, please contact us through the in-app support chat or by email (see Settings) — we aim to process such requests within 48 hours."
+        },
+        {
+          "heading": "6. Cookies and Tracking",
+          "body": "FoxVend uses essential cookies to keep you signed in and to remember your language preference. We do not use third-party advertising or tracking cookies."
+        },
+        {
+          "heading": "7. Children's Privacy",
+          "body": "FoxVend is intended for users aged 18 and older. We do not knowingly collect data from anyone under 18. If we learn that an account belongs to someone under 18, we will take steps to remove it."
+        },
+        {
+          "heading": "8. Security Measures",
+          "body": "We use industry-standard practices to protect your account, including password hashing, Row-Level Security (RLS) policies on our database so users can only access data they're authorized to see, and rate limiting to reduce spam and abuse."
+        },
+        {
+          "heading": "9. Data Breach Notification",
+          "body": "In the unlikely event of a data breach that puts your personal information at risk, we will notify affected users as promptly as reasonably possible, along with information about what happened and what steps we're taking."
+        },
+        {
+          "heading": "10. Changes to This Policy",
+          "body": "We may update this Privacy Policy as the project evolves. We'll update the date on this page when changes are made, and significant changes will be communicated within the app where possible."
+        },
+        {
+          "heading": "11. Contact Us",
+          "body": "For questions or concerns about this Privacy Policy or your data, please reach out through the in-app support chat or the email address listed in Settings."
+        }
+      ]
+    },
+    "help": {
+      "title": "Help & FAQ",
+      "intro": "Answers to common questions about buying, selling, and staying safe on FoxVend.",
+      "faqs": [
+        {
+          "q": "How do I create a listing?",
+          "a": "Tap the orange \"+\" button in the bottom navigation (or \"Sell\" in the top navbar on desktop), fill in your item's title, description, category, condition, price, and at least one photo, then submit. Your listing will be reviewed by our team before it appears publicly — this usually takes a short while."
+        },
+        {
+          "q": "How do I contact a seller?",
+          "a": "Open any listing and tap \"Message seller\" to start a chat, or \"Make an offer\" to propose a price. You can also negotiate directly from within the chat."
+        },
+        {
+          "q": "Is it safe to meet buyers/sellers in person?",
+          "a": "We recommend meeting in a public, well-lit place, bringing a friend if possible, and inspecting the item carefully before paying. Avoid sharing sensitive personal or financial information in chat. FoxVend does not process payments or verify users' identities, so use your own judgment and caution, just as you would with any in-person second-hand transaction."
+        },
+        {
+          "q": "How does the review/rating system work?",
+          "a": "After a transaction, both the buyer and seller can leave a star rating and comment about their experience. Ratings help build trust and are visible on a user's profile."
+        },
+        {
+          "q": "What if someone scams me or acts inappropriately?",
+          "a": "Use the \"Report\" option on their profile, listing, or conversation to notify our moderation team, and use \"Block\" to immediately stop them from contacting you. Reports are reviewed by our admin team. If you're in immediate danger, please contact local authorities first."
+        },
+        {
+          "q": "How do I delete my account?",
+          "a": "Account deletion is handled by our support team to protect your data and any active listings. Email us from your registered address (see Settings → Danger zone) and we'll process your request within 48 hours."
+        },
+        {
+          "q": "What payment methods are supported?",
+          "a": "FoxVend does not process payments directly — there is no in-app checkout. Buyers and sellers arrange payment between themselves. We recommend cash-on-meetup, or a trusted mobile payment app if both parties agree, and always confirm the item in person before paying when possible."
+        },
+        {
+          "q": "How do I change my language preference?",
+          "a": "Tap the language switcher (🌐) in the top navbar, or go to Settings → Language, and choose between English and Myanmar (မြန်မာ)."
+        },
+        {
+          "q": "Who do I contact for support?",
+          "a": "Use the in-app support chat (the chat bubble in the corner of the screen) for the fastest response, or email us — see Settings for the contact address."
+        }
+      ]
+    }
   },
   "safety": {
     "pleaseSelectReason": "Please select a reason.",

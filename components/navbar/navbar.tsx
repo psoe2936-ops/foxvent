@@ -258,10 +258,10 @@ export function Navbar({ user, profile, categories = [] }: NavbarProps) {
             {/* Footer links */}
             <div className="border-t border-[#E5E7EB] px-4 py-3 flex flex-wrap gap-x-4 gap-y-1">
               {[
-                { href: '/about', label: 'About' },
-                { href: '/settings', label: 'Help' },
-                { href: '/terms', label: 'Terms' },
-                { href: '/privacy', label: 'Privacy' },
+                { href: '/about', label: t('about') },
+                { href: '/help', label: t('help') },
+                { href: '/terms', label: t('terms') },
+                { href: '/privacy', label: t('privacy') },
               ].map(({ href, label }) => (
                 <Link
                   key={href}

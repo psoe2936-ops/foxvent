@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { deleteProduct, markAsSold, markAsUnsold } from '@/app/products/actions'
 import { EditListingModal } from '@/components/products/edit-listing-modal'
 import type { Category } from '@/components/profile/new-listing-modal'
+import { useToast } from '@/components/ui/toast'
 
 type ProductData = {
   id: string
@@ -35,6 +36,7 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
   const [isPending, startTransition] = useTransition()
   const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
+  const { showToast } = useToast()
 
   useEffect(() => {
     if (!open) return
@@ -50,12 +52,18 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
   function handleSoldToggle() {
     setOpen(false)
     startTransition(async () => {
-      if (product.is_sold) {
-        await markAsUnsold(product.id)
-      } else {
-        await markAsSold(product.id)
+      try {
+        if (product.is_sold) {
+          await markAsUnsold(product.id)
+        } else {
+          await markAsSold(product.id)
+        }
+        showToast(product.is_sold ? t('markAsAvailable') : t('markAsSold'), 'success')
+        router.refresh()
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : tCommon('somethingWentWrong')
+        showToast(msg, 'error')
       }
-      router.refresh()
     })
   }
 
@@ -66,7 +74,12 @@ export function ProductOwnerMenu({ product, categories, sellerUsername }: Props)
 
   function confirmAndDelete() {
     startTransition(async () => {
-      await deleteProduct(product.id, sellerUsername)
+      try {
+        await deleteProduct(product.id, sellerUsername)
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : tCommon('somethingWentWrong')
+        showToast(msg, 'error')
+      }
     })
   }
 

@@ -48,7 +48,7 @@ function SidebarInner({ pendingCount, pendingReportsCount, pendingUserReportsCou
     <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-55 shrink-0 flex-col overflow-y-auto border-r border-[#E5E7EB] bg-white lg:flex">
       {/* Brand */}
       <div className="flex shrink-0 items-center gap-2.5 border-b border-[#E5E7EB] px-4 py-4">
-        <FoxIcon className="size-7" />
+        {/*<FoxIcon className="size-7" />*/}
         <span className="text-sm font-bold text-[#1F2937]">FoxVend</span>
         <span className="rounded-md bg-[#FEF3E2] px-1.5 py-0.5 text-[10px] font-semibold text-[#C26A08]">
           Admin

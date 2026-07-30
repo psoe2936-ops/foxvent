@@ -48,10 +48,16 @@ export async function banUser(
       ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
       : null
 
-  await supabase
+  const { error, count } = await supabase
     .from('users')
-    .update({ is_banned: true, banned_until: bannedUntil, ban_reason: trimmedReason })
+    .update(
+      { is_banned: true, banned_until: bannedUntil, ban_reason: trimmedReason },
+      { count: 'exact' }
+    )
     .eq('id', userId)
+
+  if (error) return { error: error.message }
+  if (!count) return { error: 'Ban failed — no rows affected. Check permissions.' }
 
   const durationLabel: Record<BanDuration, string> = {
     '24h': '24 hours',
@@ -72,11 +78,21 @@ export async function banUser(
   return { success: true }
 }
 
-export async function unbanUser(userId: string) {
+export async function unbanUser(
+  userId: string
+): Promise<{ error: string } | { success: true }> {
   const supabase = await verifyAdmin()
-  await supabase
+  const { error, count } = await supabase
     .from('users')
-    .update({ is_banned: false, banned_until: null, ban_reason: null })
+    .update(
+      { is_banned: false, banned_until: null, ban_reason: null },
+      { count: 'exact' }
+    )
     .eq('id', userId)
+
+  if (error) return { error: error.message }
+  if (!count) return { error: 'Unban failed — no rows affected. Check permissions.' }
+
   revalidatePath('/admin/users')
+  return { success: true }
 }

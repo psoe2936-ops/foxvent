@@ -1,16 +1,27 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
 import { deleteProductAsAdmin } from '@/app/admin/products/actions'
+import { useToast } from '@/components/ui/toast'
 
 export function AdminDeleteButton({ productId }: { productId: string }) {
   const [confirm, setConfirm] = useState(false)
   const [isPending, startTransition] = useTransition()
+  const router = useRouter()
+  const { showToast } = useToast()
 
   function handleDelete() {
     startTransition(async () => {
-      await deleteProductAsAdmin(productId)
+      const result = await deleteProductAsAdmin(productId)
+      if ('error' in result) {
+        showToast(result.error, 'error')
+        return
+      }
+      setConfirm(false)
+      showToast('Listing deleted.', 'success')
+      router.refresh()
     })
   }
 
