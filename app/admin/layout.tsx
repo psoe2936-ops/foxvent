@@ -4,7 +4,6 @@ import { createClient } from '@/lib/supabase/server'
 import { AdminSidebar } from '@/components/admin/admin-sidebar'
 import { AdminMobileNav } from '@/components/admin/admin-mobile-nav'
 import { AdminTopbar } from '@/components/admin/admin-topbar'
-import { AdminBridgeBar } from '@/components/admin/admin-bridge-bar'
 import { cn } from '@/lib/utils'
 import { geist, fontMono } from '@/lib/fonts'
 
@@ -59,7 +58,6 @@ export default async function AdminLayout({
       className={cn('antialiased', fontMono.variable, 'font-sans', geist.variable)}
     >
       <body suppressHydrationWarning className="overflow-x-hidden">
-        <AdminBridgeBar />
         <div className="flex min-h-screen flex-col">
           <Suspense fallback={null}>
             <AdminMobileNav

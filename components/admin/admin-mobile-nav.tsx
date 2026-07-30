@@ -4,6 +4,7 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
+  ArrowLeft,
   BarChart2,
   Flag,
   LayoutDashboard,
@@ -64,14 +65,23 @@ export function AdminMobileNav({ pendingCount, pendingReportsCount, pendingUserR
             Admin
           </span>
         </div>
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="flex size-9 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6]"
-          aria-label="Open admin menu"
-        >
-          <Menu className="size-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/feed"
+            className="flex items-center gap-1.5 text-sm text-[#6B7280] transition-colors hover:text-[#F36D21]"
+          >
+            <ArrowLeft className="size-4" />
+            <span className="hidden sm:inline">Back to site</span>
+          </Link>
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            className="flex size-9 items-center justify-center rounded-lg text-[#6B7280] hover:bg-[#F3F4F6]"
+            aria-label="Open admin menu"
+          >
+            <Menu className="size-5" />
+          </button>
+        </div>
       </header>
 
       {/* Overlay + drawer */}

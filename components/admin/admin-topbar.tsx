@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { ChevronDown, LogOut, Settings } from 'lucide-react'
+import { ArrowLeft, ChevronDown, LogOut, Settings } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 
 const SECTION_LABELS: { prefix: string; label: string }[] = [
@@ -63,7 +63,16 @@ export function AdminTopbar({ adminName, adminAvatar, adminUsername }: AdminTopb
         <span className="text-xs font-medium text-[#9CA3AF]">Admin</span>
       </div>
 
-      <div ref={menuRef} className="relative">
+      <div className="flex items-center gap-4">
+        <Link
+          href="/feed"
+          className="flex items-center gap-1.5 text-sm text-[#6B7280] transition-colors hover:text-[#F36D21]"
+        >
+          <ArrowLeft className="size-4" />
+          <span className="hidden sm:inline">Back to site</span>
+        </Link>
+
+        <div ref={menuRef} className="relative">
         <button
           type="button"
           onClick={() => setMenuOpen((v) => !v)}
@@ -106,6 +115,7 @@ export function AdminTopbar({ adminName, adminAvatar, adminUsername }: AdminTopb
             </button>
           </div>
         )}
+        </div>
       </div>
     </header>
   )
