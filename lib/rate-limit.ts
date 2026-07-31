@@ -58,3 +58,56 @@ export async function checkRateLimit(
     return { allowed: true }
   }
 }
+
+export async function checkRateLimitByIdentifier(
+  supabase: SupabaseClient,
+  identifier: string,
+  actionType: string,
+  maxAttempts: number,
+  windowMinutes: number
+): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
+  try {
+    const windowStart = new Date(
+      Date.now() - windowMinutes * 60 * 1000
+    ).toISOString()
+
+    const { count } = await supabase
+      .from('rate_limits')
+      .select('id', { count: 'exact', head: true })
+      .eq('identifier', identifier)
+      .eq('action_type', actionType)
+      .gte('created_at', windowStart)
+
+    if ((count ?? 0) >= maxAttempts) {
+      const { data: oldest } = await supabase
+        .from('rate_limits')
+        .select('created_at')
+        .eq('identifier', identifier)
+        .eq('action_type', actionType)
+        .gte('created_at', windowStart)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .single()
+
+      const retryAfterSeconds = oldest
+        ? Math.ceil(
+            (new Date(oldest.created_at).getTime() +
+              windowMinutes * 60 * 1000 -
+              Date.now()) / 1000
+          )
+        : windowMinutes * 60
+
+      return { allowed: false, retryAfterSeconds: Math.max(1, retryAfterSeconds) }
+    }
+
+    await supabase.from('rate_limits').insert({
+      identifier,
+      action_type: actionType,
+    })
+
+    return { allowed: true }
+  } catch {
+    // Fail open — don't block legitimate users due to DB errors
+    return { allowed: true }
+  }
+}

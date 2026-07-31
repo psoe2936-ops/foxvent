@@ -43,6 +43,25 @@ function getStrength(
   return { level: 2, label: t('strengthFair'), color: '#F36D21' }
 }
 
+async function checkAuthRateLimit(
+  email: string,
+  action: string
+): Promise<{ allowed: boolean; retryAfterSeconds?: number }> {
+  try {
+    const res = await fetch('/api/auth-rate-limit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, action }),
+    })
+    const data = await res.json()
+    return data
+  } catch {
+    // Fail open on network error — don't block legitimate users if the
+    // rate-limit check itself fails
+    return { allowed: true }
+  }
+}
+
 // ── Shared sub-components ──────────────────────────────────────────────────────
 
 function Spinner({ dark = false }: { dark?: boolean }) {
@@ -217,11 +236,11 @@ function AuthModalContent({
   const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   // ── OTP state ─────────────────────────────────────────────────────────────
-  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', '', '', ''])
+  const [digits, setDigits] = useState<string[]>(['', '', '', '', '', ''])
   const [otpLoading, setOtpLoading] = useState(false)
   const [otpVerified, setOtpVerified] = useState(false)
   const [focusedBox, setFocusedBox] = useState<number | null>(null)
-  const inputRefs = useRef<Array<HTMLInputElement | null>>([null, null, null, null, null, null, null, null])
+  const inputRefs = useRef<Array<HTMLInputElement | null>>([null, null, null, null, null, null])
   const successTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const supabase = createClient()
@@ -304,6 +323,14 @@ function AuthModalContent({
     setLoading(true)
 
     if (mode === 'register') {
+      const signupRateCheck = await checkAuthRateLimit(trimmedEmail, 'signup')
+      if (!signupRateCheck.allowed) {
+        const minutes = Math.ceil((signupRateCheck.retryAfterSeconds ?? 60) / 60)
+        setError(`Too many attempts. Please try again in ${minutes} minute(s).`)
+        setLoading(false)
+        return
+      }
+
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: trimmedEmail,
         password: trimmedPassword,
@@ -317,13 +344,21 @@ function AuthModalContent({
       // session is null when email verification (OTP) is required
       if (!data.session) {
         setEmail(trimmedEmail)
-        setDigits(['', '', '', '', '', '', '', ''])
+        setDigits(['', '', '', '', '', ''])
         setOtpVerified(false)
         startCooldown()
         setScreen('otp')
         return
       }
     } else {
+      const loginRateCheck = await checkAuthRateLimit(trimmedEmail, 'login')
+      if (!loginRateCheck.allowed) {
+        const minutes = Math.ceil((loginRateCheck.retryAfterSeconds ?? 60) / 60)
+        setError(`Too many attempts. Please try again in ${minutes} minute(s).`)
+        setLoading(false)
+        return
+      }
+
       const { error: signInError } = await supabase.auth.signInWithPassword({
         email: trimmedEmail,
         password: trimmedPassword,
@@ -356,6 +391,15 @@ function AuthModalContent({
     }
 
     setLoading(true)
+
+    const resetRateCheck = await checkAuthRateLimit(trimmedEmail, 'password_reset')
+    if (!resetRateCheck.allowed) {
+      const minutes = Math.ceil((resetRateCheck.retryAfterSeconds ?? 60) / 60)
+      setError(`Too many attempts. Please try again in ${minutes} minute(s).`)
+      setLoading(false)
+      return
+    }
+
     const { error: resetError } = await supabase.auth.resetPasswordForEmail(trimmedEmail, {
       redirectTo: `${window.location.origin}/auth/callback?next=/auth/reset-password`,
     })
@@ -393,16 +437,32 @@ function AuthModalContent({
 
   const handleResend = async () => {
     if (resendCooldown > 0) return
+
+    const resendRateCheck = await checkAuthRateLimit(email, 'otp_resend')
+    if (!resendRateCheck.allowed) {
+      const minutes = Math.ceil((resendRateCheck.retryAfterSeconds ?? 60) / 60)
+      setError(`Too many attempts. Please try again in ${minutes} minute(s).`)
+      return
+    }
+
     await supabase.auth.resend({ type: 'signup', email })
     startCooldown()
   }
 
   const handleVerifyOtp = async () => {
     const token = digits.join('')
-    if (token.length < 8 || otpLoading || otpVerified) return
+    if (token.length < 6 || otpLoading || otpVerified) return
 
     setOtpLoading(true)
     setError(null)
+
+    const verifyRateCheck = await checkAuthRateLimit(email, 'otp_verify')
+    if (!verifyRateCheck.allowed) {
+      const minutes = Math.ceil((verifyRateCheck.retryAfterSeconds ?? 60) / 60)
+      setError(`Too many attempts. Please try again in ${minutes} minute(s).`)
+      setOtpLoading(false)
+      return
+    }
 
     const { error: verifyError } = await supabase.auth.verifyOtp({
       email,
@@ -414,7 +474,7 @@ function AuthModalContent({
 
     if (verifyError) {
       setError(t('invalidOtpCode'))
-      setDigits(['', '', '', '', '', '', '', ''])
+      setDigits(['', '', '', '', '', ''])
       setTimeout(() => inputRefs.current[0]?.focus(), 0)
       return
     }
@@ -438,7 +498,7 @@ function AuthModalContent({
     const next = [...digits]
     next[i] = char
     setDigits(next)
-    if (char && i < 7) inputRefs.current[i + 1]?.focus()
+    if (char && i < 5) inputRefs.current[i + 1]?.focus()
   }
 
   function handleOtpKeyDown(i: number, e: React.KeyboardEvent<HTMLInputElement>) {
@@ -449,25 +509,25 @@ function AuthModalContent({
       inputRefs.current[i - 1]?.focus()
     } else if (e.key === 'ArrowLeft' && i > 0) {
       inputRefs.current[i - 1]?.focus()
-    } else if (e.key === 'ArrowRight' && i < 7) {
+    } else if (e.key === 'ArrowRight' && i < 5) {
       inputRefs.current[i + 1]?.focus()
     }
   }
 
   function handleOtpPaste(e: React.ClipboardEvent<HTMLInputElement>) {
     e.preventDefault()
-    const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 8)
+    const paste = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
     if (!paste) return
-    const next = Array(8).fill('') as string[]
+    const next = Array(6).fill('') as string[]
     for (let j = 0; j < paste.length; j++) next[j] = paste[j]
     setDigits(next)
-    inputRefs.current[Math.min(paste.length, 7)]?.focus()
+    inputRefs.current[Math.min(paste.length, 5)]?.focus()
   }
 
   // ── Derived ───────────────────────────────────────────────────────────────
 
   const anyLoading = loading || googleLoading
-  const otpComplete = digits.join('').length === 8
+  const otpComplete = digits.join('').length === 6
 
   const headings: Record<AuthMode, string> = {
     login: t('headingLogin'),
@@ -649,7 +709,7 @@ function AuthModalContent({
                 type="button"
                 onClick={() => {
                   setScreen('form')
-                  setDigits(['', '', '', '', '', '', '', ''])
+                  setDigits(['', '', '', '', '', ''])
                   setError(null)
                 }}
                 style={{
