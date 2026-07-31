@@ -55,7 +55,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
       className="fixed inset-x-0 bottom-0 z-40 border-t border-white/50 bg-white/70 shadow-[0_-8px_32px_rgba(0,0,0,0.08)] backdrop-blur-2xl backdrop-saturate-150 md:hidden"
       style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
     >
-      <div className="flex items-center justify-around pt-1 pb-2">
+      <div className="grid grid-cols-5 items-center pt-1 pb-2">
 
         {/* Home */}
         <Link href="/feed" className={itemCls(activeHome)} onClick={() => setSearchActive(false)}>
@@ -85,7 +85,7 @@ export function BottomNav({ username, userId }: BottomNavProps) {
         </button>
 
         {/* Sell — elevated */}
-        <div className="-translate-y-2 flex flex-col items-center gap-0.5">
+        <div className="-translate-y-2 flex flex-col items-center justify-self-center gap-0.5">
           <Link
             href={username ? `/profile/${username}?new=1` : '/?login=1'}
             className="flex size-14 items-center justify-center rounded-full bg-[#F36D21] text-white shadow-[0_4px_20px_rgba(243,109,33,0.4)] transition-transform active:scale-90"
