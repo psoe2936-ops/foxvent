@@ -7,6 +7,7 @@ import {
   ArrowLeft,
   BarChart2,
   Flag,
+  History,
   LayoutDashboard,
   LogOut,
   Menu,
@@ -162,6 +163,10 @@ export function AdminMobileNav({ pendingCount, pendingReportsCount, pendingUserR
               <Link href="/admin/analytics" onClick={close} className={navCls(pathname.startsWith('/admin/analytics'))}>
                 <TrendingUp className="size-4 shrink-0" />
                 Analytics
+              </Link>
+              <Link href="/admin/audit-log" onClick={close} className={navCls(pathname.startsWith('/admin/audit-log'))}>
+                <History className="size-4 shrink-0" />
+                Audit Log
               </Link>
 
               <p className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF]">

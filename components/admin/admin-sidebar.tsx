@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import {
   BarChart2,
   Flag,
+  History,
   LayoutDashboard,
   LogOut,
   MessageCircle,
@@ -132,6 +133,13 @@ function SidebarInner({ pendingCount, pendingReportsCount, pendingUserReportsCou
         >
           <TrendingUp className="size-4 shrink-0" strokeWidth={1.75} />
           Analytics
+        </Link>
+        <Link
+          href="/admin/audit-log"
+          className={navClass(pathname.startsWith('/admin/audit-log'))}
+        >
+          <History className="size-4 shrink-0" strokeWidth={1.75} />
+          Audit Log
         </Link>
 
         <p className="px-3 pb-1 pt-4 text-[10px] font-semibold uppercase tracking-wider text-[#9CA3AF]">

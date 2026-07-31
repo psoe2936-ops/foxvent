@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { logAdminAction } from '@/lib/audit-log'
 
 type BanDuration = '24h' | '7d' | '30d' | 'permanent'
 const ALLOWED_DURATIONS = new Set<BanDuration>(['24h', '7d', '30d', 'permanent'])
@@ -18,7 +19,7 @@ async function verifyAdmin() {
     .eq('id', user.id)
     .single()
   if (!profile || profile.role !== 'admin') throw new Error('Not authorized')
-  return supabase
+  return { supabase, user }
 }
 
 export async function banUser(
@@ -37,7 +38,7 @@ export async function banUser(
     return { error: 'Ban reason must be 500 characters or fewer.' }
   }
 
-  const supabase = await verifyAdmin()
+  const { supabase, user } = await verifyAdmin()
 
   const bannedUntil: string | null =
     duration === '24h'
@@ -74,6 +75,11 @@ export async function banUser(
     link: '/settings',
   })
 
+  await logAdminAction(supabase, user.id, 'ban_user', 'user', userId, {
+    duration,
+    reason: trimmedReason,
+  })
+
   revalidatePath('/admin/users')
   return { success: true }
 }
@@ -81,7 +87,7 @@ export async function banUser(
 export async function unbanUser(
   userId: string
 ): Promise<{ error: string } | { success: true }> {
-  const supabase = await verifyAdmin()
+  const { supabase, user } = await verifyAdmin()
   const { error, count } = await supabase
     .from('users')
     .update(
@@ -92,6 +98,8 @@ export async function unbanUser(
 
   if (error) return { error: error.message }
   if (!count) return { error: 'Unban failed — no rows affected. Check permissions.' }
+
+  await logAdminAction(supabase, user.id, 'unban_user', 'user', userId)
 
   revalidatePath('/admin/users')
   return { success: true }

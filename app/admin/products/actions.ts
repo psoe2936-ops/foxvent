@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { logAdminAction } from '@/lib/audit-log'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -21,13 +22,13 @@ async function verifyAdmin() {
     throw new Error('Not authorized')
   }
 
-  return supabase
+  return { supabase, user }
 }
 
 export async function approveProduct(
   productId: string
 ): Promise<{ error: string } | { success: true }> {
-  const supabase = await verifyAdmin()
+  const { supabase, user } = await verifyAdmin()
 
   const { error, count } = await supabase
     .from('products')
@@ -40,6 +41,8 @@ export async function approveProduct(
   if (error) return { error: error.message }
   if (!count) return { error: 'Approve failed — no rows affected. Check permissions.' }
 
+  await logAdminAction(supabase, user.id, 'approve_product', 'product', productId)
+
   revalidatePath('/admin/products')
   revalidatePath(`/admin/products/${productId}`)
   return { success: true }
@@ -49,7 +52,7 @@ export async function rejectProduct(
   productId: string,
   reason: string
 ): Promise<{ error: string } | { success: true }> {
-  const supabase = await verifyAdmin()
+  const { supabase, user } = await verifyAdmin()
 
   // Fetch product + seller for the notification
   const { data: product } = await supabase
@@ -78,6 +81,11 @@ export async function rejectProduct(
     })
   }
 
+  await logAdminAction(supabase, user.id, 'reject_product', 'product', productId, {
+    reason,
+    title: product?.title ?? null,
+  })
+
   revalidatePath('/admin/products')
   revalidatePath(`/admin/products/${productId}`)
   return { success: true }
@@ -86,7 +94,14 @@ export async function rejectProduct(
 export async function deleteProductAsAdmin(
   productId: string
 ): Promise<{ error: string } | { success: true }> {
-  const supabase = await verifyAdmin()
+  const { supabase, user } = await verifyAdmin()
+
+  // Fetch title before deletion so the audit log retains it
+  const { data: product } = await supabase
+    .from('products')
+    .select('title')
+    .eq('id', productId)
+    .single()
 
   const { error, count } = await supabase
     .from('products')
@@ -95,6 +110,10 @@ export async function deleteProductAsAdmin(
 
   if (error) return { error: error.message }
   if (!count) return { error: 'Delete failed — no rows affected. Check permissions.' }
+
+  await logAdminAction(supabase, user.id, 'delete_product', 'product', productId, {
+    title: product?.title ?? null,
+  })
 
   revalidatePath('/admin/products')
   return { success: true }

@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { logAdminAction } from '@/lib/audit-log'
 
 async function verifyAdmin() {
   const supabase = await createClient()
@@ -21,13 +22,13 @@ async function verifyAdmin() {
     throw new Error('Not authorized')
   }
 
-  return supabase
+  return { supabase, user }
 }
 
 export async function dismissUserReport(
   reportId: string
 ): Promise<{ error: string } | { success: true }> {
-  const supabase = await verifyAdmin()
+  const { supabase, user } = await verifyAdmin()
 
   const { error, count } = await supabase
     .from('user_reports')
@@ -36,6 +37,8 @@ export async function dismissUserReport(
 
   if (error) return { error: error.message }
   if (!count) return { error: 'Dismiss failed — no rows affected. Check permissions.' }
+
+  await logAdminAction(supabase, user.id, 'dismiss_user_report', 'user_report', reportId)
 
   revalidatePath('/admin/user-reports')
   return { success: true }
