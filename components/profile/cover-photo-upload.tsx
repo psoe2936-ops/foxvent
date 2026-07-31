@@ -44,8 +44,10 @@ export function CoverPhotoUpload({
     setError(null)
     setUploading(true)
 
-    const extension = file.name.split('.').pop() || 'jpg'
-    const path = `cover-${userId}-${Date.now()}.${extension}`
+    const ext = file.name.split('.').pop()?.toLowerCase()
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp']
+    const safeExt = allowedExtensions.includes(ext ?? '') ? ext : 'jpg'
+    const path = `${userId}/cover-${Date.now()}.${safeExt}`
 
     const { error: uploadError } = await supabase.storage
       .from('avatars')
