@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { formatPrice } from '@/lib/format-price'
 import { sendMessage } from '@/app/chat/actions'
+import { sendImageMessage } from '@/app/[locale]/chat/actions'
 import { makeOffer, type Offer } from '@/app/offers/actions'
 import dynamic from 'next/dynamic'
 import { IncomingCallPopup } from '@/components/chat/incoming-call-popup'
@@ -16,7 +17,6 @@ import { ReportUserModal } from '@/components/users/report-user-modal'
 import { OfferCard } from '@/components/chat/offer-card'
 import { ReviewModal } from '@/components/reviews/review-modal'
 import { ImageLightbox } from '@/components/products/image-lightbox'
-import { checkRateLimit, formatRetryTime } from '@/lib/rate-limit'
 
 const VideoCall = dynamic(
   () => import('@/components/chat/video-call').then((mod) => mod.VideoCall),
@@ -425,13 +425,6 @@ export function ChatThread({
     setImageError(null)
     setImageUploading(true)
 
-    const rateCheck = await checkRateLimit(supabase, currentUserId, 'send_image', 20, 10)
-    if (!rateCheck.allowed) {
-      setImageError(`Too many images sent. Try again in ${formatRetryTime(rateCheck.retryAfterSeconds ?? 600)}.`)
-      setImageUploading(false)
-      return
-    }
-
     const ext = file.type.split('/')[1].replace('jpeg', 'jpg')
     const path = `${conversationId}/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
 
@@ -444,15 +437,9 @@ export function ChatThread({
 
     const { data: { publicUrl } } = supabase.storage.from('chat-images').getPublicUrl(path)
 
-    const { error: insertError } = await supabase.from('messages').insert({
-      conversation_id: conversationId,
-      sender_id: currentUserId,
-      content: '',
-      message_type: 'image',
-      image_url: publicUrl,
-    })
+    const result = await sendImageMessage({ conversationId, imageUrl: publicUrl })
 
-    if (insertError) setImageError('Failed to send image. Please try again.')
+    if ('error' in result) setImageError(result.error)
     setImageUploading(false)
   }
 

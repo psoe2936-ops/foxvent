@@ -46,3 +46,44 @@ export async function sendMessage(data: {
 
   return { success: true }
 }
+
+export async function sendImageMessage(data: {
+  conversationId: string
+  imageUrl: string
+}): Promise<{ error: string } | { success: true }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'You must be logged in.' }
+
+  // Verify sender is a participant in this conversation
+  const { data: conv } = await supabase
+    .from('conversations')
+    .select('id, buyer_id, seller_id')
+    .eq('id', data.conversationId)
+    .single()
+
+  if (!conv) return { error: 'Conversation not found.' }
+  if (conv.buyer_id !== user.id && conv.seller_id !== user.id) {
+    return { error: 'Not authorized.' }
+  }
+
+  // Server-side rate limit enforcement
+  const rl = await checkRateLimit(supabase, user.id, 'send_image', 20, 10)
+  if (!rl.allowed) {
+    return {
+      error: `Too many images. Try again in ${formatRetryTime(rl.retryAfterSeconds!)}.`,
+    }
+  }
+
+  const { error: insertError } = await supabase.from('messages').insert({
+    conversation_id: data.conversationId,
+    sender_id: user.id,
+    content: '',
+    message_type: 'image',
+    image_url: data.imageUrl,
+  })
+
+  if (insertError) return { error: 'Failed to send image. Please try again.' }
+
+  return { success: true }
+}
