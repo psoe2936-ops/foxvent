@@ -19,6 +19,8 @@ import { LogoutButton } from '@/components/settings/logout-button'
 import { PasswordResetButton } from '@/components/settings/password-reset-button'
 import { DeleteAccountModal } from '@/components/settings/delete-account-modal'
 import { NotificationToggles } from '@/components/settings/notification-toggles'
+import { FeedSidebar } from '@/components/feed/sidebar'
+import { HelpPromoCard } from '@/components/feed/help-promo-card'
 
 export default async function SettingsPage() {
   const t = await getTranslations('settings')
@@ -72,7 +74,12 @@ export default async function SettingsPage() {
   }
 
   return (
-    <main className="mx-auto max-w-2xl px-4 py-6 pb-24 sm:px-6 md:pb-8">
+    <div className="w-full py-4 pb-24 lg:py-6 lg:pb-10">
+      <div className="flex w-full items-start">
+        <FeedSidebar username={profile?.username} userId={user.id} />
+
+        <div className="min-w-0 flex-1 px-4 sm:px-6 lg:px-10">
+          <main className="mx-auto max-w-2xl py-2">
       <h1 className="mb-5 text-xl font-bold text-[#1F2937]">{t('title')}</h1>
 
       {/* Group 1 — Profile card */}
@@ -159,7 +166,16 @@ export default async function SettingsPage() {
           <DeleteAccountModal />
         </div>
       </div>
-    </main>
+          </main>
+        </div>
+
+        <aside className="scrollbar-none sticky top-20 hidden h-[calc(100vh-5rem)] w-[300px] shrink-0 flex-col overflow-y-auto border-l border-white/40 bg-white/60 py-6 pl-4 pr-5 shadow-[0_4px_24px_rgba(0,0,0,0.06)] backdrop-blur-xl xl:flex xl:pr-6">
+          <div className="space-y-6">
+            <HelpPromoCard />
+          </div>
+        </aside>
+      </div>
+    </div>
   )
 }
 
