@@ -387,18 +387,27 @@ export function ChatThread({
   function handleBlockConfirm() {
     setBlockError(null)
     startBlockTransition(async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        setBlockError('Failed. Please try again.')
+        return
+      }
+
       if (iBlockedThem) {
         const { error: dbErr } = await supabase
           .from('blocks')
           .delete()
-          .eq('blocker_id', currentUserId)
+          .eq('blocker_id', user.id)
           .eq('blocked_id', otherPerson!.id)
         if (dbErr) { setBlockError('Failed. Please try again.'); return }
         setIBlockedThem(false)
       } else {
         const { error: dbErr } = await supabase
           .from('blocks')
-          .upsert({ blocker_id: currentUserId, blocked_id: otherPerson!.id }, { onConflict: 'blocker_id,blocked_id' })
+          .upsert({ blocker_id: user.id, blocked_id: otherPerson!.id }, { onConflict: 'blocker_id,blocked_id' })
         if (dbErr) { setBlockError('Failed. Please try again.'); return }
         setIBlockedThem(true)
       }

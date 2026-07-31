@@ -31,11 +31,20 @@ export function BlockButton({
   function handleConfirm() {
     setError(null)
     startTransition(async () => {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        setError(tSafety('failed'))
+        return
+      }
+
       if (isBlocked) {
         const { error: dbErr } = await supabase
           .from('blocks')
           .delete()
-          .eq('blocker_id', viewerId)
+          .eq('blocker_id', user.id)
           .eq('blocked_id', targetUserId)
         if (dbErr) { setError(tSafety('failed')); return }
         setIsBlocked(false)
@@ -43,7 +52,7 @@ export function BlockButton({
       } else {
         const { error: dbErr } = await supabase
           .from('blocks')
-          .upsert({ blocker_id: viewerId, blocked_id: targetUserId }, { onConflict: 'blocker_id,blocked_id' })
+          .upsert({ blocker_id: user.id, blocked_id: targetUserId }, { onConflict: 'blocker_id,blocked_id' })
         if (dbErr) { setError(tSafety('failed')); return }
         setIsBlocked(true)
         onBlockChange?.(true)

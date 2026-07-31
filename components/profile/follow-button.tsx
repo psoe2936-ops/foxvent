@@ -39,6 +39,16 @@ export function FollowButton({
     }
 
     const supabase = createClient()
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      router.push('/?login=1')
+      return
+    }
+
     const next = !following
 
     setFollowing(next)
@@ -48,7 +58,7 @@ export function FollowButton({
     try {
       if (next) {
         const { error } = await supabase.from('follows').insert({
-          follower_id: viewerId,
+          follower_id: user.id,
           following_id: targetUserId,
         })
         if (error) throw error
@@ -56,7 +66,7 @@ export function FollowButton({
         const { error } = await supabase
           .from('follows')
           .delete()
-          .eq('follower_id', viewerId)
+          .eq('follower_id', user.id)
           .eq('following_id', targetUserId)
         if (error) throw error
       }
