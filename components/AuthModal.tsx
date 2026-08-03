@@ -15,7 +15,8 @@ import { useRouter } from 'next/navigation'
 
 type AuthMode = 'login' | 'register' | 'forgot'
 type Screen = 'form' | 'otp' | 'reset-sent'
-type FieldErrors = { email?: string; password?: string; username?: string }
+type FieldErrors = { email?: string; password?: string; username?: string; fullName?: string }
+type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken'
 type AuthT = ReturnType<typeof useTranslations<'auth'>>
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
@@ -23,6 +24,10 @@ type AuthT = ReturnType<typeof useTranslations<'auth'>>
 function validateEmail(t: AuthT, val: string): string | undefined {
   if (!val) return t('emailRequired')
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)) return t('emailInvalid')
+}
+
+function validateFullName(t: AuthT, val: string): string | undefined {
+  if (val && !/^[a-zA-Zက-႟\s]+$/.test(val)) return t('fullNameInvalid')
 }
 
 function validatePassword(t: AuthT, val: string): string | undefined {
@@ -41,6 +46,18 @@ function getStrength(
   if (score >= 3) return { level: 4, label: t('strengthStrong'), color: '#1A7A4A' }
   if (score >= 2) return { level: 3, label: t('strengthGood'), color: '#D97706' }
   return { level: 2, label: t('strengthFair'), color: '#F36D21' }
+}
+
+async function checkUsernameAvailability(
+  supabase: ReturnType<typeof createClient>,
+  username: string
+): Promise<boolean> {
+  const { data } = await supabase
+    .from('users')
+    .select('id')
+    .eq('username', username.toLowerCase())
+    .maybeSingle()
+  return !data
 }
 
 async function checkAuthRateLimit(
@@ -107,23 +124,38 @@ function StrengthMeter({ t, password }: { t: AuthT; password: string }) {
 function FormField({
   label,
   error,
+  note,
   children,
 }: {
   label: string
   error?: string
+  note?: { text: ReactNode; color: string }
   children: ReactNode
 }) {
   return (
     <label style={fieldStyle}>
       <span style={labelStyle}>{label}</span>
       {children}
-      {error && (
+      {error ? (
         <span
           style={{ display: 'block', fontSize: '11px', color: '#C0392B', marginTop: '3px' }}
         >
           {error}
         </span>
-      )}
+      ) : note ? (
+        <span
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            fontSize: '11px',
+            color: note.color,
+            marginTop: '3px',
+          }}
+        >
+          {note.text}
+        </span>
+      ) : null}
     </label>
   )
 }
@@ -230,6 +262,8 @@ function AuthModalContent({
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [usernameStatus, setUsernameStatus] = useState<UsernameStatus>('idle')
+  const usernameCheckIdRef = useRef(0)
 
   // ── Resend cooldown ───────────────────────────────────────────────────────
   const [resendCooldown, setResendCooldown] = useState(0)
@@ -262,6 +296,26 @@ function AuthModalContent({
     return () => clearTimeout(t)
   }, [screen])
 
+  // Debounced username availability check (register form only)
+  // Note: status resets to 'idle' in the username input's onChange handler,
+  // not here — this effect only owns the delayed lookup itself.
+  useEffect(() => {
+    if (mode !== 'register' || screen !== 'form') return
+    if (username.length < 3) return
+
+    const handle = setTimeout(async () => {
+      const checkId = ++usernameCheckIdRef.current
+      setUsernameStatus('checking')
+      const available = await checkUsernameAvailability(supabase, username)
+      if (usernameCheckIdRef.current !== checkId) return // stale response, superseded by newer input
+      setUsernameStatus(available ? 'available' : 'taken')
+      setFieldErrors((p) => ({ ...p, username: available ? undefined : t('usernameTaken') }))
+    }, 500)
+
+    return () => clearTimeout(handle)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [username, mode, screen])
+
   // ── Cooldown ──────────────────────────────────────────────────────────────
 
   function startCooldown() {
@@ -284,6 +338,7 @@ function AuthModalContent({
     setScreen('form')
     setError(null)
     setFieldErrors({})
+    setUsernameStatus('idle')
   }
 
   function clearFieldError(field: keyof FieldErrors) {
@@ -310,12 +365,29 @@ function AuthModalContent({
     }
 
     if (mode === 'register') {
-      if (!fullName.trim()) {
+      const trimmedFullName = fullName.trim()
+      if (!trimmedFullName) {
         setError(t('fullNameRequired'))
+        return
+      }
+      const fullNameErr = validateFullName(t, trimmedFullName)
+      if (fullNameErr) {
+        setFieldErrors({ fullName: fullNameErr })
         return
       }
       if (!username) {
         setFieldErrors({ username: t('usernameRequired') })
+        return
+      }
+
+      let usernameAvailable = usernameStatus === 'available'
+      if (!usernameAvailable) {
+        setUsernameStatus('checking')
+        usernameAvailable = await checkUsernameAvailability(supabase, username)
+        setUsernameStatus(usernameAvailable ? 'available' : 'taken')
+      }
+      if (!usernameAvailable) {
+        setFieldErrors({ username: t('usernameTaken') })
         return
       }
     }
@@ -798,12 +870,19 @@ function AuthModalContent({
             <form onSubmit={mode === 'forgot' ? handleForgotPassword : handleEmailAuth}>
               {mode === 'register' && (
                 <>
-                  <FormField label={t('fullName')}>
+                  <FormField label={t('fullName')} error={fieldErrors.fullName}>
                     <input
                       type="text"
                       required
                       value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
+                      onChange={(e) => {
+                        const v = e.target.value
+                        setFullName(v)
+                        setFieldErrors((p) => ({ ...p, fullName: validateFullName(t, v) }))
+                      }}
+                      onBlur={() =>
+                        setFieldErrors((p) => ({ ...p, fullName: validateFullName(t, fullName) }))
+                      }
                       disabled={anyLoading}
                       style={{ ...inputStyle, opacity: anyLoading ? 0.6 : 1 }}
                       className={inputClassName}
@@ -815,6 +894,13 @@ function AuthModalContent({
                   <FormField
                     label={`${t('username')}${username.length > 0 ? ` (${username.length}/30)` : ''}`}
                     error={fieldErrors.username}
+                    note={
+                      !fieldErrors.username && usernameStatus === 'checking'
+                        ? { text: <><Spinner dark /> {t('checkingUsername')}</>, color: '#6B6860' }
+                        : !fieldErrors.username && usernameStatus === 'available'
+                          ? { text: <><Check size={12} /> {t('usernameAvailable')}</>, color: '#1A7A4A' }
+                          : undefined
+                    }
                   >
                     <input
                       type="text"
@@ -826,6 +912,7 @@ function AuthModalContent({
                           .replace(/[^a-z0-9._]/g, '')
                           .slice(0, 30)
                         setUsername(v)
+                        setUsernameStatus('idle')
                         clearFieldError('username')
                       }}
                       disabled={anyLoading}
@@ -846,6 +933,12 @@ function AuthModalContent({
                   onChange={(e) => {
                     setEmail(e.target.value)
                     clearFieldError('email')
+                  }}
+                  onBlur={() => {
+                    if (mode === 'register' && email) {
+                      const err = validateEmail(t, email.trim())
+                      setFieldErrors((p) => ({ ...p, email: err }))
+                    }
                   }}
                   disabled={anyLoading}
                   style={{ ...inputStyle, opacity: anyLoading ? 0.6 : 1 }}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { ChevronRight, Star } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { mockProfile } from '@/lib/mock/profile'

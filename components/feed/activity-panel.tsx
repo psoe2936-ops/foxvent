@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { AlertTriangle, Bell, CheckCircle2, Lock, MessageCircle, UserPlus } from 'lucide-react'
 import { formatRelativeTime } from '@/lib/format-relative-time'

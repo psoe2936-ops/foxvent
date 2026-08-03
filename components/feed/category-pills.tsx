@@ -1,4 +1,4 @@
-import Link from 'next/link'
+import { Link } from '@/i18n/navigation'
 import { getTranslations } from 'next-intl/server'
 import { buildMarketplaceHref, type MarketplaceFilterParams } from '@/lib/marketplace-url'
 import { HoverEdgeScroll } from '@/components/feed/hover-edge-scroll'
