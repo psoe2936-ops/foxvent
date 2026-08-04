@@ -23,7 +23,7 @@ export function SellButton({
 
   const handleClick = () => {
     if (isLoggedIn) {
-      router.push(username ? `/profile/${username}` : '/feed')
+      router.push(username ? `/profile/${username}?new=1` : '/?login=1')
     } else {
       onRequireAuth?.()
     }
