@@ -73,7 +73,7 @@ export default async function FollowingPage({ params }: Props) {
           {t('followingCountLabel', { count: followingUsers.length })}
         </p>
 
-        {followingUsers.length === 0 ? (
+        {followingUsers.length === 0 ? ( 
           <p className="mt-8 text-sm text-[#9CA3AF]">{t('notFollowingAnyoneYet')}</p>
         ) : (
           <ul className="mt-5 divide-y divide-[#F3F4F6] rounded-2xl border border-[#E5E7EB] bg-white">
