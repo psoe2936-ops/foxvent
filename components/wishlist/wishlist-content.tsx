@@ -1,0 +1,88 @@
+import Image from 'next/image'
+import { Link } from '@/i18n/navigation'
+import { Heart } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
+import { createClient } from '@/lib/supabase/server'
+import { getConditionLabel } from '@/lib/condition-label'
+import { ProductCard } from '@/components/feed/product-card'
+
+export async function WishlistContent({ userId }: { userId: string }) {
+  const t = await getTranslations('wishlist')
+  const tProduct = await getTranslations('product')
+  const tChat = await getTranslations('chat')
+  const supabase = await createClient()
+
+  const { data: wishlistRows } = await supabase
+    .from('wishlists')
+    .select(
+      `product_id,
+       products(
+         id, title, price, images, condition, status, is_sold, created_at,
+         categories(name),
+         users(username, avatar_url)
+       )`
+    )
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false })
+
+  const savedProducts = (wishlistRows ?? [])
+    .map((row: any) => (Array.isArray(row.products) ? row.products[0] : row.products))
+    .filter((p: any) => p && p.status === 'approved')
+
+  return (
+    <div>
+      <div className="flex items-center gap-2">
+        <Heart className="size-6 text-[#F36D21]" fill="#F36D21" />
+        <h1 className="text-2xl font-bold text-[#1F2937]">{t('myWishlist')}</h1>
+      </div>
+      <p className="mt-1 text-sm text-[#6B7280]">
+        {t('savedItemCount', { count: savedProducts.length })}
+      </p>
+
+      {savedProducts.length === 0 ? (
+        <div className="mt-8 flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#E5E7EB] bg-white py-16 text-center">
+          <Image src="/fox-curious.png" alt="" width={120} height={120} className="mx-auto mb-4" />
+          <p className="text-base font-medium text-[#1F2937]">{t('noSavedItemsYet')}</p>
+          <p className="mt-1 text-sm text-[#6B7280]">
+            {t('tapHeartToSave')}
+          </p>
+          <Link
+            href="/feed"
+            className="mt-5 rounded-lg bg-[#F36D21] px-5 py-2.5 text-sm font-semibold text-white hover:opacity-90"
+          >
+            {tChat('browseListings')}
+          </Link>
+        </div>
+      ) : (
+        <div className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+          {savedProducts.map((product: any) => {
+            const category = Array.isArray(product.categories)
+              ? product.categories[0]
+              : product.categories
+            const seller = Array.isArray(product.users)
+              ? product.users[0]
+              : product.users
+
+            return (
+              <ProductCard
+                key={product.id}
+                id={product.id}
+                title={product.title}
+                price={product.price}
+                images={product.images}
+                conditionLabel={getConditionLabel(tProduct, product.condition)}
+                conditionKey={product.condition}
+                categoryName={category?.name}
+                sellerUsername={seller?.username}
+                sellerAvatar={seller?.avatar_url}
+                createdAt={product.created_at}
+                initialSaved={true}
+                isSold={product.is_sold ?? false}
+              />
+            )
+          })}
+        </div>
+      )}
+    </div>
+  )
+}
