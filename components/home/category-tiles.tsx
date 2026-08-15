@@ -1,6 +1,6 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 
 const CATEGORY_TILES = [
   { name: 'Electronics', icon: '💻' },

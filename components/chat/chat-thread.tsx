@@ -1,8 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
-import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { Check, CheckCheck, ImagePlus, Loader2, MoreVertical, Send, Shield, Video, X } from 'lucide-react'
 import type { RealtimeChannel } from '@supabase/supabase-js'
 import { useTranslations } from 'next-intl'

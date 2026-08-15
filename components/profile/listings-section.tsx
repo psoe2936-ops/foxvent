@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter } from '@/i18n/navigation'
 import { Plus } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { ProductGrid } from '@/components/profile/product-grid'

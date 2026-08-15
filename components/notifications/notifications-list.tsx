@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import Image from 'next/image'
 import { AlertCircle, Bell, CheckCircle2, MessageCircle, UserPlus } from 'lucide-react'
 import { useTranslations } from 'next-intl'

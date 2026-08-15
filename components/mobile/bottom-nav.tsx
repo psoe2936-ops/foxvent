@@ -1,8 +1,7 @@
 'use client'
 
-import Link from 'next/link'
 import { House, Search, Plus, MessageCircle, User } from 'lucide-react'
-import { usePathname, useRouter } from '@/i18n/navigation'
+import { Link, usePathname, useRouter } from '@/i18n/navigation'
 import { useTranslations } from 'next-intl'
 import { useEffect, useState } from 'react'
 import { SidebarUnreadBadge } from '@/components/feed/sidebar-unread-badge'

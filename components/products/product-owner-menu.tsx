@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { CheckCircle, MoreVertical, Pencil, Trash2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { deleteProduct, markAsSold, markAsUnsold } from '@/app/products/actions'

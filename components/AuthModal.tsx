@@ -11,7 +11,7 @@ import { Check, Eye, EyeOff, Mail } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { createClient } from '@/lib/supabase/client'
 import { sanitizeUsername } from '@/lib/sanitize'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 
 type AuthMode = 'login' | 'register' | 'forgot'
 type Screen = 'form' | 'otp' | 'reset-sent'

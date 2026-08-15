@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter } from '@/i18n/navigation'
 import { Pencil, X } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { updateProfile } from '@/app/profile/actions'
